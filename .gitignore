@@ -1,1 +1,4 @@
 .history
+.vscode
+.aider.chat.history.md
+.vscode/sessions.json
