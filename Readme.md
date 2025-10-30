@@ -169,17 +169,17 @@ Key sizes:
 ```mermaid
 flowchart TD
   A[Create Capsule] --> B[Select files + title + notes]
-  B --> C[Choose approver (pubkey)]
+  B --> C[Choose approver pubkey]
   C --> D[Set policy: date/location]
   D --> E[Generate CMK]
   E --> F[Compress + Encrypt files with CMK]
-  F --> G[Upload encrypted payload to IPFS -> payload_cid]
-  G --> H[Generate location_hash (if any)]
+  F --> G[Upload encrypted payload to IPFS]
+  G --> H[Generate location_hash if any]
   H --> I[Wrap CMK for approver using X25519+AEAD]
   I --> J[Assemble metadata JSON]
   J --> K[Sign metadata with Ed25519]
-  K --> L[Upload metadata JSON to IPFS -> metadata_cid (optional) or store locally]
-  L --> M[Save local record (capsule_id, cids, status=Locked)]
+  K --> L[Upload metadata JSON to IPFS]
+  L --> M[Save local record]
   M --> N[Show success + share link/QR with metadata]
 ```
 
@@ -189,17 +189,17 @@ Optional: store metadata JSON also on IPFS. If metadata is sensitive, keep local
 
 ```mermaid
 flowchart TD
-  U[Open Capsule] --> V[Fetch metadata (local or IPFS)]
+  U[Open Capsule] --> V[Fetch metadata]
   V --> W[Verify metadata signature]
-  W -->|fail| X[Abort: Tampered Metadata]
+  W -->|fail| X[Abort Tampered Metadata]
   W --> Y[Check policy conditions]
-  Y -->|fail| Z[Access Denied: Policy Not Met]
+  Y -->|fail| Z[Access Denied Policy Not Met]
   Y --> AA[Fetch encrypted payload from IPFS]
   AA --> AB[Unwrap CMK with private key]
-  AB -->|fail| AC[Abort: Not Authorized]
+  AB -->|fail| AC[Abort Not Authorized]
   AB --> AD[Decrypt payload with CMK]
   AD --> AE[Extract files to user folder]
-  AE --> AF[Mark local status=Unlocked]
+  AE --> AF[Mark local status Unlocked]
 ```
 
 ### 7.3 Policy Evaluation
@@ -208,8 +208,8 @@ flowchart TD
 stateDiagram-v2
   [*] --> Idle
   Idle --> EvaluateDate : DATE_AFTER
-  EvaluateDate --> Deny : now < date
-  EvaluateDate --> EvaluateLocation : now >= date
+  EvaluateDate --> Deny : now less than date
+  EvaluateDate --> EvaluateLocation : now greater or equal date
   EvaluateLocation --> Deny : hash_mismatch
   EvaluateLocation --> Allow : hash_match
   Deny --> [*]
@@ -421,16 +421,16 @@ sequenceDiagram
   participant POL as Policy Engine
   participant ENC as Crypto Engine
   participant IP as IPFS
-  U->>UI: Select files, approver, policy
-  UI->>ENC: Generate CMK, compress+encrypt files
+  U->>UI: Select files approver policy
+  UI->>ENC: Generate CMK compress encrypt files
   ENC-->>UI: cipher_archive
-  UI->>IP: add_bytes(cipher_archive)
+  UI->>IP: add_bytes cipher_archive
   IP-->>UI: payload_cid
-  UI->>POL: Build location hash (if needed)
+  UI->>POL: Build location hash if needed
   POL-->>UI: location_hash
-  UI->>ENC: Wrap CMK to approver + Sign metadata
-  ENC-->>UI: encrypted_cmk + signature
-  UI->>IP: add_json(metadata)
+  UI->>ENC: Wrap CMK to approver Sign metadata
+  ENC-->>UI: encrypted_cmk signature
+  UI->>IP: add_json metadata
   IP-->>UI: metadata_cid
   UI-->>U: Capsule created
 ```
@@ -445,14 +445,14 @@ sequenceDiagram
   participant ENC as Crypto Engine
   participant IP as IPFS
   A->>UI: Open capsule
-  UI->>IP: get_json(metadata_cid) or local
+  UI->>IP: get_json metadata_cid or local
   IP-->>UI: metadata
   UI->>ENC: Verify metadata signature
   ENC-->>UI: ok
-  UI->>POL: Evaluate policy (date/location)
-  POL-->>UI: pass/fail
+  UI->>POL: Evaluate policy date location
+  POL-->>UI: pass fail
   alt pass
-    UI->>IP: get_bytes(payload_cid)
+    UI->>IP: get_bytes payload_cid
     IP-->>UI: cipher_archive
     UI->>ENC: Unwrap CMK with approver private key
     ENC-->>UI: CMK
@@ -460,4 +460,5 @@ sequenceDiagram
     ENC-->>UI: files
     UI-->>A: Files available
   else fail
-    UI-->>A: Access
+    UI-->>A: Access denied
+  end
