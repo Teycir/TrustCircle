@@ -1,20 +1,21 @@
-# TrustCircle Lite (TCL) — Full Build Specification
+# TrustCircle Lite Web — Full Build Specification
 
-A fresh, end-to-end specification to build a simple, privacy-first, single-approver secure data sharing app. Includes concept, architecture, tech stack, data models, cryptography, flows, APIs, threat model, and implementation roadmap with Mermaid diagrams.
+A web-based, privacy-first, single-approver secure data sharing app built with Next.js and deployed on Vercel. All encryption happens client-side in the browser.
 
 ---
 
 ## 1) Concept
 
-TrustCircle Lite (TCL) lets you lock files so that exactly one named approver can unlock them under specific environmental conditions (e.g., date/time and/or location). It is designed to feel like a physical safe: you need to be at the right time/place and hold the right private key.
+TrustCircle Lite lets you lock files so that exactly one named approver can unlock them under specific environmental conditions like date/time and location. It is designed to feel like a physical safe: you need to be at the right time/place and hold the right private key.
 
 Core objectives:
 - Single approver: a single designated person has the authority to unlock.
 - Two-factor by environment: unlock requires both device conditions and key possession.
-- Local-first privacy: encryption and policy checks happen on the client before any access attempt.
-- Decentralized storage: encrypted payloads and metadata are stored on IPFS for distribution without revealing private contents.
+- Client-side privacy: encryption and policy checks happen in the browser before any upload.
+- Decentralized storage: encrypted payloads stored on IPFS via Pinata.
+- Easy sharing: capsule metadata stored in Supabase for discovery.
 
-Non-goals (for v1):
+Non-goals for v1:
 - Multi-approver thresholds or quorum workflows.
 - Server-side key escrow or recovery.
 - Continuous background tracking of user location.
@@ -25,59 +26,61 @@ Non-goals (for v1):
 
 - As a creator, I can encrypt files into a capsule and specify a single approver, plus optional time and location policy.
 - As the approver, I can unlock a capsule when the local date/time and location match the policy and I possess the correct private key.
-- As a creator, I can see the status of my capsules (Locked/Unlocked/Expired) locally.
-- As an approver, I can verify the capsule’s metadata authenticity and policy before attempting unlock.
+- As a creator, I can see the status of my capsules in my dashboard.
+- As an approver, I can verify the capsule metadata authenticity and policy before attempting unlock.
+- As a user, I can share a capsule via URL or QR code.
 
 ---
 
 ## 3) System Architecture Overview
 
-- Client application performs all crypto and policy checks locally.
-- Encrypted payloads and policy metadata are stored on IPFS.
-- No central server is required to unlock or validate conditions.
+- Next.js web app performs all crypto and policy checks in browser.
+- Encrypted payloads stored on IPFS via Pinata.
+- Supabase stores capsule metadata and user inventory.
+- All encryption happens client-side before upload.
 
 ```mermaid
 graph LR
-  subgraph Client
-    UI[Desktop/Mobile UI]
-    ID[Identity & Key Manager]
+  subgraph Browser
+    UI[Next.js UI]
+    ID[Identity Manager]
     ENC[Crypto Engine]
     POL[Policy Engine]
-    INV[Local Inventory DB]
   end
 
-  IPFS[(IPFS Network)]
+  IPFS[Pinata IPFS]
+  SB[Supabase]
 
   UI --> ID
   UI --> POL
   UI --> ENC
-  ID <---> ENC
+  ID --> ENC
   POL --> ENC
-  UI --> INV
   ENC --> IPFS
-  POL --> UI
+  UI --> SB
   UI --> IPFS
-  IPFS --> UI
 ```
 
 Key interactions:
-- Creation: UI -> Crypto Engine -> IPFS (upload encrypted payload + metadata).
-- Unlock: UI -> IPFS (fetch metadata) -> Policy Engine (validate env) -> Crypto Engine (decrypt).
+- Creation: Browser Crypto -> Pinata IPFS -> Supabase metadata.
+- Unlock: Supabase metadata -> Pinata IPFS -> Browser Crypto decrypt.
 
 ---
 
 ## 4) Technology Stack
 
-- Platform: Python 3.11+
-- UI: tkinter or customtkinter (desktop) — minimal, dependency-light
-- Crypto: cryptography (Fernet for data, X25519/ECIES for key wrapping, Ed25519 for signing)
-- Storage: ipfshttpclient to connect to a local IPFS daemon
-- Geolocation: geopy (reverse geocoding optional), system location services for coordinates
-- Local persistence: sqlite3 for inventory, preferences
-- Packaging: PyInstaller for desktop bundling
-- Logging: Python logging with PII-safe scrubber
+- Framework: Next.js 14 with App Router and TypeScript
+- Deployment: Vercel
+- UI: Tailwind CSS and shadcn/ui components
+- Crypto: noble-curves for Ed25519 and X25519, Web Crypto API for AES-GCM
+- Storage: Pinata for IPFS uploads and retrieval
+- Database: Supabase for capsule metadata and user inventory
+- Auth: Supabase Auth optional for user accounts
+- Geolocation: Browser Geolocation API
+- Local persistence: IndexedDB for keys and preferences
+- Compression: fflate for file compression
 
-Rationale: mature libraries, offline-capable, minimal external dependencies, reproducible builds.
+Rationale: modern web stack, zero installation, cross-platform, serverless, client-side encryption.
 
 ---
 
@@ -85,10 +88,10 @@ Rationale: mature libraries, offline-capable, minimal external dependencies, rep
 
 ### 5.1 Capsule Components
 
-- Encrypted Payload: compressed archive of user files, encrypted with a randomly generated Capsule Master Key (CMK).
-- Metadata (JSON): public policy, recipient key, encrypted CMK, signatures, integrity nonces.
+- Encrypted Payload: compressed archive of user files, encrypted with a randomly generated Capsule Master Key.
+- Metadata: public policy, recipient key, encrypted CMK, signatures, integrity nonces.
 
-### 5.2 Metadata Schema (JSON)
+### 5.2 Metadata Schema
 
 ```json
 {
@@ -115,7 +118,7 @@ Rationale: mature libraries, offline-capable, minimal external dependencies, rep
     "logic": "ALL" 
   },
   "encrypted_cmk": {
-    "scheme": "x25519+chacha20poly1305",
+    "scheme": "x25519+aes256gcm",
     "ciphertext": "BASE64",
     "ephemeral_pub": "x25519:BASE64",
     "nonce": "BASE64"
@@ -132,33 +135,59 @@ Rationale: mature libraries, offline-capable, minimal external dependencies, rep
 ```
 
 Notes:
-- LOCATION_HASH generation: hash(salt || round(lat, precision) || round(lon, precision) || day_utc) with precision digits for decimal degrees; day_utc = YYYY-MM-DD.
+- LOCATION_HASH generation: hash of salt, rounded lat/lon, and day_utc.
 - The metadata_sig covers all fields except itself to prevent tampering.
-- The encrypted CMK is wrapped to the approver’s public key.
+- The encrypted CMK is wrapped to the approver public key.
+
+### 5.3 Supabase Schema
+
+Capsules table:
+```sql
+create table capsules (
+  id uuid primary key default gen_random_uuid(),
+  creator_pubkey text not null,
+  approver_pubkey text not null,
+  title text,
+  notes text,
+  payload_cid text not null,
+  metadata jsonb not null,
+  status text default 'locked',
+  created_at timestamp default now(),
+  unlocked_at timestamp
+);
+
+create index idx_capsules_creator on capsules(creator_pubkey);
+create index idx_capsules_approver on capsules(approver_pubkey);
+```
+
+Row Level Security:
+- Users can read capsules where their pubkey matches creator or approver.
+- Users can insert capsules with their pubkey as creator.
+- Users can update status of capsules where their pubkey matches approver.
 
 ---
 
 ## 6) Cryptographic Design
 
-- Data Encryption: CMK (32 bytes) -> Fernet (AES-128 in CBC + HMAC; or use AES-256-GCM directly if preferred). Default to Fernet for simplicity; alternative available via config.
+- Data Encryption: CMK 32 bytes -> AES-256-GCM via Web Crypto API.
 - CMK Wrapping: ECIES-style using X25519:
   - Sender generates ephemeral X25519 key pair.
-  - Derive shared secret with approver’s X25519 public key.
+  - Derive shared secret with approver X25519 public key.
   - KDF: HKDF-SHA256 -> 32-byte key.
-  - AEAD: ChaCha20-Poly1305 to encrypt CMK with random nonce.
-  - Store ciphertext + ephemeral public + nonce in metadata.encrypted_cmk.
+  - AEAD: AES-256-GCM to encrypt CMK with random nonce.
+  - Store ciphertext, ephemeral public, nonce in metadata.
 - Identity:
   - Ed25519 key pair for signing metadata.
-  - Optional separate X25519 key pair for key agreement (or derive via libsodium conversion).
+  - X25519 key pair for key agreement.
 - Metadata Integrity:
-  - metadata_sig.signature = Ed25519Sign(serialize(metadata_without_signature)).
+  - metadata_sig.signature = Ed25519Sign of serialized metadata.
 - Policy Privacy:
   - Location details reduced to salted hash; actual coordinates never stored.
 
 Key sizes:
 - Ed25519/X25519: 32-byte keys.
-- HKDF: info label “TCL-CMK-WRAP”.
-- Nonce: 12 bytes (AEAD).
+- HKDF: info label "TCL-CMK-WRAP".
+- Nonce: 12 bytes for AES-GCM.
 
 ---
 
@@ -168,38 +197,35 @@ Key sizes:
 
 ```mermaid
 flowchart TD
-  A[Create Capsule] --> B[Select files + title + notes]
+  A[Create Capsule] --> B[Select files title notes]
   B --> C[Choose approver pubkey]
-  C --> D[Set policy: date/location]
+  C --> D[Set policy date location]
   D --> E[Generate CMK]
-  E --> F[Compress + Encrypt files with CMK]
-  F --> G[Upload encrypted payload to IPFS]
+  E --> F[Compress Encrypt files with CMK]
+  F --> G[Upload encrypted payload to Pinata]
   G --> H[Generate location_hash if any]
-  H --> I[Wrap CMK for approver using X25519+AEAD]
+  H --> I[Wrap CMK for approver using X25519]
   I --> J[Assemble metadata JSON]
   J --> K[Sign metadata with Ed25519]
-  K --> L[Upload metadata JSON to IPFS]
-  L --> M[Save local record]
-  M --> N[Show success + share link/QR with metadata]
+  K --> L[Save to Supabase]
+  L --> M[Show success share link]
 ```
 
-Optional: store metadata JSON also on IPFS. If metadata is sensitive, keep local and share out-of-band.
-
-### 7.2 Capsule Unlock (Approver)
+### 7.2 Capsule Unlock
 
 ```mermaid
 flowchart TD
-  U[Open Capsule] --> V[Fetch metadata]
+  U[Open Capsule] --> V[Fetch metadata from Supabase]
   V --> W[Verify metadata signature]
   W -->|fail| X[Abort Tampered Metadata]
   W --> Y[Check policy conditions]
   Y -->|fail| Z[Access Denied Policy Not Met]
-  Y --> AA[Fetch encrypted payload from IPFS]
+  Y --> AA[Fetch encrypted payload from Pinata]
   AA --> AB[Unwrap CMK with private key]
   AB -->|fail| AC[Abort Not Authorized]
   AB --> AD[Decrypt payload with CMK]
-  AD --> AE[Extract files to user folder]
-  AE --> AF[Mark local status Unlocked]
+  AD --> AE[Extract files to browser download]
+  AE --> AF[Update status in Supabase]
 ```
 
 ### 7.3 Policy Evaluation
@@ -220,55 +246,51 @@ stateDiagram-v2
 
 ## 8) Module Design and APIs
 
-### 8.1 Identity & Key Manager
+### 8.1 Identity Manager
 
-- generate_identity(): returns {ed25519_keypair, x25519_keypair}
-- load_identity(store): returns keys from local secure storage
-- export_public_profile(): {creator_pubkey_ed25519, approver_pubkey_ed25519, x25519_pub}
+- generateIdentity: returns Ed25519 and X25519 keypairs
+- loadIdentity: returns keys from IndexedDB
+- exportPublicProfile: returns public keys for sharing
 
 ### 8.2 Policy Engine
 
-- build_location_hash(lat, lon, date_utc, precision, salt, algo="SHA256") -> base64
-- evaluate(policy, device_context) -> {pass: bool, failures: [string]}
-- device_context: {now_utc, lat, lon}
+- buildLocationHash: lat, lon, date, precision, salt -> base64
+- evaluate: policy, device_context -> pass or fail
+- device_context: now_utc, lat, lon
 
 ### 8.3 Crypto Engine
 
-- encrypt_payload(files[]) -> {cipher_archive_bytes, cmk, archive_manifest}
-- decrypt_payload(cipher_archive_bytes, cmk) -> files[]
-- wrap_cmk_for_recipient(cmk, recipient_x25519_pub) -> {ciphertext, ephemeral_pub, nonce}
-- unwrap_cmk(ciphertext, recipient_x25519_priv, ephemeral_pub, nonce) -> cmk
-- sign_metadata(metadata_without_sig, ed25519_priv) -> signature
-- verify_metadata(metadata, ed25519_pub) -> bool
+- encryptPayload: files -> cipher_archive, cmk
+- decryptPayload: cipher_archive, cmk -> files
+- wrapCmkForRecipient: cmk, recipient_x25519_pub -> ciphertext, ephemeral_pub, nonce
+- unwrapCmk: ciphertext, recipient_x25519_priv, ephemeral_pub, nonce -> cmk
+- signMetadata: metadata, ed25519_priv -> signature
+- verifyMetadata: metadata, ed25519_pub -> bool
 
-### 8.4 IPFS Client
+### 8.4 Pinata Client
 
-- add_bytes(bytes) -> cid
-- add_json(obj) -> cid
-- get_bytes(cid) -> bytes
-- get_json(cid) -> obj
+- uploadBytes: bytes -> cid
+- getBytes: cid -> bytes
 
-### 8.5 Inventory & Persistence
+### 8.5 Supabase Client
 
-- save_capsule(record)
-- update_status(capsule_id, status)
-- list_capsules(filters)
-
-Record fields:
-- capsule_id, title, notes, payload_cid, metadata_cid?, created_at, approver_pubkey, status
+- saveCapsule: record -> id
+- updateStatus: capsule_id, status -> void
+- listCapsules: filters -> capsules array
+- getCapsule: capsule_id -> capsule
 
 ---
 
 ## 9) Error Model and UX Copy
 
-- Tampered Metadata: “This capsule’s details are invalid. It may have been altered.”
+- Tampered Metadata: "This capsule details are invalid. It may have been altered."
 - Policy Not Met: 
-  - Date: “This capsule isn’t available yet.”
-  - Location: “You’re not in the required unlock area.”
-- Unauthorized: “Your key doesn’t match the authorized approver.”
-- Network: “Unable to reach IPFS. Check connectivity or local daemon.”
+  - Date: "This capsule is not available yet."
+  - Location: "You are not in the required unlock area."
+- Unauthorized: "Your key does not match the authorized approver."
+- Network: "Unable to reach storage. Check connectivity."
 
-All errors should be non-technical, with a “Details” toggle for logs.
+All errors should be non-technical, with a Details toggle for logs.
 
 ---
 
@@ -277,18 +299,18 @@ All errors should be non-technical, with a “Details” toggle for logs.
 Adversaries:
 - Passive observer of IPFS: sees encrypted payloads and metadata.
 - Active modifier: attempts to replace metadata or payload.
-- Unauthorized local user: tries to unlock without private key.
+- Unauthorized user: tries to unlock without private key.
 - Location spoofing attempts.
 
 Assets:
 - CMK, decrypted files, policy integrity, approver identity.
 
-Risks & Mitigations:
+Risks and Mitigations:
 - Metadata tampering -> Ed25519 signature verification on metadata.
-- Payload substitution -> Optional payload manifest hash included in metadata; verify on download.
-- Key theft -> OS keystore integration (optional), passphrase-protected private keys, minimal key export paths.
-- Location spoofing -> Use salted, coarse-grained hash; allow optional secondary factors (date + location). Encourage real device location APIs; warn if mock providers detected.
-- Traffic analysis -> Client-side encryption; metadata reveals only hashes and public keys. Option to keep metadata off IPFS (share out-of-band).
+- Payload substitution -> Optional payload manifest hash included in metadata.
+- Key theft -> IndexedDB encryption, passphrase-protected private keys.
+- Location spoofing -> Use salted, coarse-grained hash; allow optional secondary factors.
+- Traffic analysis -> Client-side encryption; metadata reveals only hashes and public keys.
 - Replay attacks -> Nonces in CMK wrap; signed timestamps; versioned metadata.
 
 ---
@@ -296,45 +318,45 @@ Risks & Mitigations:
 ## 11) Privacy Considerations
 
 - Never store raw coordinates in metadata; only salted hashes.
-- Keep location precision coarse (1–3 decimal places) to reduce specificity.
+- Keep location precision coarse to reduce specificity.
 - Optional: allow unlock with only DATE_AFTER for users in sensitive regions.
 - No telemetry by default; optional opt-in for anonymous error reporting.
 
 ---
 
-## 12) Performance & Reliability
+## 12) Performance and Reliability
 
 - Payload size: compress before encrypt for smaller CIDs.
 - Streaming encryption/decryption for large archives to reduce memory usage.
-- Retry/backoff for IPFS interactions.
-- Local cache for recently accessed payloads with integrity checks.
+- Retry/backoff for Pinata and Supabase interactions.
+- Browser cache for recently accessed payloads with integrity checks.
 
 ---
 
-## 13) Build & Packaging
+## 13) Build and Deployment
 
-- Environments: dev (debug), prod (optimized).
-- Config via .env or settings.json (IPFS API URL, default precision).
-- Packaging: PyInstaller to single-file executable per OS.
-- Code signing recommended for distribution.
+- Environments: dev local, preview Vercel, prod Vercel.
+- Config via .env.local for Pinata API keys and Supabase credentials.
+- Deployment: git push triggers Vercel build and deploy.
+- Edge Functions: optional for metadata relay or rate limiting.
 
 ---
 
 ## 14) Testing Strategy
 
 - Unit tests:
-  - Crypto primitives (wrap/unwrap CMK; deterministic failures).
-  - Policy evaluation (edge dates, precision rounding).
-  - Metadata signing/verification.
+  - Crypto primitives with Vitest.
+  - Policy evaluation edge cases.
+  - Metadata signing and verification.
 - Integration tests:
-  - Full create->upload->unlock loop with local IPFS.
-  - Tampering scenarios (modified metadata, wrong approver key).
+  - Full create to unlock loop with test Supabase.
+  - Tampering scenarios.
 - E2E tests:
+  - Playwright for browser flows.
   - Simulated geolocation and clock scenarios.
-  - Large payloads.
 - Security tests:
   - Fuzzing of metadata parser.
-  - Negative tests for nonce reuse, KDF misuse.
+  - Negative tests for nonce reuse.
 
 ---
 
@@ -342,123 +364,126 @@ Risks & Mitigations:
 
 - Single approver.
 - DATE_AFTER and LOCATION_HASH_EQ conditions with ALL logic.
-- Local-only identity with exportable public keys.
-- Encrypted payload upload to IPFS.
-- Optional: metadata on IPFS or shared off-band.
-- Desktop UI with simple flows.
+- Browser-based identity with exportable public keys.
+- Encrypted payload upload to Pinata IPFS.
+- Supabase stores capsule metadata for easy sharing.
+- Responsive web UI works on desktop and mobile.
 
 Out of scope for MVP:
-- Mobile clients.
+- Native mobile apps.
 - Recovery flows, multi-approver, remote policy updates.
 
 ---
 
 ## 16) Roadmap
 
-- Phase 1: Core crypto + policy engine + IPFS client + CLI skeleton
-- Phase 2: Desktop UI; create and unlock flows; inventory
-- Phase 3: Hardening, UX polish, packaging; test suite
-- Phase 4: Enhancements (payload manifest, OS keychain, optional mobile)
+- Phase 1: Next.js setup, crypto engine, Pinata integration, Supabase schema
+- Phase 2: Create and unlock flows, inventory UI, key management
+- Phase 3: Policy engine, geolocation, testing, security audit
+- Phase 4: PWA support, optional Supabase Auth, sharing features
 
 ---
 
-## 17) Example CLI (for development)
-
-- tcl gen-keys -> generates ed25519/x25519 pair
-- tcl create --files ./docs --title "Taxes 2025" --approver-pub <pub> --date "2025-12-01" --loc "hash:BASE64,prec=2,salt=BASE64"
-- tcl show <capsule_id>
-- tcl unlock <capsule_id> --output ./out
-
----
-
-## 18) Example Pseudocode
+## 17) Example Code
 
 Creation:
 
-```python
-cmk = os.urandom(32)
-archive = compress(files)
-cipher_archive = fernet_encrypt(cmk, archive)
-payload_cid = ipfs.add_bytes(cipher_archive)
+```typescript
+const cmk = crypto.getRandomValues(new Uint8Array(32))
+const archive = await compress(files)
+const cipherArchive = await aesGcmEncrypt(cmk, archive)
+const payloadCid = await pinata.upload(cipherArchive)
 
-loc_hash = build_location_hash(lat, lon, date_utc, precision, salt) if use_location else None
-policy = build_policy(date_after, loc_hash)
+const locHash = useLocation ? buildLocationHash(lat, lon, dateUtc, precision, salt) : null
+const policy = buildPolicy(dateAfter, locHash)
 
-wrap = wrap_cmk_for_recipient(cmk, approver_x25519_pub)
-metadata = assemble_metadata(..., payload_cid, policy, wrap)
-metadata_sig = ed25519_sign(serialize(metadata_wo_sig), creator_ed25519_priv)
-metadata["metadata_sig"] = {"alg":"ed25519", "signature": b64(metadata_sig)}
+const wrap = await wrapCmkForRecipient(cmk, approverX25519Pub)
+const metadata = assembleMetadata(payloadCid, policy, wrap)
+const metadataSig = await ed25519Sign(metadata, creatorEd25519Priv)
+metadata.metadata_sig = { alg: "ed25519", signature: toBase64(metadataSig) }
 
-metadata_cid = ipfs.add_json(metadata)
-save_inventory(...)
+await supabase.from('capsules').insert({ 
+  metadata, 
+  payload_cid: payloadCid,
+  creator_pubkey: creatorPubkey,
+  approver_pubkey: approverPubkey,
+  title,
+  notes
+})
 ```
 
 Unlock:
 
-```python
-metadata = load_metadata()
-assert verify_metadata(metadata, metadata["creator_pubkey"])
+```typescript
+const { data } = await supabase.from('capsules').select('*').eq('id', capsuleId).single()
+const metadata = data.metadata
+assert(await verifyMetadata(metadata, metadata.creator_pubkey))
 
-if not evaluate(metadata["unlock_policy"], device_context()):
-    raise PolicyError
+if (!evaluate(metadata.unlock_policy, deviceContext())) {
+  throw new PolicyError()
+}
 
-cipher_archive = ipfs.get_bytes(metadata["payload_cid"])
-cmk = unwrap_cmk(metadata["encrypted_cmk"], approver_x25519_priv)
-archive = fernet_decrypt(cmk, cipher_archive)
-extract(archive, output_dir)
+const cipherArchive = await pinata.get(metadata.payload_cid)
+const cmk = await unwrapCmk(metadata.encrypted_cmk, approverX25519Priv)
+const archive = await aesGcmDecrypt(cmk, cipherArchive)
+const files = await decompress(archive)
+
+await supabase.from('capsules').update({ 
+  status: 'unlocked', 
+  unlocked_at: new Date() 
+}).eq('id', capsuleId)
 ```
 
 ---
 
-## 19) Mermaid Sequence Diagrams
+## 18) Sequence Diagrams
 
-Create Capsule (detailed):
+Create Capsule:
 
 ```mermaid
 sequenceDiagram
   participant U as User
-  participant UI as UI
-  participant POL as Policy Engine
+  participant UI as Next.js UI
   participant ENC as Crypto Engine
-  participant IP as IPFS
+  participant PIN as Pinata
+  participant SB as Supabase
   U->>UI: Select files approver policy
   UI->>ENC: Generate CMK compress encrypt files
   ENC-->>UI: cipher_archive
-  UI->>IP: add_bytes cipher_archive
-  IP-->>UI: payload_cid
-  UI->>POL: Build location hash if needed
-  POL-->>UI: location_hash
-  UI->>ENC: Wrap CMK to approver Sign metadata
+  UI->>PIN: upload cipher_archive
+  PIN-->>UI: payload_cid
+  UI->>ENC: Wrap CMK Sign metadata
   ENC-->>UI: encrypted_cmk signature
-  UI->>IP: add_json metadata
-  IP-->>UI: metadata_cid
-  UI-->>U: Capsule created
+  UI->>SB: insert capsule record
+  SB-->>UI: capsule_id
+  UI-->>U: Capsule created share link
 ```
 
-Unlock Capsule (detailed):
+Unlock Capsule:
 
 ```mermaid
 sequenceDiagram
   participant A as Approver
-  participant UI as UI
+  participant UI as Next.js UI
+  participant SB as Supabase
   participant POL as Policy Engine
+  participant PIN as Pinata
   participant ENC as Crypto Engine
-  participant IP as IPFS
-  A->>UI: Open capsule
-  UI->>IP: get_json metadata_cid or local
-  IP-->>UI: metadata
+  A->>UI: Open capsule link
+  UI->>SB: fetch capsule metadata
+  SB-->>UI: metadata
   UI->>ENC: Verify metadata signature
   ENC-->>UI: ok
   UI->>POL: Evaluate policy date location
   POL-->>UI: pass fail
   alt pass
-    UI->>IP: get_bytes payload_cid
-    IP-->>UI: cipher_archive
-    UI->>ENC: Unwrap CMK with approver private key
-    ENC-->>UI: CMK
-    UI->>ENC: Decrypt archive
+    UI->>PIN: get payload_cid
+    PIN-->>UI: cipher_archive
+    UI->>ENC: Unwrap CMK Decrypt archive
     ENC-->>UI: files
-    UI-->>A: Files available
+    UI->>SB: update status unlocked
+    UI-->>A: Files available for download
   else fail
     UI-->>A: Access denied
   end
+```

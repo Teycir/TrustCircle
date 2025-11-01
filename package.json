@@ -1,0 +1,30 @@
+{
+  "name": "trustcircle",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A web-based, privacy-first, single-approver secure data sharing app built with Next.js and deployed on Vercel. All encryption happens client-side in the browser.",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Teycir/TrustCircle.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Teycir/TrustCircle/issues"
+  },
+  "homepage": "https://github.com/Teycir/TrustCircle#readme",
+  "dependencies": {
+    "@noble/curves": "^2.0.1",
+    "@supabase/supabase-js": "^2.78.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.6"
+  }
+}
