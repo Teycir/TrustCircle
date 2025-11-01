@@ -1,5 +1,28 @@
 import { ed25519, x25519 } from '@noble/curves/ed25519.js'
 
+const usedNonces = new Set<string>()
+
+async function hkdf(ikm: Uint8Array, salt: Uint8Array, info: string, length: number): Promise<Uint8Array> {
+  const key = await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits'])
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'HKDF', hash: 'SHA-256', salt, info: new TextEncoder().encode(info) },
+    key,
+    length * 8
+  )
+  return new Uint8Array(bits)
+}
+
+function generateUniqueNonce(): Uint8Array {
+  let nonce: Uint8Array
+  let nonceStr: string
+  do {
+    nonce = crypto.getRandomValues(new Uint8Array(12))
+    nonceStr = toBase64(nonce)
+  } while (usedNonces.has(nonceStr))
+  usedNonces.add(nonceStr)
+  return nonce
+}
+
 export async function generateIdentity(): Promise<{
   ed25519: { privateKey: Uint8Array; publicKey: Uint8Array }
   x25519: { privateKey: Uint8Array; publicKey: Uint8Array }
@@ -15,7 +38,7 @@ export async function generateIdentity(): Promise<{
 
 export async function aesGcmEncrypt(key: Uint8Array, data: Uint8Array): Promise<Uint8Array> {
   const cryptoKey = await crypto.subtle.importKey('raw', key, 'AES-GCM', false, ['encrypt'])
-  const iv = crypto.getRandomValues(new Uint8Array(12))
+  const iv = generateUniqueNonce()
   const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, data)
   
   const result = new Uint8Array(iv.length + ciphertext.byteLength)
@@ -41,12 +64,19 @@ export async function wrapCmkForRecipient(cmk: Uint8Array, recipientX25519Pub: U
   const ephemeralPub = x25519.getPublicKey(ephemeralPriv)
   const sharedSecret = x25519.getSharedSecret(ephemeralPriv, recipientX25519Pub)
   
-  const wrappingKey = await crypto.subtle.importKey('raw', sharedSecret, 'AES-GCM', false, ['encrypt'])
-  const iv = crypto.getRandomValues(new Uint8Array(12))
-  const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, wrappingKey, cmk)
+  const salt = crypto.getRandomValues(new Uint8Array(16))
+  const wrappingKey = await hkdf(sharedSecret, salt, 'TCL-CMK-WRAP', 32)
+  
+  const cryptoKey = await crypto.subtle.importKey('raw', wrappingKey, 'AES-GCM', false, ['encrypt'])
+  const iv = generateUniqueNonce()
+  const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, cmk)
+  
+  const result = new Uint8Array(salt.length + ciphertext.byteLength)
+  result.set(salt, 0)
+  result.set(new Uint8Array(ciphertext), salt.length)
   
   return {
-    ciphertext: new Uint8Array(ciphertext),
+    ciphertext: result,
     ephemeralPub,
     nonce: iv
   }
@@ -59,8 +89,13 @@ export async function unwrapCmk(
   nonce: Uint8Array
 ): Promise<Uint8Array> {
   const sharedSecret = x25519.getSharedSecret(recipientX25519Priv, ephemeralPub)
-  const wrappingKey = await crypto.subtle.importKey('raw', sharedSecret, 'AES-GCM', false, ['decrypt'])
-  const cmk = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: nonce }, wrappingKey, ciphertext)
+  
+  const salt = ciphertext.slice(0, 16)
+  const actualCiphertext = ciphertext.slice(16)
+  const wrappingKey = await hkdf(sharedSecret, salt, 'TCL-CMK-WRAP', 32)
+  
+  const cryptoKey = await crypto.subtle.importKey('raw', wrappingKey, 'AES-GCM', false, ['decrypt'])
+  const cmk = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: nonce }, cryptoKey, actualCiphertext)
   return new Uint8Array(cmk)
 }
 

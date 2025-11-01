@@ -4,6 +4,13 @@ export interface DeviceContext {
   lon?: number
 }
 
+export class PolicyError extends Error {
+  constructor(message: string, public type: 'DATE' | 'LOCATION' | 'UNKNOWN') {
+    super(message)
+    this.name = 'PolicyError'
+  }
+}
+
 export interface PolicyCondition {
   type: 'DATE_AFTER' | 'LOCATION_HASH_EQ'
   value: string
@@ -44,17 +51,30 @@ export async function evaluate(policy: UnlockPolicy, context: DeviceContext): Pr
     policy.conditions.map(c => evaluateCondition(c, context))
   )
   
-  return policy.logic === 'ALL' ? results.every(r => r) : results.some(r => r)
+  const passed = policy.logic === 'ALL' ? results.every(r => r.passed) : results.some(r => r.passed)
+  
+  if (!passed) {
+    const failedTypes = results.filter(r => !r.passed).map(r => r.type)
+    if (failedTypes.includes('DATE')) {
+      throw new PolicyError('This capsule is not available yet.', 'DATE')
+    }
+    if (failedTypes.includes('LOCATION')) {
+      throw new PolicyError('You are not in the required unlock area.', 'LOCATION')
+    }
+    throw new PolicyError('Policy conditions not met.', 'UNKNOWN')
+  }
+  
+  return true
 }
 
-async function evaluateCondition(condition: PolicyCondition, context: DeviceContext): Promise<boolean> {
+async function evaluateCondition(condition: PolicyCondition, context: DeviceContext): Promise<{ passed: boolean; type: 'DATE' | 'LOCATION' | 'UNKNOWN' }> {
   if (condition.type === 'DATE_AFTER') {
-    return context.now >= new Date(condition.value)
+    return { passed: context.now >= new Date(condition.value), type: 'DATE' }
   }
   
   if (condition.type === 'LOCATION_HASH_EQ') {
     if (!context.lat || !context.lon || !condition.precision || !condition.salt) {
-      return false
+      return { passed: false, type: 'LOCATION' }
     }
     
     const hash = await buildLocationHash(
@@ -65,8 +85,8 @@ async function evaluateCondition(condition: PolicyCondition, context: DeviceCont
       condition.salt
     )
     
-    return hash === condition.value
+    return { passed: hash === condition.value, type: 'LOCATION' }
   }
   
-  return false
+  return { passed: false, type: 'UNKNOWN' }
 }

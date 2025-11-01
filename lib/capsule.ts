@@ -1,7 +1,8 @@
 import { generateIdentity, aesGcmEncrypt, aesGcmDecrypt, wrapCmkForRecipient, unwrapCmk, signMetadata, verifyMetadata, toBase64, fromBase64 } from './crypto'
-import { buildLocationHash, evaluate, type UnlockPolicy, type DeviceContext } from './policy'
+import { evaluate, type UnlockPolicy, type DeviceContext, PolicyError } from './policy'
 import { PinataClient } from './pinata'
 import { TrustCircleDB, type CapsuleRecord } from './supabase'
+import { compress, decompress } from './compression'
 
 export interface CapsuleMetadata {
   version: string
@@ -50,7 +51,8 @@ export class CapsuleManager {
 
   async createCapsule(params: CreateCapsuleParams): Promise<string> {
     const cmk = crypto.getRandomValues(new Uint8Array(32))
-    const cipherArchive = await aesGcmEncrypt(cmk, params.files)
+    const compressed = compress(params.files)
+    const cipherArchive = await aesGcmEncrypt(cmk, compressed)
     const payloadCid = await this.pinata.uploadBytes(cipherArchive)
 
     const wrap = await wrapCmkForRecipient(cmk, params.approverPubkey.x25519)
@@ -93,6 +95,10 @@ export class CapsuleManager {
     const capsule = await this.db.getCapsule(params.capsuleId)
     const metadata = capsule.metadata as CapsuleMetadata
 
+    if (metadata.version !== '1.0') {
+      throw new Error('Unsupported capsule version')
+    }
+
     const creatorPubkey = fromBase64(metadata.creator_pubkey.split(':')[1])
     const signature = fromBase64(metadata.metadata_sig.signature)
     const { metadata_sig, capsule_id, ...metadataToVerify } = metadata
@@ -101,7 +107,12 @@ export class CapsuleManager {
       throw new Error('This capsule details are invalid. It may have been altered.')
     }
 
-    if (!await evaluate(metadata.unlock_policy, params.context)) {
+    try {
+      await evaluate(metadata.unlock_policy, params.context)
+    } catch (error) {
+      if (error instanceof PolicyError) {
+        throw error
+      }
       throw new Error('Access denied. Policy conditions not met.')
     }
 
@@ -112,7 +123,8 @@ export class CapsuleManager {
     const nonce = fromBase64(metadata.encrypted_cmk.nonce)
 
     const cmk = await unwrapCmk(ciphertext, params.approverKeys.x25519.privateKey, ephemeralPub, nonce)
-    const archive = await aesGcmDecrypt(cmk, cipherArchive)
+    const compressed = await aesGcmDecrypt(cmk, cipherArchive)
+    const archive = decompress(compressed)
 
     await this.db.updateStatus(params.capsuleId, 'unlocked')
 

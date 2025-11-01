@@ -20,7 +20,16 @@
   "homepage": "https://github.com/Teycir/TrustCircle#readme",
   "dependencies": {
     "@noble/curves": "^2.0.1",
-    "@supabase/supabase-js": "^2.78.0"
+    "@supabase/supabase-js": "^2.78.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "autoprefixer": "^10.4.21",
+    "fflate": "^0.8.2",
+    "next": "^14.2.33",
+    "postcss": "^8.5.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^4.1.16"
   },
   "devDependencies": {
     "@types/node": "^24.9.2",

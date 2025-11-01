@@ -30,10 +30,10 @@ describe('Policy Engine', () => {
     }
     
     const pass = await evaluate(policy, { now: new Date('2025-01-02') })
-    const fail = await evaluate(policy, { now: new Date('2024-12-31') })
-    
     expect(pass).toBe(true)
-    expect(fail).toBe(false)
+    
+    await expect(evaluate(policy, { now: new Date('2024-12-31') }))
+      .rejects.toThrow('This capsule is not available yet.')
   })
 
   it('evaluates LOCATION_HASH_EQ condition', async () => {
@@ -55,10 +55,10 @@ describe('Policy Engine', () => {
     }
     
     const pass = await evaluate(policy, { now: date, lat, lon })
-    const fail = await evaluate(policy, { now: date, lat: 40.0, lon })
-    
     expect(pass).toBe(true)
-    expect(fail).toBe(false)
+    
+    await expect(evaluate(policy, { now: date, lat: 40.0, lon }))
+      .rejects.toThrow('You are not in the required unlock area.')
   })
 
   it('evaluates ALL logic with multiple conditions', async () => {
@@ -71,10 +71,10 @@ describe('Policy Engine', () => {
     }
     
     const pass = await evaluate(policy, { now: new Date('2025-01-03') })
-    const fail = await evaluate(policy, { now: new Date('2025-01-01T12:00:00Z') })
-    
     expect(pass).toBe(true)
-    expect(fail).toBe(false)
+    
+    await expect(evaluate(policy, { now: new Date('2025-01-01T12:00:00Z') }))
+      .rejects.toThrow('This capsule is not available yet.')
   })
 
   it('evaluates ANY logic with multiple conditions', async () => {
@@ -87,10 +87,10 @@ describe('Policy Engine', () => {
     }
     
     const pass = await evaluate(policy, { now: new Date('2025-01-02') })
-    const fail = await evaluate(policy, { now: new Date('2024-12-31') })
-    
     expect(pass).toBe(true)
-    expect(fail).toBe(false)
+    
+    await expect(evaluate(policy, { now: new Date('2024-12-31') }))
+      .rejects.toThrow('This capsule is not available yet.')
   })
 
   it('fails location check when context missing coordinates', async () => {
@@ -104,8 +104,7 @@ describe('Policy Engine', () => {
       logic: 'ALL' as const
     }
     
-    const result = await evaluate(policy, { now: new Date() })
-    
-    expect(result).toBe(false)
+    await expect(evaluate(policy, { now: new Date() }))
+      .rejects.toThrow('You are not in the required unlock area.')
   })
 })

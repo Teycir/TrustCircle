@@ -119,7 +119,7 @@ describe('Capsule Integration', () => {
       capsuleId,
       approverKeys,
       context: { now: new Date('2025-01-01') }
-    })).rejects.toThrow('Access denied. Policy conditions not met.')
+    })).rejects.toThrow('This capsule is not available yet.')
   })
 
   it('rejects tampered metadata', async () => {
