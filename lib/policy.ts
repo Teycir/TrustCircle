@@ -23,9 +23,14 @@ export async function buildLocationHash(
   precision: number,
   salt: string
 ): Promise<string> {
-  const roundedLat = Math.round(lat * Math.pow(10, precision)) / Math.pow(10, precision)
-  const roundedLon = Math.round(lon * Math.pow(10, precision)) / Math.pow(10, precision)
-  const dayUtc = date.toISOString().split('T')[0]
+  if (lat < -90 || lat > 90) throw new Error('Latitude must be between -90 and 90')
+  if (lon < -180 || lon > 180) throw new Error('Longitude must be between -180 and 180')
+  
+  const factor = 10 ** precision
+  const roundedLat = Math.round(lat * factor) / factor
+  const roundedLon = Math.round(lon * factor) / factor
+  const dayUtc = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
+    .toISOString().split('T')[0]
   
   const input = `${salt}:${roundedLat}:${roundedLon}:${dayUtc}`
   const data = new TextEncoder().encode(input)
