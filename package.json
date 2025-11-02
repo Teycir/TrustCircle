@@ -5,6 +5,9 @@
   "description": "A web-based, privacy-first, single-approver secure data sharing app built with Next.js and deployed on Vercel. All encryption happens client-side in the browser.",
   "main": "index.js",
   "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "test": "vitest"
   },
   "repository": {
