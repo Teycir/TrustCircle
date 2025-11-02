@@ -3,6 +3,7 @@ import { evaluate, type UnlockPolicy, type DeviceContext, PolicyError } from './
 import { PinataClient } from './pinata'
 import { TrustCircleDB, type CapsuleRecord } from './supabase'
 import { compress, decompress } from './compression'
+import { validateFileSize } from './validation'
 
 export interface CapsuleMetadata {
   version: string
@@ -50,10 +51,13 @@ export class CapsuleManager {
   ) {}
 
   async createCapsule(params: CreateCapsuleParams): Promise<string> {
-    const cmk = crypto.getRandomValues(new Uint8Array(32))
-    const compressed = compress(params.files)
-    const cipherArchive = await aesGcmEncrypt(cmk, compressed)
-    const payloadCid = await this.pinata.uploadBytes(cipherArchive)
+    try {
+      validateFileSize(params.files.length)
+      
+      const cmk = crypto.getRandomValues(new Uint8Array(32))
+      const compressed = compress(params.files)
+      const cipherArchive = await aesGcmEncrypt(cmk, compressed)
+      const payloadCid = await this.pinata.uploadBytes(cipherArchive)
 
     const wrap = await wrapCmkForRecipient(cmk, params.approverPubkey.x25519)
     
@@ -88,12 +92,19 @@ export class CapsuleManager {
       metadata: fullMetadata
     }
 
-    return await this.db.saveCapsule(record)
+      return await this.db.saveCapsule(record)
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Capsule creation failed: ${error.message}`)
+      }
+      throw error
+    }
   }
 
   async unlockCapsule(params: UnlockCapsuleParams): Promise<Uint8Array> {
-    const capsule = await this.db.getCapsule(params.capsuleId)
-    const metadata = capsule.metadata as CapsuleMetadata
+    try {
+      const capsule = await this.db.getCapsule(params.capsuleId)
+      const metadata = capsule.metadata as CapsuleMetadata
 
     if (metadata.version !== '1.0') {
       throw new Error('Unsupported capsule version')
@@ -126,8 +137,17 @@ export class CapsuleManager {
     const compressed = await aesGcmDecrypt(cmk, cipherArchive)
     const archive = decompress(compressed)
 
-    await this.db.updateStatus(params.capsuleId, 'unlocked')
+      await this.db.updateStatus(params.capsuleId, 'unlocked')
 
-    return archive
+      return archive
+    } catch (error) {
+      if (error instanceof PolicyError) {
+        throw error
+      }
+      if (error instanceof Error) {
+        throw new Error(`Capsule unlock failed: ${error.message}`)
+      }
+      throw error
+    }
   }
 }

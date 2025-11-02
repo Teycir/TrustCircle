@@ -30,7 +30,7 @@ describe('Pinata Client', () => {
   })
 
   it('throws error on upload failure', async () => {
-    vi.mocked(fetch).mockResolvedValueOnce({
+    vi.mocked(fetch).mockResolvedValue({
       ok: false,
       statusText: 'Unauthorized'
     } as Response)
@@ -53,7 +53,7 @@ describe('Pinata Client', () => {
   })
 
   it('throws error on fetch failure', async () => {
-    vi.mocked(fetch).mockResolvedValueOnce({
+    vi.mocked(fetch).mockResolvedValue({
       ok: false,
       statusText: 'Not Found'
     } as Response)

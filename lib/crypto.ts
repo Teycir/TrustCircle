@@ -99,13 +99,21 @@ export async function unwrapCmk(
   return new Uint8Array(cmk)
 }
 
+function canonicalJson(obj: any): string {
+  if (obj === null || typeof obj !== 'object') return JSON.stringify(obj)
+  if (Array.isArray(obj)) return `[${obj.map(canonicalJson).join(',')}]`
+  const keys = Object.keys(obj).sort()
+  const pairs = keys.map(k => `"${k}":${canonicalJson(obj[k])}`)
+  return `{${pairs.join(',')}}`
+}
+
 export function signMetadata(metadata: any, ed25519Priv: Uint8Array): Uint8Array {
-  const message = new TextEncoder().encode(JSON.stringify(metadata))
+  const message = new TextEncoder().encode(canonicalJson(metadata))
   return ed25519.sign(message, ed25519Priv)
 }
 
 export function verifyMetadata(metadata: any, signature: Uint8Array, ed25519Pub: Uint8Array): boolean {
-  const message = new TextEncoder().encode(JSON.stringify(metadata))
+  const message = new TextEncoder().encode(canonicalJson(metadata))
   return ed25519.verify(signature, message, ed25519Pub)
 }
 
