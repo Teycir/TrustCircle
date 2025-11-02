@@ -2,24 +2,59 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useIdentity } from '@/lib/hooks'
+import { getClient, downloadFile } from '@/lib/client'
 
 export default function UnlockCapsule() {
+  const { identity } = useIdentity()
   const [capsuleId, setCapsuleId] = useState('')
   const [loading, setLoading] = useState(false)
-  const [files, setFiles] = useState<string[] | null>(null)
+  const [unlocked, setUnlocked] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [fileData, setFileData] = useState<Uint8Array | null>(null)
 
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!identity) return
+    
     setLoading(true)
+    setError(null)
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      setFiles(['document.pdf', 'image.jpg'])
-    } catch (error) {
-      alert('Error: ' + (error as Error).message)
+      const client = getClient()
+      const data = await client.unlockCapsule({
+        capsuleId,
+        approverKeys: identity,
+        context: { now: new Date() }
+      })
+      
+      setFileData(data)
+      setUnlocked(true)
+    } catch (err) {
+      setError((err as Error).message)
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleDownload = () => {
+    if (fileData) {
+      downloadFile(fileData, 'unlocked-file')
+    }
+  }
+
+  if (!identity) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="bg-white rounded-lg shadow-md p-8 max-w-md">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">Identity Required</h3>
+          <p className="text-gray-600 mb-6">You need to generate an identity first</p>
+          <Link href="/identity" className="block w-full bg-indigo-600 text-white py-3 rounded-lg text-center font-semibold hover:bg-indigo-700">
+            Go to Identity
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -34,20 +69,26 @@ export default function UnlockCapsule() {
       <main className="max-w-3xl mx-auto px-4 py-12">
         <h2 className="text-3xl font-bold text-gray-900 mb-8">Unlock Capsule</h2>
 
-        {files ? (
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <p className="text-red-800">{error}</p>
+          </div>
+        )}
+
+        {unlocked ? (
           <div className="bg-white rounded-lg shadow-md p-8">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Unlocked Files</h3>
-            <ul className="space-y-2 mb-6">
-              {files.map((file, i) => (
-                <li key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                  <span className="text-gray-700">{file}</span>
-                  <button className="text-indigo-600 hover:text-indigo-800">Download</button>
-                </li>
-              ))}
-            </ul>
-            <button onClick={() => setFiles(null)} className="text-gray-600 hover:text-gray-900">
-              Unlock Another
-            </button>
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">Unlocked Successfully</h3>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+              <p className="text-green-800">File size: {fileData?.length} bytes</p>
+            </div>
+            <div className="flex gap-4">
+              <button onClick={handleDownload} className="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700">
+                Download File
+              </button>
+              <button onClick={() => { setUnlocked(false); setFileData(null); setCapsuleId('') }} className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg hover:bg-gray-200">
+                Unlock Another
+              </button>
+            </div>
           </div>
         ) : (
           <form onSubmit={handleUnlock} className="bg-white rounded-lg shadow-md p-8 space-y-6">
@@ -58,7 +99,7 @@ export default function UnlockCapsule() {
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-sm text-blue-800">
-                <strong>Note:</strong> Unlock requires your private key and meeting policy conditions.
+                <strong>Note:</strong> Unlock requires your private key and meeting policy conditions (date/location).
               </p>
             </div>
 
