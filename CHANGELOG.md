@@ -2,6 +2,25 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [2.3.1] - 2025-01-29
+
+### Fixed
+- **Code Quality Improvements**:
+  - Fixed all TypeScript compilation errors across the codebase
+  - Added comprehensive error handling with try-catch blocks in crypto operations
+  - Optimized toBase64 performance by replacing spread operator with loop
+  - Removed unnecessary type assertions throughout crypto.ts
+  - Applied optional chaining for cleaner null checks
+  - Changed generic Error to TypeError for type validation
+  - Fixed trailing whitespace issues
+  - Enhanced error messages for better debugging
+  - Added crypto availability check at module level
+  - Fixed Uint8Array type compatibility issues with BufferSource
+  - Fixed Date constructor type errors in dashboard and unlock pages
+  - Replaced toSorted with sort for ES2020 compatibility
+  - Fixed BlobPart type issues in file operations
+  - Removed unused update operation in sync.ts
+
 ## [2.3.0] - 2025-01-29
 
 ### Added

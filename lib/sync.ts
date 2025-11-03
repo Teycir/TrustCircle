@@ -12,8 +12,6 @@ export async function syncPendingOperations() {
         if (op.entity === 'capsule') {
           if (op.type === 'create') {
             await client.createCapsule(op.data)
-          } else if (op.type === 'update') {
-            await client.updateCapsule(op.data.id, op.data)
           } else if (op.type === 'delete') {
             await client['db'].deleteCapsule(op.data.id)
           }

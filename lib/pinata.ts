@@ -13,25 +13,23 @@ export class PinataClient {
     if (!data || data.length === 0) throw new Error('Data cannot be empty')
 
     return withRetry(async () => {
-      try {
-        const formData = new FormData()
-        formData.append('file', new Blob([data]), filename || 'capsule.bin')
+      const formData = new FormData()
+      formData.append('file', new Blob([data as BlobPart]), filename || 'capsule.bin')
 
-        const response = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${this.apiKey}` },
-          body: formData
-        })
+      const response = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${this.apiKey}` },
+        body: formData
+      })
 
-        if (!response.ok) {
-          throw new Error(`Pinata upload failed: ${response.statusText}`)
-        }
-
-        const result = await response.json()
-        return result.IpfsHash
-      } catch (error) {
-        throw new Error(`Failed to upload to Pinata: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => response.statusText)
+        throw new Error(`Pinata upload failed: ${errorText}`)
       }
+
+      const result = await response.json()
+      if (!result?.IpfsHash) throw new Error('Invalid response: missing IpfsHash')
+      return result.IpfsHash
     })
   }
 
@@ -39,18 +37,15 @@ export class PinataClient {
     if (!cid?.trim()) throw new Error('CID cannot be empty')
 
     return withRetry(async () => {
-      try {
-        const response = await fetch(`${this.gateway}/ipfs/${cid}`)
+      const response = await fetch(`${this.gateway}/ipfs/${cid}`)
 
-        if (!response.ok) {
-          throw new Error(`Pinata fetch failed: ${response.statusText}`)
-        }
-
-        const buffer = await response.arrayBuffer()
-        return new Uint8Array(buffer)
-      } catch (error) {
-        throw new Error(`Failed to fetch from IPFS: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => response.statusText)
+        throw new Error(`Pinata fetch failed: ${errorText}`)
       }
+
+      const buffer = await response.arrayBuffer()
+      return new Uint8Array(buffer)
     })
   }
 
@@ -59,9 +54,14 @@ export class PinataClient {
       headers: { Authorization: `Bearer ${this.apiKey}` }
     })
 
-    if (!response.ok) throw new Error('Failed to get storage usage')
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => response.statusText)
+      throw new Error(`Failed to get storage usage: ${errorText}`)
+    }
 
     const data = await response.json()
+    if (!data?.rows || !Array.isArray(data.rows)) throw new Error('Invalid response format')
+
     const used = data.rows.reduce((sum: number, row: any) => sum + (row.size || 0), 0)
     const limit = 1073741824
 
@@ -76,7 +76,10 @@ export class PinataClient {
       headers: { Authorization: `Bearer ${this.apiKey}` }
     })
 
-    if (!response.ok) throw new Error(`Failed to unpin file: ${response.statusText}`)
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => response.statusText)
+      throw new Error(`Failed to unpin file: ${errorText}`)
+    }
   }
 
   async purgeOldFiles(threshold: number = 0.9): Promise<void> {
@@ -88,17 +91,28 @@ export class PinataClient {
       headers: { Authorization: `Bearer ${this.apiKey}` }
     })
 
-    if (!response.ok) throw new Error('Failed to list files')
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => response.statusText)
+      throw new Error(`Failed to list files: ${errorText}`)
+    }
 
     const data = await response.json()
+    if (!data?.rows || !Array.isArray(data.rows)) throw new Error('Invalid response format')
+
     const targetSize = usage.limit * 0.7
     let currentSize = usage.used
+    const unpinPromises = []
 
     for (const file of data.rows) {
       if (currentSize <= targetSize) break
+      if (!file?.ipfs_pin_hash) continue
 
-      await this.unpin(file.ipfs_pin_hash)
-      currentSize -= file.size
+      unpinPromises.push(this.unpin(file.ipfs_pin_hash).catch(err =>
+        console.error(`Failed to unpin ${file.ipfs_pin_hash}:`, err)
+      ))
+      currentSize -= file.size || 0
     }
+
+    await Promise.all(unpinPromises)
   }
 }

@@ -83,7 +83,7 @@ describe('Capsule Integration', () => {
       metadata: { ...savedMetadata, capsule_id: capsuleId }
     })
 
-    const encryptedPayload = mockPinata.uploadBytes.mock.calls[0][0]
+    const encryptedPayload = mockPinata.uploadBytes.mock.calls[0][0] as Uint8Array
     mockPinata.getBytes.mockResolvedValueOnce(encryptedPayload)
 
     const decrypted = await manager.unlockCapsule({

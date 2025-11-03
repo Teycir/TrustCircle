@@ -10,9 +10,9 @@ export async function* encryptStream(
       const { done, value } = await reader.read()
       if (done) break
 
-      const cryptoKey = await crypto.subtle.importKey('raw', key, 'AES-GCM', false, ['encrypt'])
+      const cryptoKey = await crypto.subtle.importKey('raw', key as BufferSource, 'AES-GCM', false, ['encrypt'])
       const iv = crypto.getRandomValues(new Uint8Array(12))
-      const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, value)
+      const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, value as BufferSource)
 
       const chunk = new Uint8Array(iv.length + encrypted.byteLength)
       chunk.set(iv, 0)

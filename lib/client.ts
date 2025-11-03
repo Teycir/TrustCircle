@@ -35,7 +35,7 @@ export function downloadFile(data: Uint8Array, filename: string) {
   if (!data?.length) throw new Error('Data cannot be empty')
   if (!filename?.trim()) throw new Error('Filename cannot be empty')
 
-  const blob = new Blob([data.buffer as ArrayBuffer])
+  const blob = new Blob([data as BlobPart])
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url

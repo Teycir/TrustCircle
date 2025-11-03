@@ -28,7 +28,7 @@ function UnlockCapsuleContent() {
         const client = getClient()
         const publicKey = `ed25519:${toBase64(identity.ed25519.publicKey)}`
         const data = await client['db'].listCapsules({ approver: publicKey })
-        setCapsules(data.toSorted((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
+        setCapsules([...data].sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()))
       } catch (err) {
         console.error('Failed to load capsules:', err)
       } finally {
