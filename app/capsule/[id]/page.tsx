@@ -57,7 +57,6 @@ export default function CapsulePage() {
         context: { now: new Date() }
       })
 
-      await client['db'].updateStatus(capsuleId, 'unlocked')
       setUnlockedData(result)
       setCapsule((prev: any) => ({ ...prev, status: 'unlocked' }))
     } catch (err) {
@@ -107,7 +106,6 @@ export default function CapsulePage() {
   }
 
   const metadata = capsule.metadata as CapsuleMetadata
-  const shareUrl = `${globalThis.location?.origin || ''}/capsule/${capsuleId}`
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -179,12 +177,12 @@ export default function CapsulePage() {
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(capsuleId);
-                    const mailtoLink = `mailto:?subject=${encodeURIComponent('TrustCircle Capsule ID Shared')}&body=${encodeURIComponent(`I've shared a secure capsule with you on TrustCircle.\n\nCapsule ID: ${capsuleId}\n\nTo access:\n1. Visit ${shareUrl}\n2. Or go to TrustCircle and use the Capsule ID above\n3. Unlock when conditions are met`)}`;
+                    const mailtoLink = `mailto:?subject=${encodeURIComponent('TrustCircle Capsule ID Shared')}&body=${encodeURIComponent(`I've shared a secure capsule with you on TrustCircle.\n\nCapsule ID: ${capsuleId}\n\nTo access:\n1. Visit TrustCircle\n2. Use the Capsule ID above\n3. Unlock when conditions are met`)}`;
                     const link = document.createElement('a');
                     link.href = mailtoLink;
                     link.click();
                   }}
-                  className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 font-medium"
+                  className="flex-1 bg-gradient-to-r from-indigo-400 to-purple-400 hover:from-indigo-500 hover:to-purple-500 text-white px-4 py-2 rounded font-medium shadow-sm"
                 >
                   📧 Share
                 </button>
@@ -200,7 +198,7 @@ export default function CapsulePage() {
                 </p>
                 <Link
                   href="/login"
-                  className="inline-block bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700"
+                  className="inline-block bg-gradient-to-r from-indigo-400 to-purple-400 hover:from-indigo-500 hover:to-purple-500 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm"
                 >
                   Log In
                 </Link>
@@ -218,21 +216,22 @@ export default function CapsulePage() {
             {identity && isApprover && (
               <div className="flex gap-3">
                 {unlockedData ? (
-                  <button
-                    onClick={handleDownload}
-                    className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700"
-                  >
-                    💾 Download
-                  </button>
-                ) : capsule.status === 'unlocked' ? (
-                  <div className="flex-1 bg-green-100 text-green-800 py-3 rounded-lg font-semibold text-center">
-                    ✓ Already Unlocked
-                  </div>
+                  <>
+                    <button
+                      onClick={handleDownload}
+                      className="flex-1 bg-gradient-to-r from-green-400 to-emerald-400 hover:from-green-500 hover:to-emerald-500 text-white px-6 py-3 rounded-lg font-semibold shadow-sm"
+                    >
+                      📥 Download File
+                    </button>
+                    <div className="flex-1 bg-green-50 border border-green-200 rounded-lg p-3 flex items-center justify-center">
+                      <span className="text-green-800 font-medium">✓ Unlocked</span>
+                    </div>
+                  </>
                 ) : (
                   <button
                     onClick={handleUnlock}
-                    disabled={unlocking}
-                    className="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 disabled:bg-gray-400"
+                    disabled={unlocking || capsule.status === 'unlocked'}
+                    className="flex-1 bg-gradient-to-r from-indigo-400 to-purple-400 hover:from-indigo-500 hover:to-purple-500 text-white px-6 py-3 rounded-lg font-semibold disabled:bg-gray-300 disabled:from-gray-300 disabled:to-gray-300 shadow-sm"
                   >
                     {unlocking ? '🔓 Unlocking...' : '🔓 Unlock Capsule'}
                   </button>

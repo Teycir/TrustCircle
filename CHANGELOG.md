@@ -2,6 +2,60 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [2.3.0] - 2025-01-29
+
+### Added
+- **Location Lock Feature**: Complete implementation of location-based unlocking
+  - Location capture during capsule creation with precision level 2 (approx 1km radius)
+  - Location hash verification during unlock using SHA-256
+  - Privacy-preserving location storage (hash only, not actual coordinates)
+  - Graceful fallback when geolocation is unavailable
+  - Optional location requirement checkbox on create page
+
+### Improved
+- **UI/UX Enhancements**:
+  - Beautiful gradient buttons across entire app with light colors matching background
+  - Gradient colors: indigo-400 to purple-400 for primary actions
+  - Gradient colors: blue-400 to cyan-400 for download actions
+  - Gradient colors: gray-400 to gray-500 for secondary actions
+  - Gradient colors: green-400 to emerald-400 for success actions
+  - Shadow effects on all buttons for depth
+  - Consistent button styling across all pages (create, dashboard, unlock, capsule, admin, identity)
+
+- **Dashboard Improvements**:
+  - Newest capsules appear first (reverse chronological order)
+  - Better sorting for both created and received capsules
+
+- **Create Page Enhancements**:
+  - Default unlock date set to yesterday for immediate testing
+  - Date field auto-filled with yesterday's date
+  - Improved user experience for quick capsule creation
+
+- **Storage Display Fix**:
+  - Fixed storage calculation to fetch all files (up to 1000) instead of just 1
+  - Accurate storage usage display in MB
+  - Proper calculation of used space across all pinned files
+
+### Fixed
+- **Code Quality**:
+  - Added proper error handling with try-catch blocks in Pinata client
+  - Used optional chain expressions for null checks
+  - Marked readonly properties in PinataClient class
+  - Fixed timing attack vulnerability with constant-time comparison
+  - Used String.fromCodePoint instead of String.fromCharCode
+  - Used codePointAt instead of charCodeAt for better Unicode support
+
+- **Policy Evaluation**:
+  - Location check passes when no location data provided (allows unlock without location)
+  - Location check validates when location data is provided
+  - Proper error messages for location mismatch
+
+### Technical
+- Location lock uses haversine distance calculation for accuracy
+- Policy evaluation supports optional location context
+- Geolocation utility with high accuracy and timeout handling
+- Dashboard and unlock page use toSorted for immutable sorting
+
 ## [2.2.0] - 2025-01-29
 
 ### Added

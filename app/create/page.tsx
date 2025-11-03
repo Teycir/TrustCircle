@@ -16,7 +16,10 @@ function CreateCapsuleContent() {
   const [approverKey, setApproverKey] = useState('')
   const [title, setTitle] = useState('')
   const [notes, setNotes] = useState('')
-  const [dateAfter, setDateAfter] = useState('')
+  const yesterday = new Date()
+  yesterday.setDate(yesterday.getDate() - 1)
+  const defaultDate = yesterday.toISOString().slice(0, 16)
+  const [dateAfter, setDateAfter] = useState(defaultDate)
   const [useLocation, setUseLocation] = useState(false)
   const [expiresAt, setExpiresAt] = useState('')
   const [loading, setLoading] = useState(false)
@@ -98,7 +101,7 @@ function CreateCapsuleContent() {
         <div className="bg-white rounded-lg shadow-md p-8 max-w-md">
           <h3 className="text-xl font-semibold text-gray-900 mb-4">Identity Required</h3>
           <p className="text-gray-600 mb-6">You need to generate an identity first</p>
-          <Link href="/identity" className="block w-full bg-indigo-600 text-white py-3 rounded-lg text-center font-semibold hover:bg-indigo-700">
+          <Link href="/identity" className="block w-full bg-gradient-to-r from-indigo-400 to-purple-400 hover:from-indigo-500 hover:to-purple-500 text-white py-3 rounded-lg text-center font-semibold shadow-sm">
             Go to Identity
           </Link>
         </div>
@@ -147,13 +150,13 @@ function CreateCapsuleContent() {
             <div className="flex flex-col sm:flex-row gap-3">
               <Link
                 href={`/capsule/${result}`}
-                className="flex-1 bg-indigo-600 text-white py-3 rounded-lg text-center font-semibold hover:bg-indigo-700"
+                className="flex-1 bg-gradient-to-r from-indigo-400 to-purple-400 hover:from-indigo-500 hover:to-purple-500 text-white py-3 rounded-lg text-center font-semibold shadow-sm"
               >
                 View Capsule
               </Link>
               <button
                 onClick={() => setResult(null)}
-                className="flex-1 bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-700"
+                className="flex-1 bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white py-3 rounded-lg font-semibold shadow-sm"
               >
                 Create Another
               </button>
@@ -182,7 +185,7 @@ function CreateCapsuleContent() {
                 <button
                   type="button"
                   onClick={() => setApproverKey(getPublicKeyString())}
-                  className="text-xs bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 font-medium"
+                  className="text-xs bg-gradient-to-r from-indigo-400 to-purple-400 hover:from-indigo-500 hover:to-purple-500 text-white px-3 py-1 rounded font-medium shadow-sm"
                 >
                   🔑 Use My Key
                 </button>
@@ -216,7 +219,7 @@ function CreateCapsuleContent() {
               </div>
             </div>
 
-            <button type="submit" disabled={loading} className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 disabled:bg-gray-400">
+            <button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-indigo-400 to-purple-400 hover:from-indigo-500 hover:to-purple-500 text-white py-3 rounded-lg font-semibold disabled:bg-gray-300 disabled:from-gray-300 disabled:to-gray-300 shadow-sm">
               {loading ? 'Creating...' : 'Create Capsule'}
             </button>
           </form>

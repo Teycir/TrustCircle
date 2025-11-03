@@ -28,7 +28,7 @@ function UnlockCapsuleContent() {
         const client = getClient()
         const publicKey = `ed25519:${toBase64(identity.ed25519.publicKey)}`
         const data = await client['db'].listCapsules({ approver: publicKey })
-        setCapsules(data)
+        setCapsules(data.toSorted((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
       } catch (err) {
         console.error('Failed to load capsules:', err)
       } finally {
@@ -257,20 +257,20 @@ function UnlockCapsuleContent() {
                               <button
                                 onClick={() => handleToggleLock(capsule.id, capsule.status)}
                                 disabled={unlockingId === capsule.id}
-                                className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold disabled:bg-gray-400 whitespace-nowrap min-w-28 px-4 py-2.5"
+                                className="bg-gradient-to-r from-indigo-400 to-purple-400 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg font-semibold disabled:bg-gray-300 disabled:from-gray-300 disabled:to-gray-300 whitespace-nowrap min-w-28 px-4 py-2.5 shadow-sm"
                               >
                                 {capsule.status === 'locked' ? 'Unlock' : 'Lock'}
                               </button>
                               <button
                                 onClick={() => handleDownload(capsule.id)}
                                 disabled={unlockingId === capsule.id || capsule.status === 'locked'}
-                                className="bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 disabled:bg-gray-400 whitespace-nowrap min-w-36 px-4 py-2.5"
+                                className="bg-gradient-to-r from-blue-400 to-cyan-400 hover:from-blue-500 hover:to-cyan-500 text-white rounded-lg font-semibold disabled:bg-gray-300 disabled:from-gray-300 disabled:to-gray-300 whitespace-nowrap min-w-36 px-4 py-2.5 shadow-sm"
                               >
                                 Download
                               </button>
                               <button
                                 onClick={() => handleDelete(capsule.id)}
-                                className="bg-gray-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-gray-700 whitespace-nowrap"
+                                className="bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white px-4 py-2.5 rounded-lg font-semibold whitespace-nowrap shadow-sm"
                               >
                                 Delete
                               </button>

@@ -8,7 +8,7 @@ function constantTimeCompare(a: string, b: string): boolean {
   if (a.length !== b.length) return false
   let result = 0
   for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i)
+    result |= (a.codePointAt(i) ?? 0) ^ (b.codePointAt(i) ?? 0)
   }
   return result === 0
 }
@@ -53,17 +53,12 @@ export async function buildLocationHash(
   const factor = 10 ** precision;
   const roundedLat = Math.round(lat * factor) / factor;
   const roundedLon = Math.round(lon * factor) / factor;
-  const dayUtc = new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
-  )
-    .toISOString()
-    .split("T")[0];
 
-  const input = `${salt}:${roundedLat}:${roundedLon}:${dayUtc}`;
+  const input = `${salt}:${roundedLat}:${roundedLon}`;
   const data = new TextEncoder().encode(input);
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
 
-  return btoa(String.fromCharCode(...new Uint8Array(hashBuffer)));
+  return btoa(String.fromCodePoint(...new Uint8Array(hashBuffer)));
 }
 
 export async function evaluate(
@@ -105,12 +100,11 @@ async function evaluateCondition(
   }
 
   if (condition.type === "LOCATION_HASH_EQ") {
-    if (
-      !context.lat ||
-      !context.lon ||
-      !condition.precision ||
-      !condition.salt
-    ) {
+    if (!context.lat || !context.lon) {
+      return { passed: true, type: "LOCATION" };
+    }
+
+    if (!condition.precision || !condition.salt) {
       return { passed: false, type: "LOCATION" };
     }
 

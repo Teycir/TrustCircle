@@ -116,13 +116,13 @@ export default function AdminPage() {
             <div className="flex gap-4 pt-8">
               <button
                 onClick={handleSave}
-                className="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700"
+                className="flex-1 bg-gradient-to-r from-indigo-400 to-purple-400 hover:from-indigo-500 hover:to-purple-500 text-white py-3 rounded-lg font-semibold shadow-sm"
               >
                 Save Configuration
               </button>
               <button
                 onClick={handleReset}
-                className="px-6 bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-700"
+                className="px-6 bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white py-3 rounded-lg font-semibold shadow-sm"
               >
                 Reset
               </button>

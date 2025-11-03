@@ -93,7 +93,7 @@ function IdentityContent() {
               )}
               
               <div className="flex flex-col gap-3 max-w-xs mx-auto">
-                <button onClick={handleGenerate} className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700">
+                <button onClick={handleGenerate} className="bg-gradient-to-r from-indigo-400 to-purple-400 hover:from-indigo-500 hover:to-purple-500 text-white px-6 py-3 rounded-lg font-semibold shadow-sm">
                   Generate New Identity
                 </button>
                 
@@ -131,7 +131,7 @@ function IdentityContent() {
                   <code className="text-sm text-gray-800 break-all">{publicKey}</code>
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={() => navigator.clipboard.writeText(publicKey)} className="flex-1 bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium">
+                  <button onClick={() => navigator.clipboard.writeText(publicKey)} className="flex-1 bg-gradient-to-r from-indigo-400 to-purple-400 hover:from-indigo-500 hover:to-purple-500 text-white py-2.5 rounded-lg font-medium shadow-sm">
                     📋 Copy to Clipboard
                   </button>
                   <button onClick={exportPublicKey} className="flex-1 bg-white border border-gray-300 text-gray-700 py-2.5 rounded-lg hover:bg-gray-50 font-medium">
@@ -158,7 +158,7 @@ function IdentityContent() {
                     </p>
                   </div>
                 </div>
-                <button onClick={exportKeys} className="w-full bg-amber-600 text-white py-2.5 rounded-lg hover:bg-amber-700 font-medium">
+                <button onClick={exportKeys} className="w-full bg-gradient-to-r from-indigo-400 to-purple-400 hover:from-indigo-500 hover:to-purple-500 text-white py-2.5 rounded-lg font-medium shadow-sm">
                   📦 Export Full Backup (JSON)
                 </button>
                 <p className="text-xs text-amber-700 mt-2">⚠️ Keep this file secure - it contains your private keys</p>

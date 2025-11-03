@@ -1,8 +1,8 @@
 import { withRetry } from './retry'
 
 export class PinataClient {
-  private apiKey: string
-  private gateway: string
+  private readonly apiKey: string
+  private readonly gateway: string
 
   constructor(apiKey: string, gateway: string = 'https://gateway.pinata.cloud') {
     this.apiKey = apiKey
@@ -13,55 +13,63 @@ export class PinataClient {
     if (!data || data.length === 0) throw new Error('Data cannot be empty')
 
     return withRetry(async () => {
-      const formData = new FormData()
-      formData.append('file', new Blob([data]), filename || 'capsule.bin')
+      try {
+        const formData = new FormData()
+        formData.append('file', new Blob([data]), filename || 'capsule.bin')
 
-      const response = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${this.apiKey}` },
-        body: formData
-      })
+        const response = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${this.apiKey}` },
+          body: formData
+        })
 
-      if (!response.ok) {
-        throw new Error(`Pinata upload failed: ${response.statusText}`)
+        if (!response.ok) {
+          throw new Error(`Pinata upload failed: ${response.statusText}`)
+        }
+
+        const result = await response.json()
+        return result.IpfsHash
+      } catch (error) {
+        throw new Error(`Failed to upload to Pinata: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
-
-      const result = await response.json()
-      return result.IpfsHash
     })
   }
 
   async getBytes(cid: string): Promise<Uint8Array> {
-    if (!cid || !cid.trim()) throw new Error('CID cannot be empty')
+    if (!cid?.trim()) throw new Error('CID cannot be empty')
 
     return withRetry(async () => {
-      const response = await fetch(`${this.gateway}/ipfs/${cid}`)
+      try {
+        const response = await fetch(`${this.gateway}/ipfs/${cid}`)
 
-      if (!response.ok) {
-        throw new Error(`Pinata fetch failed: ${response.statusText}`)
+        if (!response.ok) {
+          throw new Error(`Pinata fetch failed: ${response.statusText}`)
+        }
+
+        const buffer = await response.arrayBuffer()
+        return new Uint8Array(buffer)
+      } catch (error) {
+        throw new Error(`Failed to fetch from IPFS: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
-
-      const buffer = await response.arrayBuffer()
-      return new Uint8Array(buffer)
     })
   }
 
   async getStorageUsage(): Promise<{ used: number; limit: number; percentage: number }> {
-    const response = await fetch('https://api.pinata.cloud/data/pinList?status=pinned&pageLimit=1', {
+    const response = await fetch('https://api.pinata.cloud/data/pinList?status=pinned&pageLimit=1000', {
       headers: { Authorization: `Bearer ${this.apiKey}` }
     })
 
     if (!response.ok) throw new Error('Failed to get storage usage')
 
     const data = await response.json()
-    const used = data.rows.reduce((sum: number, row: any) => sum + row.size, 0)
+    const used = data.rows.reduce((sum: number, row: any) => sum + (row.size || 0), 0)
     const limit = 1073741824
 
     return { used, limit, percentage: (used / limit) * 100 }
   }
 
   async unpin(cid: string): Promise<void> {
-    if (!cid || !cid.trim()) throw new Error('CID cannot be empty')
+    if (!cid?.trim()) throw new Error('CID cannot be empty')
 
     const response = await fetch(`https://api.pinata.cloud/pinning/unpin/${cid}`, {
       method: 'DELETE',

@@ -41,6 +41,11 @@ export interface CapsuleMetadata {
   hints?: {
     title?: string;
     notes?: string;
+    location?: {
+      latitude: number;
+      longitude: number;
+      radius: number;
+    };
   };
 }
 

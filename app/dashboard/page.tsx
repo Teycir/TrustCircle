@@ -39,7 +39,7 @@ function DashboardContent() {
             : { approver: publicKey }
         )
 
-        setCapsules(data)
+        setCapsules(data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
       } catch (err) {
         setError((err as Error).message)
       } finally {
@@ -73,7 +73,7 @@ function DashboardContent() {
         <div className="bg-white rounded-lg shadow-md p-8 max-w-md">
           <h3 className="text-xl font-semibold text-gray-900 mb-4">Identity Required</h3>
           <p className="text-gray-600 mb-6">Generate an identity to view your capsules</p>
-          <Link href="/identity" className="block w-full bg-indigo-600 text-white py-3 rounded-lg text-center font-semibold hover:bg-indigo-700">
+          <Link href="/identity" className="block w-full bg-gradient-to-r from-indigo-400 to-purple-400 hover:from-indigo-500 hover:to-purple-500 text-white py-3 rounded-lg text-center font-semibold shadow-sm">
             Go to Identity
           </Link>
         </div>
@@ -124,13 +124,13 @@ function DashboardContent() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 />
                 <div className="flex gap-2">
-                  <button onClick={() => setStatusFilter('all')} className={`px-4 py-2 rounded-lg text-sm font-medium ${statusFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                  <button onClick={() => setStatusFilter('all')} className={`px-4 py-2 rounded-lg text-sm font-medium ${statusFilter === 'all' ? 'bg-gradient-to-r from-indigo-400 to-purple-400 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
                     All
                   </button>
                   <button onClick={() => setStatusFilter('locked')} className={`px-4 py-2 rounded-lg text-sm font-medium ${statusFilter === 'locked' ? 'bg-yellow-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
                     Locked
                   </button>
-                  <button onClick={() => setStatusFilter('unlocked')} className={`px-4 py-2 rounded-lg text-sm font-medium ${statusFilter === 'unlocked' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                  <button onClick={() => setStatusFilter('unlocked')} className={`px-4 py-2 rounded-lg text-sm font-medium ${statusFilter === 'unlocked' ? 'bg-gradient-to-r from-green-400 to-emerald-400 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
                     Unlocked
                   </button>
                 </div>
@@ -190,7 +190,7 @@ function DashboardContent() {
                           <CopyButton text={capsule.id} label="Copy ID" />
                           <a
                             href={`mailto:?subject=Secure Capsule Shared with You&body=I've shared a secure capsule with you on TrustCircle.%0D%0A%0D%0ACapsule ID: ${capsule.id}%0D%0A%0D%0ATo access it:%0D%0A1. Log in to TrustCircle%0D%0A2. Go to the Unlock page%0D%0A3. Find the capsule in your list%0D%0A4. Unlock it when conditions are met%0D%0A%0D%0AYou'll need your TrustCircle identity to unlock this capsule.`}
-                            className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 font-medium"
+                            className="px-3 py-1 bg-gradient-to-r from-blue-400 to-cyan-400 hover:from-blue-500 hover:to-cyan-500 text-white text-xs rounded font-medium shadow-sm"
                             title="Send capsule ID via email with instructions"
                           >
                             📧 Share
