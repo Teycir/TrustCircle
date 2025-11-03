@@ -10,7 +10,7 @@ import { fromBase64, ed25519PublicKeyToX25519 } from '@/lib/crypto'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 
 function CreateCapsuleContent() {
-  const { identity } = useIdentity()
+  const { identity, getPublicKeyString } = useIdentity()
   const [file, setFile] = useState<File | null>(null)
   const [approverKey, setApproverKey] = useState('')
   const [title, setTitle] = useState('')
@@ -140,9 +140,13 @@ function CreateCapsuleContent() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm font-medium text-gray-700">Approver Public Key</label>
-                <Link href="/identity" target="_blank" className="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
-                  🔑 Get from Identity →
-                </Link>
+                <button
+                  type="button"
+                  onClick={() => setApproverKey(getPublicKeyString())}
+                  className="text-xs bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 font-medium"
+                >
+                  🔑 Use My Key
+                </button>
               </div>
               <input type="text" value={approverKey} onChange={(e) => setApproverKey(e.target.value)} className="w-full px-4 py-2 border rounded-lg font-mono text-sm" placeholder="ed25519:...,x25519:..." required />
               <div className="mt-2 bg-blue-50 border border-blue-200 rounded p-3">
@@ -151,7 +155,7 @@ function CreateCapsuleContent() {
                   <li>1. Ask the recipient to go to their Identity page</li>
                   <li>2. They click "Copy to Clipboard" or "Save as File"</li>
                   <li>3. They share the key with you (via email, message, etc.)</li>
-                  <li>4. Paste it here in the format: ed25519:...,x25519:...</li>
+                  <li>4. Paste it here, or click "Use My Key" to test with yourself</li>
                 </ol>
               </div>
             </div>

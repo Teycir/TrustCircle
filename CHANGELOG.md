@@ -2,6 +2,28 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [1.5.0] - 2025-01-29
+
+### Added
+- **Unlock Page Improvements**: Enhanced unlock workflow with separate unlock/lock/download actions
+  - Unlock button decrypts capsule and stores data in memory
+  - Separate Download button for user-controlled downloads
+  - Lock button transforms from Unlock after successful decryption
+  - Lock button clears decrypted data and updates database status
+  - Multiple capsules can be unlocked simultaneously
+  - Status syncs with Supabase database
+
+- **Create Page Enhancement**: Added "Use My Key" button
+  - Auto-fills approver key field with user's own public key
+  - Useful for testing capsules with yourself
+  - Prevents data loss from navigating to Identity page
+
+### Fixed
+- **Unlock State Management**: Fixed inconsistent lock/unlock button states
+  - Buttons now properly reflect database status
+  - Handles capsules unlocked in previous sessions
+  - Shows Lock button for unlocked capsules without decrypted data in memory
+
 ## [1.4.0] - 2025-01-29
 
 ### Added

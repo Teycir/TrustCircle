@@ -11,12 +11,9 @@ function UnlockCapsuleContent() {
   const { identity } = useIdentity()
   const [capsules, setCapsules] = useState<any[]>([])
   const [loadingList, setLoadingList] = useState(true)
-  const [selectedId, setSelectedId] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [unlocked, setUnlocked] = useState(false)
+  const [unlockingId, setUnlockingId] = useState('')
+  const [unlockedData, setUnlockedData] = useState<Map<string, { data: Uint8Array; filename: string }>>(new Map())
   const [error, setError] = useState<string | null>(null)
-  const [fileData, setFileData] = useState<Uint8Array | null>(null)
-  const [filename, setFilename] = useState<string>('unlocked-file')
 
   useEffect(() => {
     if (!identity) return
@@ -40,9 +37,8 @@ function UnlockCapsuleContent() {
   const handleUnlock = async (capsuleId: string) => {
     if (!identity) return
 
-    setLoading(true)
+    setUnlockingId(capsuleId)
     setError(null)
-    setSelectedId(capsuleId)
 
     try {
       const client = getClient()
@@ -52,15 +48,41 @@ function UnlockCapsuleContent() {
         context: { now: new Date() }
       })
 
-      downloadFile(result.data, result.filename || 'unlocked-file')
-      setFileData(result.data)
-      setFilename(result.filename || 'unlocked-file')
-      setUnlocked(true)
+      await client['db'].updateStatus(capsuleId, 'unlocked')
+
+      setUnlockedData(prev => new Map(prev).set(capsuleId, {
+        data: result.data,
+        filename: result.filename || 'unlocked-file'
+      }))
+
+      setCapsules(prev => prev.map(c => 
+        c.id === capsuleId ? { ...c, status: 'unlocked' } : c
+      ))
     } catch (err) {
       console.error('Unlock error:', err)
       setError((err as Error).message)
     } finally {
-      setLoading(false)
+      setUnlockingId('')
+    }
+  }
+
+  const handleLock = async (capsuleId: string) => {
+    try {
+      const client = getClient()
+      await client['db'].updateStatus(capsuleId, 'locked')
+
+      setUnlockedData(prev => {
+        const newMap = new Map(prev)
+        newMap.delete(capsuleId)
+        return newMap
+      })
+
+      setCapsules(prev => prev.map(c => 
+        c.id === capsuleId ? { ...c, status: 'locked' } : c
+      ))
+    } catch (err) {
+      console.error('Lock error:', err)
+      setError((err as Error).message)
     }
   }
 
@@ -77,9 +99,10 @@ function UnlockCapsuleContent() {
     }
   }
 
-  const handleDownload = () => {
-    if (fileData) {
-      downloadFile(fileData, filename)
+  const handleDownload = (capsuleId: string) => {
+    const data = unlockedData.get(capsuleId)
+    if (data) {
+      downloadFile(data.data, data.filename)
     }
   }
 
@@ -139,35 +162,8 @@ function UnlockCapsuleContent() {
           </div>
         )}
 
-        {unlocked ? (
-          <div className="bg-white rounded-lg shadow-md p-8">
-            <div className="text-center mb-6">
-              <div className="text-6xl mb-4">✅</div>
-              <h3 className="text-2xl font-semibold text-gray-900 mb-2">Download Started!</h3>
-              <p className="text-gray-600">Your file has been unlocked and downloaded</p>
-            </div>
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-700">Filename:</span>
-                <span className="text-sm font-mono text-gray-900">{filename}</span>
-              </div>
-              <div className="flex items-center justify-between mt-2">
-                <span className="text-sm text-gray-700">Size:</span>
-                <span className="text-sm text-gray-900">{((fileData?.length || 0) / 1024).toFixed(2)} KB</span>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <button onClick={handleDownload} className="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700">
-                💾 Download Again
-              </button>
-              <button onClick={() => { setUnlocked(false); setFileData(null); setFilename('unlocked-file'); setSelectedId('') }} className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg hover:bg-gray-200">
-                ← Back to List
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg shadow-md">
-            {loadingList && (
+        <div className="bg-white rounded-lg shadow-md">
+          {loadingList && (
               <div className="p-12 text-center text-gray-500">Loading capsules...</div>
             )}
             {!loadingList && capsules.length === 0 && (
@@ -184,7 +180,7 @@ function UnlockCapsuleContent() {
               <div>
                 <div className="p-6 border-b bg-gray-50">
                   <h3 className="font-semibold text-gray-900">Available Capsules ({capsules.length})</h3>
-                  <p className="text-sm text-gray-600 mt-1">Click unlock to download the file</p>
+                  <p className="text-sm text-gray-600 mt-1">Unlock capsules to access their contents</p>
                 </div>
                 <div className="divide-y max-h-[600px] overflow-y-auto">
                   {capsules.map((capsule) => (
@@ -212,13 +208,37 @@ function UnlockCapsuleContent() {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <button
-                            onClick={() => handleUnlock(capsule.id)}
-                            disabled={loading && selectedId === capsule.id}
-                            className="bg-green-600 text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-green-700 disabled:bg-gray-400 whitespace-nowrap"
-                          >
-                            {loading && selectedId === capsule.id ? '🔓 Unlocking...' : '🔓 Unlock'}
-                          </button>
+                          {capsule.status === 'unlocked' && unlockedData.has(capsule.id) ? (
+                            <>
+                              <button
+                                onClick={() => handleDownload(capsule.id)}
+                                className="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-blue-700 whitespace-nowrap"
+                              >
+                                💾 Download
+                              </button>
+                              <button
+                                onClick={() => handleLock(capsule.id)}
+                                className="bg-yellow-600 text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-yellow-700 whitespace-nowrap"
+                              >
+                                🔒 Lock
+                              </button>
+                            </>
+                          ) : capsule.status === 'unlocked' ? (
+                            <button
+                              onClick={() => handleLock(capsule.id)}
+                              className="bg-yellow-600 text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-yellow-700 whitespace-nowrap"
+                            >
+                              🔒 Lock
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleUnlock(capsule.id)}
+                              disabled={unlockingId === capsule.id}
+                              className="bg-green-600 text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-green-700 disabled:bg-gray-400 whitespace-nowrap"
+                            >
+                              {unlockingId === capsule.id ? '🔓 Unlocking...' : '🔓 Unlock'}
+                            </button>
+                          )}
                           <button
                             onClick={() => handleDelete(capsule.id)}
                             className="bg-red-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-red-700 whitespace-nowrap"
@@ -232,8 +252,7 @@ function UnlockCapsuleContent() {
                 </div>
               </div>
             )}
-          </div>
-        )}
+        </div>
       </main>
     </div>
   )
