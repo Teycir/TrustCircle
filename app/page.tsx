@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { getStorageUsage } from '@/lib/client'
+import { useAuth } from '@/lib/useAuth'
 
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -29,10 +30,15 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 
 export default function Home() {
   const [storage, setStorage] = useState<{ used: number; limit: number; percentage: number } | null>(null)
+  const { user, signOut } = useAuth()
 
   useEffect(() => {
     getStorageUsage().then(setStorage).catch(() => setStorage(null))
   }, [])
+
+  const handleSignOut = async () => {
+    await signOut()
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -41,11 +47,25 @@ export default function Home() {
           <h1 className="text-2xl font-bold text-indigo-600 flex items-center gap-2">
             <span>🔐</span> TrustCircle
           </h1>
-          {storage && (
-            <div className="text-sm text-gray-600">
-              Storage: {(storage.used / 1024 / 1024).toFixed(2)} MB / {(storage.limit / 1024 / 1024).toFixed(0)} MB
-            </div>
-          )}
+          <div className="flex items-center gap-4">
+            {storage && (
+              <div className="text-sm text-gray-600">
+                Storage: {(storage.used / 1024 / 1024).toFixed(2)} MB / {(storage.limit / 1024 / 1024).toFixed(0)} MB
+              </div>
+            )}
+            {user ? (
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-600">{user.email}</span>
+                <button onClick={handleSignOut} className="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <Link href="/login" className="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+                Sign In
+              </Link>
+            )}
+          </div>
         </div>
       </nav>
 
@@ -119,6 +139,14 @@ export default function Home() {
             <FAQItem
               question="How do I send a capsule to someone?"
               answer="To send a capsule: 1) Ask the recipient to share their public key from their Identity page. 2) Create a capsule and paste their public key in the Approver field. 3) Share the Capsule ID with them. They can then view it in their Dashboard under Sent to Me and unlock it when conditions are met."
+            />
+            <FAQItem
+              question="Do I need an API key to use TrustCircle?"
+              answer="No. As a user, you don't need any API keys. Key generation happens entirely in your browser. API keys are only needed by whoever deploys the website for Pinata and Supabase, not by end users."
+            />
+            <FAQItem
+              question="Can I use TrustCircle on multiple devices?"
+              answer="Yes. Each device will have its own identity by default. You can either use different identities on each device with their own public keys, or export your keys from one device and import them on another to use the same identity everywhere."
             />
             <FAQItem
               question="Can I share capsules with multiple people?"

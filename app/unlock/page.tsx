@@ -5,8 +5,9 @@ import Link from 'next/link'
 import { useIdentity } from '@/lib/hooks'
 import { getClient, downloadFile } from '@/lib/client'
 import { toBase64 } from '@/lib/crypto'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
 
-export default function UnlockCapsule() {
+function UnlockCapsuleContent() {
   const { identity } = useIdentity()
   const [capsules, setCapsules] = useState<any[]>([])
   const [loadingList, setLoadingList] = useState(true)
@@ -235,5 +236,13 @@ export default function UnlockCapsule() {
         )}
       </main>
     </div>
+  )
+}
+
+export default function UnlockCapsule() {
+  return (
+    <ProtectedRoute>
+      <UnlockCapsuleContent />
+    </ProtectedRoute>
   )
 }

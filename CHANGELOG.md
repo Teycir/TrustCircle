@@ -2,6 +2,25 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [1.4.0] - 2025-01-29
+
+### Added
+- **Authentication Protection**: Implemented route protection to prevent unauthorized access
+  - Created ProtectedRoute component for client-side authentication checks
+  - Protected dashboard, create, unlock, and identity pages
+  - Automatic redirect to login for unauthenticated users
+  - Configured Supabase client with proper session persistence
+  - Added authentication test suite
+
+### Fixed
+- **Session Persistence**: Fixed authentication state not persisting across page navigation
+  - Enabled autoRefreshToken and persistSession in Supabase client
+  - Configured localStorage for session storage
+  - Removed problematic server-side middleware causing redirect loops
+
+### Dependencies
+- Added @supabase/ssr for server-side authentication support
+
 ## [1.3.0] - 2025-01-29
 
 ### Added

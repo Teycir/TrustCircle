@@ -1,13 +1,46 @@
 'use client'
 
 import { useIdentity } from '@/lib/hooks'
+import { useAuth } from '@/lib/useAuth'
+import { toBase64 } from '@/lib/crypto'
 import Link from 'next/link'
+import { useState } from 'react'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
 
-export default function Identity() {
-  const { identity, loading, create, getPublicKeyString, exportKeys } = useIdentity()
+function IdentityContent() {
+  const { identity, loading, create, getPublicKeyString, exportKeys, importKeys } = useIdentity()
+  const { user, savePublicKeys: savePublicKeysToServer } = useAuth()
+  const [importing, setImporting] = useState(false)
+  const [error, setError] = useState('')
 
   const handleGenerate = async () => {
-    await create()
+    const newIdentity = await create()
+    if (user && newIdentity) {
+      const ed25519Pub = toBase64(newIdentity.ed25519.publicKey)
+      const x25519Pub = toBase64(newIdentity.x25519.publicKey)
+      await savePublicKeysToServer(user.id, ed25519Pub, x25519Pub)
+    }
+  }
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setImporting(true)
+    setError('')
+    try {
+      await importKeys(file)
+      if (user && identity) {
+        const ed25519Pub = toBase64(identity.ed25519.publicKey)
+        const x25519Pub = toBase64(identity.x25519.publicKey)
+        await savePublicKeysToServer(user.id, ed25519Pub, x25519Pub)
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to import keys')
+    } finally {
+      setImporting(false)
+      e.target.value = ''
+    }
   }
 
   const publicKey = getPublicKeyString()
@@ -49,10 +82,36 @@ export default function Identity() {
             <div className="text-center py-8">
               <div className="text-6xl mb-4">🔑</div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">No Identity Found</h3>
-              <p className="text-gray-600 mb-6">Generate a new cryptographic identity to get started</p>
-              <button onClick={handleGenerate} className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700">
-                Generate Identity
-              </button>
+              <p className="text-gray-600 mb-6">Generate a new cryptographic identity or import existing keys</p>
+              
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                  {error}
+                </div>
+              )}
+              
+              <div className="flex flex-col gap-3 max-w-xs mx-auto">
+                <button onClick={handleGenerate} className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700">
+                  Generate New Identity
+                </button>
+                
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept=".json"
+                    onChange={handleImport}
+                    disabled={importing}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                    id="import-keys"
+                  />
+                  <label
+                    htmlFor="import-keys"
+                    className="block bg-white border-2 border-indigo-600 text-indigo-600 px-6 py-3 rounded-lg font-semibold hover:bg-indigo-50 cursor-pointer text-center"
+                  >
+                    {importing ? 'Importing...' : '📥 Import Keys from File'}
+                  </label>
+                </div>
+              </div>
             </div>
           ) : (
             <>
@@ -123,5 +182,13 @@ export default function Identity() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function Identity() {
+  return (
+    <ProtectedRoute>
+      <IdentityContent />
+    </ProtectedRoute>
   )
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { generateIdentity, toBase64 } from './crypto'
+import { generateIdentity, toBase64, fromBase64 } from './crypto'
 import { saveIdentity, loadIdentity } from './keystore'
 
 const IDENTITY_KEY = 'default'
@@ -61,5 +61,28 @@ export function useIdentity() {
     URL.revokeObjectURL(url)
   }
 
-  return { identity, loading, create, getPublicKeys, getPublicKeyString, exportKeys }
+  const importKeys = async (file: File) => {
+    const text = await file.text()
+    const data = JSON.parse(text)
+
+    if (!data.ed25519?.privateKey || !data.ed25519?.publicKey || !data.x25519?.privateKey || !data.x25519?.publicKey) {
+      throw new Error('Invalid key file format')
+    }
+
+    const importedIdentity = {
+      ed25519: {
+        privateKey: fromBase64(data.ed25519.privateKey),
+        publicKey: fromBase64(data.ed25519.publicKey)
+      },
+      x25519: {
+        privateKey: fromBase64(data.x25519.privateKey),
+        publicKey: fromBase64(data.x25519.publicKey)
+      }
+    }
+
+    await saveIdentity(IDENTITY_KEY, importedIdentity)
+    setIdentity(importedIdentity)
+  }
+
+  return { identity, loading, create, getPublicKeys, getPublicKeyString, exportKeys, importKeys }
 }

@@ -7,8 +7,9 @@ import { getClient, fileToUint8Array } from '@/lib/client'
 import { getCurrentLocation } from '@/lib/geolocation'
 import { buildLocationHash } from '@/lib/policy'
 import { fromBase64, ed25519PublicKeyToX25519 } from '@/lib/crypto'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
 
-export default function CreateCapsule() {
+function CreateCapsuleContent() {
   const { identity } = useIdentity()
   const [file, setFile] = useState<File | null>(null)
   const [approverKey, setApproverKey] = useState('')
@@ -174,5 +175,13 @@ export default function CreateCapsule() {
         )}
       </main>
     </div>
+  )
+}
+
+export default function CreateCapsule() {
+  return (
+    <ProtectedRoute>
+      <CreateCapsuleContent />
+    </ProtectedRoute>
   )
 }

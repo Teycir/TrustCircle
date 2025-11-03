@@ -67,6 +67,67 @@ Key interactions:
 
 ---
 
+## 3.5) Key Generation and API Keys
+
+### User Key Generation
+
+User cryptographic keys are generated entirely client-side and require NO API keys or server configuration.
+
+When a user visits TrustCircle:
+1. Navigate to the Identity page
+2. Click Generate Identity
+3. Keys are generated in the browser using JavaScript crypto libraries
+4. Keys are stored locally in IndexedDB browser storage
+5. No server communication or API keys required
+
+Key Points:
+- Each browser or device has its own independent keys
+- Keys are device-specific and stored locally
+- No account system or login required
+- Users can export keys to transfer between devices
+
+### API Keys for Deployment Only
+
+API keys are ONLY needed by the person deploying the application:
+
+Pinata API Key:
+- Used for uploading and downloading encrypted capsules to IPFS
+- Configured once in .env.local by the deployer
+- NOT required by end users
+- Handles storage operations on behalf of all users
+
+Supabase Credentials:
+- Used for storing capsule metadata
+- Configured once in .env.local by the deployer
+- NOT required by end users
+
+### Architecture Summary
+
+```
+Deployment on Vercel:
+├─ Has Pinata API key in environment variables
+├─ Has Supabase credentials in environment variables
+├─ Serves the website to users
+└─ Handles IPFS and database operations on behalf of users
+
+User Browser:
+├─ Generates keys locally with no API needed
+├─ Stores keys in IndexedDB
+├─ Encrypts and decrypts files locally
+└─ Communicates with deployment for storage only
+```
+
+### Multi-Device Usage
+
+To use the same identity on multiple devices:
+1. Export your keys from the Identity page on device A
+2. Save the JSON backup file securely
+3. Import the keys on device B
+
+Alternatively, each device can have its own identity with its own public key to share.
+
+---
+
 ## 4) Technology Stack
 
 - Framework: Next.js 14 with App Router and TypeScript

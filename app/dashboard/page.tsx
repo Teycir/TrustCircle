@@ -5,8 +5,9 @@ import Link from 'next/link'
 import { useIdentity } from '@/lib/hooks'
 import { getClient } from '@/lib/client'
 import { toBase64 } from '@/lib/crypto'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
 
-export default function Dashboard() {
+function DashboardContent() {
   const { identity, loading: identityLoading } = useIdentity()
   const [tab, setTab] = useState<'created' | 'sent'>('created')
   const [capsules, setCapsules] = useState<any[]>([])
@@ -141,5 +142,13 @@ export default function Dashboard() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function Dashboard() {
+  return (
+    <ProtectedRoute>
+      <DashboardContent />
+    </ProtectedRoute>
   )
 }
