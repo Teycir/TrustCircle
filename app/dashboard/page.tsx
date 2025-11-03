@@ -67,7 +67,9 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold text-indigo-600">TrustCircle Lite</Link>
+          <Link href="/" className="text-2xl font-bold text-indigo-600 flex items-center gap-2">
+            <span>🔐</span> TrustCircle
+          </Link>
           <Link href="/" className="text-gray-600 hover:text-gray-900">← Back</Link>
         </div>
       </nav>

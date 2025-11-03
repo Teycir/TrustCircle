@@ -69,6 +69,18 @@ export class CapsuleManager {
     try {
       validateFileSize(params.files.length);
 
+      const usage = await this.pinata.getStorageUsage();
+      const availableSpace = usage.limit - usage.used;
+      const estimatedSize = params.files.length * 1.2;
+
+      if (estimatedSize > availableSpace) {
+        const availableMB = (availableSpace / 1024 / 1024).toFixed(2);
+        const requiredMB = (estimatedSize / 1024 / 1024).toFixed(2);
+        throw new Error(`Not enough storage space. Available: ${availableMB} MB, Required: ${requiredMB} MB`);
+      }
+
+      await this.pinata.purgeOldFiles(0.9);
+
       const cmk = crypto.getRandomValues(new Uint8Array(32));
       const compressed = compress(params.files);
       const cipherArchive = await aesGcmEncrypt(cmk, compressed);

@@ -40,3 +40,11 @@ export function downloadFile(data: Uint8Array, filename: string) {
   a.click()
   URL.revokeObjectURL(url)
 }
+
+export async function getStorageUsage(): Promise<{ used: number; limit: number; percentage: number }> {
+  const apiKey = process.env.NEXT_PUBLIC_PINATA_JWT || process.env.NEXT_PUBLIC_PINATA_API_KEY
+  if (!apiKey) throw new Error('NEXT_PUBLIC_PINATA_JWT not configured')
+  
+  const pinata = new PinataClient(apiKey)
+  return await pinata.getStorageUsage()
+}

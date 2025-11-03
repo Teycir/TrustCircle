@@ -1,13 +1,28 @@
 'use client'
 
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
+import { getStorageUsage } from '@/lib/client'
 
 export default function Home() {
+  const [storage, setStorage] = useState<{ used: number; limit: number; percentage: number } | null>(null)
+
+  useEffect(() => {
+    getStorageUsage().then(setStorage).catch(() => setStorage(null))
+  }, [])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <h1 className="text-2xl font-bold text-indigo-600">TrustCircle Lite</h1>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-indigo-600 flex items-center gap-2">
+            <span>🔐</span> TrustCircle
+          </h1>
+          {storage && (
+            <div className="text-sm text-gray-600">
+              Storage: {(storage.used / 1024 / 1024).toFixed(2)} MB / {(storage.limit / 1024 / 1024).toFixed(0)} MB
+            </div>
+          )}
         </div>
       </nav>
 

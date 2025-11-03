@@ -45,4 +45,45 @@ export class PinataClient {
       return new Uint8Array(buffer)
     })
   }
+
+  async getStorageUsage(): Promise<{ used: number; limit: number; percentage: number }> {
+    const response = await fetch('https://api.pinata.cloud/data/pinList?status=pinned&pageLimit=1', {
+      headers: { Authorization: `Bearer ${this.apiKey}` }
+    })
+
+    if (!response.ok) throw new Error('Failed to get storage usage')
+
+    const data = await response.json()
+    const used = data.rows.reduce((sum: number, row: any) => sum + row.size, 0)
+    const limit = 1073741824
+    
+    return { used, limit, percentage: (used / limit) * 100 }
+  }
+
+  async purgeOldFiles(threshold: number = 0.9): Promise<void> {
+    const usage = await this.getStorageUsage()
+    
+    if (usage.percentage < threshold * 100) return
+
+    const response = await fetch('https://api.pinata.cloud/data/pinList?status=pinned&pageLimit=1000&sortBy=date_pinned&sortOrder=ASC', {
+      headers: { Authorization: `Bearer ${this.apiKey}` }
+    })
+
+    if (!response.ok) throw new Error('Failed to list files')
+
+    const data = await response.json()
+    const targetSize = usage.limit * 0.7
+    let currentSize = usage.used
+
+    for (const file of data.rows) {
+      if (currentSize <= targetSize) break
+
+      await fetch(`https://api.pinata.cloud/pinning/unpin/${file.ipfs_pin_hash}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${this.apiKey}` }
+      })
+
+      currentSize -= file.size
+    }
+  }
 }

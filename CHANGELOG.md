@@ -2,6 +2,40 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [1.2.0] - 2025-01-29
+
+### Added
+- **Branding**: Updated app name from "TrustCircle Lite" to "TrustCircle"
+  - Added 🔐 icon to navigation across all pages
+  - Added favicon with lock icon to browser tab
+- **Storage Management**: Automatic purge system for Pinata storage
+  - Monitors storage usage and purges oldest files when approaching 90% capacity
+  - Dynamically detects storage limits from Pinata API
+  - Reduces storage to 70% when purge is triggered
+  - Pre-upload validation to prevent exceeding available space
+  
+- **UI Improvements**:
+  - Storage usage display in navigation bar showing used/total space
+  - Required title field for capsule creation
+  - Timestamp appended to filenames to distinguish duplicate uploads
+  - Original filename preserved on download with timestamp
+  - Consistent branding with lock icon across all pages
+  
+- **Configuration**:
+  - Added support for NEXT_PUBLIC_PINATA_JWT environment variable
+  - Updated Tailwind CSS to v4 with new @import syntax
+  - Fixed PostCSS configuration for Tailwind v4 compatibility
+  - Added path aliases to tsconfig.json for @/ imports
+
+### Fixed
+- **Database**: Created missing Supabase capsules table with proper schema
+- **Key Format**: Simplified public key format to use both ed25519 and x25519 keys
+- **File Naming**: Fixed Pinata uploads defaulting to "blob" by adding proper filenames
+
+### Testing
+- Added purge.test.ts for storage management validation
+- Verified storage usage monitoring and purge functionality
+
 ## [1.1.0] - 2025-01-02
 
 ### Security Fixes
