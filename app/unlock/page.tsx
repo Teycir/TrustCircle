@@ -234,6 +234,15 @@ function UnlockCapsuleContent() {
                                 <span>📅 {new Date(capsule.created_at).toLocaleDateString()}</span>
                                 <span>🕐 {new Date(capsule.created_at).toLocaleTimeString()}</span>
                               </div>
+                              {capsule.expires_at && (
+                                <p className={`text-sm mb-2 ${
+                                  new Date(capsule.expires_at) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                                    ? 'text-red-600 font-medium'
+                                    : 'text-gray-500'
+                                }`}>
+                                  ⚠️ Expires: {new Date(capsule.expires_at).toLocaleDateString()}
+                                </p>
+                              )}
                               <div className="flex items-center gap-2 mb-3">
                                 <span className="text-xs text-gray-500">ID:</span>
                                 <code className="text-xs bg-gray-100 px-2 py-1 rounded font-mono text-gray-700">{capsule.id}</code>
