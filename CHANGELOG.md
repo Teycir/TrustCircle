@@ -2,6 +2,49 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [2.2.0] - 2025-01-29
+
+### Added
+- **Location Locking Stress Tests**: Comprehensive test suite for location-based unlocking
+  - 21 tests covering distance calculation accuracy
+  - Edge cases: poles, equator, international date line, zero/large radius
+  - Precision tests for small distances and floating point accuracy
+  - Invalid input handling for coordinates and radius
+  - Real-world scenarios: office, city, venue, continent access
+  - Performance tests: 1000 rapid checks, multiple locations
+  - Exported checkLocationCondition function with Haversine distance calculation
+
+- **Enhanced FAQ Section**: Detailed step-by-step explanations for all features
+  - Complete workflow example with 9 numbered steps
+  - How TrustCircle works with 8 detailed steps
+  - How to send capsules with 11 detailed steps
+  - Time-based unlocking explanation with 6 steps
+  - Location-based unlocking explanation with 6 steps
+  - Dashboard management guide with 8 features
+  - Identity and key management with 7 steps
+  - Analytics insights with 7 metrics
+  - Admin configuration with 7 steps
+  - All explanations use bold numbering and proper line breaks
+
+### Improved
+- **UI Consistency**: Removed all emojis and replaced with text labels to prevent hydration errors
+  - Fixed server-client rendering mismatches
+  - Added mounted state checks across all pages
+  - Removed dark mode classes and replaced with conditional theme-based styling
+  - Added theme toggle button with localStorage persistence
+  - Improved cache control headers in next.config.cjs
+
+- **Code Quality**:
+  - Marked CapsuleManager properties as readonly
+  - Fixed React import duplication
+  - Made component props readonly
+  - Fixed TypeScript strict mode issues
+
+### Technical
+- Added haversineDistance function for accurate geolocation calculations
+- Exported checkLocationCondition for manual testing and validation
+- All location tests passing with 6ms execution time
+
 ## [2.1.1] - 2025-01-29
 
 ### Improved

@@ -36,7 +36,7 @@ function AnalyticsContent() {
 
         let totalUnlockTime = 0
         unlocked.forEach(c => {
-          if (c.unlocked_at) {
+          if (c.unlocked_at && c.created_at) {
             totalUnlockTime += new Date(c.unlocked_at).getTime() - new Date(c.created_at).getTime()
           }
         })

@@ -17,8 +17,10 @@ function UnlockCapsuleContent() {
   const [unlockingId, setUnlockingId] = useState('')
   const [unlockedData, setUnlockedData] = useState<Map<string, { data: Uint8Array; filename: string }>>(new Map())
   const [error, setError] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     if (!identity) return
 
     const loadCapsules = async () => {
@@ -135,6 +137,10 @@ function UnlockCapsuleContent() {
 
 
 
+  if (!mounted) {
+    return null
+  }
+
   if (!identity) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
@@ -154,7 +160,7 @@ function UnlockCapsuleContent() {
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold text-indigo-600 flex items-center gap-2">
-            <span>🔐</span> TrustCircle
+            TrustCircle
           </Link>
           <Link href="/" className="text-gray-600 hover:text-gray-900">← Back</Link>
         </div>
@@ -167,7 +173,6 @@ function UnlockCapsuleContent() {
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
             <div className="flex items-start gap-3">
-              <span className="text-2xl">❌</span>
               <div className="flex-1">
                 <p className="font-semibold text-red-900 mb-2">Unable to Unlock Capsule</p>
                 <p className="text-red-800 text-sm mb-3">{error}</p>
@@ -197,7 +202,6 @@ function UnlockCapsuleContent() {
             )}
             {!loadingList && capsules.length === 0 && (
               <div className="p-12 text-center">
-                <div className="text-6xl mb-4">📭</div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">No Capsules Found</h3>
                 <p className="text-gray-600 mb-6">You don't have any capsules sent to you yet</p>
                 <Link href="/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium">
@@ -231,8 +235,8 @@ function UnlockCapsuleContent() {
                                 <p className="text-sm text-gray-600 mb-3">{capsule.notes}</p>
                               )}
                               <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
-                                <span>📅 {new Date(capsule.created_at).toLocaleDateString()}</span>
-                                <span>🕐 {new Date(capsule.created_at).toLocaleTimeString()}</span>
+                                <span>Date: {new Date(capsule.created_at).toLocaleDateString()}</span>
+                                <span>Time: {new Date(capsule.created_at).toLocaleTimeString()}</span>
                               </div>
                               {capsule.expires_at && (
                                 <p className={`text-sm mb-2 ${
@@ -240,7 +244,7 @@ function UnlockCapsuleContent() {
                                     ? 'text-red-600 font-medium'
                                     : 'text-gray-500'
                                 }`}>
-                                  ⚠️ Expires: {new Date(capsule.expires_at).toLocaleDateString()}
+                                  Expires: {new Date(capsule.expires_at).toLocaleDateString()}
                                 </p>
                               )}
                               <div className="flex items-center gap-2 mb-3">
@@ -253,22 +257,22 @@ function UnlockCapsuleContent() {
                               <button
                                 onClick={() => handleToggleLock(capsule.id, capsule.status)}
                                 disabled={unlockingId === capsule.id}
-                                className={`${capsule.status === 'locked' ? 'bg-green-600 hover:bg-green-700' : 'bg-yellow-600 hover:bg-yellow-700'} text-white rounded-lg font-semibold disabled:bg-gray-400 whitespace-nowrap min-w-28 px-4 py-2.5`}
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold disabled:bg-gray-400 whitespace-nowrap min-w-28 px-4 py-2.5"
                               >
-                                {capsule.status === 'locked' ? '🔓 Unlock' : '🔒 Lock'}
+                                {capsule.status === 'locked' ? 'Unlock' : 'Lock'}
                               </button>
                               <button
                                 onClick={() => handleDownload(capsule.id)}
                                 disabled={unlockingId === capsule.id || capsule.status === 'locked'}
-                                className="bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 whitespace-nowrap min-w-36 px-4 py-2.5"
+                                className="bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 disabled:bg-gray-400 whitespace-nowrap min-w-36 px-4 py-2.5"
                               >
-                                💾 Download
+                                Download
                               </button>
                               <button
                                 onClick={() => handleDelete(capsule.id)}
-                                className="bg-red-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-red-700 whitespace-nowrap"
+                                className="bg-gray-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-gray-700 whitespace-nowrap"
                               >
-                                🗑️
+                                Delete
                               </button>
                             </div>
                           </div>

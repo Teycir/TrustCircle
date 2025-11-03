@@ -60,10 +60,60 @@ export interface UnlockCapsuleParams {
   context: DeviceContext;
 }
 
+function haversineDistance(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number {
+  const R = 6371000
+  const toRad = (deg: number) => (deg * Math.PI) / 180
+  const dLat = toRad(lat2 - lat1)
+  const dLon = toRad(lon2 - lon1)
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return R * c
+}
+
+export function checkLocationCondition(
+  policy: any,
+  currentLocation: { latitude: number; longitude: number }
+): void {
+  if (!policy.location) return
+
+  const { latitude, longitude, radius } = policy.location
+
+  if (latitude < -90 || latitude > 90) {
+    throw new Error('Invalid latitude')
+  }
+  if (longitude < -180 || longitude > 180) {
+    throw new Error('Invalid longitude')
+  }
+  if (radius < 0) {
+    throw new Error('Invalid radius')
+  }
+
+  const distance = haversineDistance(
+    latitude,
+    longitude,
+    currentLocation.latitude,
+    currentLocation.longitude
+  )
+
+  if (distance > radius) {
+    throw new Error('Location requirement not met')
+  }
+}
+
 export class CapsuleManager {
   constructor(
-    private pinata: PinataClient,
-    private db: TrustCircleDB,
+    private readonly pinata: PinataClient,
+    private readonly db: TrustCircleDB,
   ) {}
 
   async createCapsule(params: CreateCapsuleParams): Promise<string> {
