@@ -8,6 +8,7 @@ export default defineConfig(({ mode }) => {
       globals: true,
       environment: 'node',
       include: ['test/**/*.test.ts'],
+      setupFiles: ['./test/setup.ts'],
       env: {
         NEXT_PUBLIC_SUPABASE_URL: env.NEXT_PUBLIC_SUPABASE_URL,
         NEXT_PUBLIC_SUPABASE_ANON_KEY: env.NEXT_PUBLIC_SUPABASE_ANON_KEY,

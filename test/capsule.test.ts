@@ -88,13 +88,13 @@ describe('Capsule Integration', () => {
     const encryptedPayload = mockPinata.uploadBytes.mock.calls[0][0] as Uint8Array
     mockPinata.getBytes.mockResolvedValueOnce(encryptedPayload)
 
-    const decrypted = await manager.unlockCapsule({
+    const result = await manager.unlockCapsule({
       capsuleId,
       approverKeys,
       context: { now: new Date('2025-06-01') }
     })
 
-    expect(new TextDecoder().decode(decrypted)).toBe('secret data')
+    expect(new TextDecoder().decode(result.data)).toBe('secret data')
     expect(mockDb.updateStatus).toHaveBeenCalledWith(capsuleId, 'unlocked')
   })
 
