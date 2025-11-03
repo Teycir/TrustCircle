@@ -32,7 +32,8 @@ describe('Pinata Client', () => {
   it('throws error on upload failure', async () => {
     vi.mocked(fetch).mockResolvedValue({
       ok: false,
-      statusText: 'Unauthorized'
+      statusText: 'Unauthorized',
+      text: async () => 'Unauthorized'
     } as Response)
 
     const data = new Uint8Array([1, 2, 3])
@@ -55,7 +56,8 @@ describe('Pinata Client', () => {
   it('throws error on fetch failure', async () => {
     vi.mocked(fetch).mockResolvedValue({
       ok: false,
-      statusText: 'Not Found'
+      statusText: 'Not Found',
+      text: async () => 'Not Found'
     } as Response)
 
     await expect(client.getBytes('QmInvalid')).rejects.toThrow('Pinata fetch failed: Not Found')
