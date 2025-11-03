@@ -2,6 +2,25 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [1.7.0] - 2025-01-29
+
+### Added
+- **QR Code for Public Key**: Generate QR code on identity page for easy in-person key sharing
+  - Show/Hide QR Code toggle button
+  - 200x200 SVG QR code display
+  - Scan with phone camera to get public key
+  - Perfect for face-to-face key exchange
+
+- **Search & Filter Capsules**: Enhanced dashboard with search and filter capabilities
+  - Search by title, notes, or capsule ID
+  - Real-time search as you type
+  - Filter by status: All, Locked, Unlocked
+  - Visual feedback when no capsules match filters
+  - Better management for users with many capsules
+
+### Dependencies
+- Added qrcode.react for QR code generation
+
 ## [1.6.1] - 2025-01-29
 
 ### Added

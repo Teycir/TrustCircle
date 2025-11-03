@@ -16,6 +16,8 @@ function DashboardContent() {
   const [capsules, setCapsules] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'locked' | 'unlocked'>('all')
 
   useEffect(() => {
     if (!identity) {
@@ -47,6 +49,15 @@ function DashboardContent() {
 
     loadCapsules()
   }, [identity, tab])
+
+  const filteredCapsules = capsules.filter(capsule => {
+    const matchesSearch = !search || 
+      capsule.title?.toLowerCase().includes(search.toLowerCase()) ||
+      capsule.notes?.toLowerCase().includes(search.toLowerCase()) ||
+      capsule.id.toLowerCase().includes(search.toLowerCase())
+    const matchesStatus = statusFilter === 'all' || capsule.status === statusFilter
+    return matchesSearch && matchesStatus
+  })
 
   if (identityLoading) {
     return (
@@ -103,6 +114,28 @@ function DashboardContent() {
           </div>
 
           <div className="p-6">
+            {capsules.length > 0 && (
+              <div className="mb-4 space-y-3">
+                <input
+                  type="text"
+                  placeholder="Search by title, notes, or ID"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+                <div className="flex gap-2">
+                  <button onClick={() => setStatusFilter('all')} className={`px-4 py-2 rounded-lg text-sm font-medium ${statusFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                    All
+                  </button>
+                  <button onClick={() => setStatusFilter('locked')} className={`px-4 py-2 rounded-lg text-sm font-medium ${statusFilter === 'locked' ? 'bg-yellow-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                    Locked
+                  </button>
+                  <button onClick={() => setStatusFilter('unlocked')} className={`px-4 py-2 rounded-lg text-sm font-medium ${statusFilter === 'unlocked' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                    Unlocked
+                  </button>
+                </div>
+              </div>
+            )}
             {loading && (
               <div className="text-center py-8 text-gray-500">Loading capsules...</div>
             )}
@@ -116,9 +149,12 @@ function DashboardContent() {
                 )}
               </div>
             )}
-            {!loading && capsules.length > 0 && (
+            {!loading && filteredCapsules.length === 0 && capsules.length > 0 && (
+              <div className="text-center py-8 text-gray-500">No capsules match your filters</div>
+            )}
+            {!loading && filteredCapsules.length > 0 && (
               <div className="space-y-4">
-                {capsules.map((capsule) => {
+                {filteredCapsules.map((capsule) => {
                   const metadata = capsule.metadata as CapsuleMetadata
                   return (
                     <div key={capsule.id} className="border rounded-lg p-3 sm:p-4 hover:bg-gray-50">

@@ -6,12 +6,14 @@ import { toBase64 } from '@/lib/crypto'
 import Link from 'next/link'
 import { useState } from 'react'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { QRCodeSVG } from 'qrcode.react'
 
 function IdentityContent() {
   const { identity, loading, create, getPublicKeyString, exportKeys, importKeys, deleteIdentity } = useIdentity()
   const { user, savePublicKeys: savePublicKeysToServer } = useAuth()
   const [importing, setImporting] = useState(false)
   const [error, setError] = useState('')
+  const [showQR, setShowQR] = useState(false)
 
   const handleGenerate = async () => {
     const newIdentity = await create()
@@ -136,6 +138,14 @@ function IdentityContent() {
                     💾 Save as File
                   </button>
                 </div>
+                <button onClick={() => setShowQR(!showQR)} className="w-full mt-3 bg-white border border-indigo-300 text-indigo-600 py-2.5 rounded-lg hover:bg-indigo-50 font-medium">
+                  {showQR ? '🔼 Hide QR Code' : '📱 Show QR Code'}
+                </button>
+                {showQR && (
+                  <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200 flex justify-center">
+                    <QRCodeSVG value={publicKey} size={200} />
+                  </div>
+                )}
               </div>
 
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">

@@ -56,7 +56,7 @@ This document outlines planned features and improvements for TrustCircle.
 - **Technical**: Supabase Edge Functions + email service integration
 
 #### 5. QR Code for Public Key
-- **Status**: Planned
+- **Status**: ✅ Completed (v1.7.0)
 - **Effort**: 15 minutes
 - **Value**: Medium
 - **Description**: Generate QR code on identity page
@@ -72,7 +72,7 @@ This document outlines planned features and improvements for TrustCircle.
 ### Medium Priority
 
 #### 6. Search & Filter Capsules
-- **Status**: Planned
+- **Status**: ✅ Completed (v1.7.0)
 - **Effort**: 20 minutes
 - **Value**: Medium
 - **Description**: Enhanced capsule organization
