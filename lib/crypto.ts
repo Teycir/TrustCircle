@@ -89,7 +89,7 @@ export async function aesGcmEncrypt(
     );
     const iv = generateUniqueNonce();
     const ciphertext = await crypto.subtle.encrypt(
-      { name: "AES-GCM", iv },
+      { name: "AES-GCM", iv: iv as BufferSource },
       cryptoKey,
       data as BufferSource,
     );
@@ -121,7 +121,7 @@ export async function aesGcmDecrypt(
     const iv = data.slice(0, 12);
     const ciphertext = data.slice(12);
     const plaintext = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv },
+      { name: "AES-GCM", iv: iv as BufferSource },
       cryptoKey,
       ciphertext as BufferSource,
     );
@@ -156,14 +156,14 @@ export async function wrapCmkForRecipient(
 
     const cryptoKey = await crypto.subtle.importKey(
       "raw",
-      wrappingKey,
+      wrappingKey as BufferSource,
       "AES-GCM",
       false,
       ["encrypt"],
     );
     const iv = generateUniqueNonce();
     const ciphertext = await crypto.subtle.encrypt(
-      { name: "AES-GCM", iv },
+      { name: "AES-GCM", iv: iv as BufferSource },
       cryptoKey,
       cmk as BufferSource,
     );
@@ -213,13 +213,13 @@ export async function unwrapCmk(
 
     const cryptoKey = await crypto.subtle.importKey(
       "raw",
-      wrappingKey,
+      wrappingKey as BufferSource,
       "AES-GCM",
       false,
       ["decrypt"],
     );
     const cmk = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: nonce },
+      { name: "AES-GCM", iv: nonce as BufferSource },
       cryptoKey,
       actualCiphertext as BufferSource,
     );
