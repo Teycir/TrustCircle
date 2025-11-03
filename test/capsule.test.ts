@@ -20,7 +20,9 @@ describe('Capsule Integration', () => {
 
     mockPinata = {
       uploadBytes: vi.fn().mockResolvedValue('QmTestCID123'),
-      getBytes: vi.fn()
+      getBytes: vi.fn(),
+      getStorageUsage: vi.fn().mockResolvedValue({ used: 0, limit: 1073741824, percentage: 0 }),
+      purgeOldFiles: vi.fn().mockResolvedValue(undefined)
     }
 
     mockDb = {
