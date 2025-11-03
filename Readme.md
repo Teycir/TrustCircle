@@ -1,12 +1,14 @@
-# TrustCircle Lite Web — Full Build Specification
+# TrustCircle
 
-A web-based, privacy-first, single-approver secure data sharing app built with Next.js and deployed on Vercel. All encryption happens client-side in the browser.
+🔐 A web-based, privacy-first secure data sharing app with time and location-based unlocking. Built with Next.js, all encryption happens client-side in the browser.
+
+**Current Version:** 2.3.0
 
 ---
 
-## 1) Concept
+## Overview
 
-TrustCircle Lite lets you lock files so that exactly one named approver can unlock them under specific environmental conditions like date/time and location. It is designed to feel like a physical safe: you need to be at the right time/place and hold the right private key.
+TrustCircle lets you lock files so that exactly one designated approver can unlock them under specific conditions like date/time and location. It's designed to feel like a physical safe: you need to be at the right time/place and hold the right private key.
 
 Core objectives:
 - Single approver: a single designated person has the authority to unlock.
@@ -15,10 +17,19 @@ Core objectives:
 - Decentralized storage: encrypted payloads stored on IPFS via Pinata.
 - Easy sharing: capsule metadata stored in Supabase for discovery.
 
-Non-goals for v1:
-- Multi-approver thresholds or quorum workflows.
-- Server-side key escrow or recovery.
-- Continuous background tracking of user location.
+## Features
+
+- ✅ **Time-Based Unlocking**: Set unlock dates for future access
+- ✅ **Location-Based Unlocking**: Require specific GPS location (±1km radius)
+- ✅ **Client-Side Encryption**: AES-256-GCM encryption in browser
+- ✅ **Beautiful Gradient UI**: Modern design with light color scheme
+- ✅ **Dashboard Management**: Track created and received capsules
+- ✅ **Search & Filter**: Find capsules by title, notes, or status
+- ✅ **QR Code Sharing**: Share public keys via QR code
+- ✅ **Analytics**: View usage statistics and insights
+- ✅ **Auto-Expiration**: Optional capsule expiration dates
+- ✅ **Offline Support**: Works without internet connectivity
+- ✅ **Mobile Responsive**: Works on all devices
 
 ---
 
@@ -421,31 +432,59 @@ Risks and Mitigations:
 
 ---
 
-## 15) MVP Scope
+## Quick Start
 
-- Single approver.
-- DATE_AFTER and LOCATION_HASH_EQ conditions with ALL logic.
-- Browser-based identity with exportable public keys.
-- Encrypted payload upload to Pinata IPFS.
-- Supabase stores capsule metadata for easy sharing.
-- Responsive web UI works on desktop and mobile.
+### For Users
 
-Out of scope for MVP:
-- Native mobile apps.
-- Recovery flows, multi-approver, remote policy updates.
+1. Visit the deployed TrustCircle app
+2. Go to Identity page and generate your keys (no API keys needed)
+3. Share your public key with others
+4. Create capsules or unlock capsules sent to you
+
+### For Developers
+
+```bash
+# Clone repository
+git clone https://github.com/yourusername/TrustCircle.git
+cd TrustCircle
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your Pinata and Supabase credentials
+
+# Run development server
+npm run dev
+
+# Run tests
+npm test
+```
+
+### Environment Variables
+
+```env
+NEXT_PUBLIC_PINATA_JWT=your_pinata_jwt_token
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+## Recent Updates (v2.3.0)
+
+- ✨ Complete location lock feature with privacy-preserving hash storage
+- 🎨 Beautiful gradient buttons across entire app
+- 📊 Fixed storage calculation for accurate usage display
+- 🗓️ Default unlock date set to yesterday for easy testing
+- 🔄 Newest capsules appear first on dashboard
+- 🔒 Enhanced security with proper error handling
+- 📱 Improved mobile responsiveness
+
+See [CHANGELOG.md](CHANGELOG.md) for full version history.
 
 ---
 
-## 16) Roadmap
-
-- Phase 1: Next.js setup, crypto engine, Pinata integration, Supabase schema
-- Phase 2: Create and unlock flows, inventory UI, key management
-- Phase 3: Policy engine, geolocation, testing, security audit
-- Phase 4: PWA support, optional Supabase Auth, sharing features
-
----
-
-## 17) Example Code
+## Example Code
 
 Creation:
 
