@@ -1,10 +1,12 @@
 import { PolicyError } from '@/lib/policy'
 
-export function ErrorMessage({ error }: { error: Error | string }) {
-  const message = typeof error === 'string' ? error : error.message
+export function ErrorMessage({ error }: { error: Error | string | null | undefined }) {
+  if (!error) return null
+  
+  const message = typeof error === 'string' ? error : error.message || 'Unknown error'
   
   const getUserFriendlyMessage = (err: Error | string): string => {
-    const msg = typeof err === 'string' ? err : err.message
+    const msg = typeof err === 'string' ? err : (err.message || 'Unknown error')
     
     if (err instanceof PolicyError) {
       return msg

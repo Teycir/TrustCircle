@@ -1,5 +1,5 @@
 export function validatePublicKey(key: string): void {
-  if (!key || typeof key !== "string") {
+  if (!key || typeof key !== "string" || key.trim() === "") {
     throw new Error("Public key must be a non-empty string");
   }
 
@@ -8,18 +8,22 @@ export function validatePublicKey(key: string): void {
     throw new Error('Invalid key format. Expected "ed25519:..."');
   }
 
+  if (!/^[A-Za-z0-9+/]+=*$/.test(parts[1])) {
+    throw new Error("Invalid base64 encoding");
+  }
+
   try {
     const decoded = atob(parts[1]);
     if (decoded.length !== 32) {
       throw new Error("Invalid key length");
     }
-  } catch (error) {
+  } catch {
     throw new Error("Invalid base64 encoding");
   }
 }
 
 export function validateCapsuleId(id: string): void {
-  if (!id || typeof id !== "string") {
+  if (!id || typeof id !== "string" || id.trim() === "") {
     throw new Error("Capsule ID must be a non-empty string");
   }
 
@@ -31,12 +35,22 @@ export function validateCapsuleId(id: string): void {
 }
 
 export function validateFileSize(size: number, maxMB = 100): void {
+  if (typeof size !== "number" || isNaN(size) || size < 0) {
+    throw new Error("File size must be a non-negative number");
+  }
+  if (!isFinite(size)) {
+    throw new Error("File size must be finite");
+  }
   if (size > maxMB * 1024 * 1024) {
     throw new Error(`File size exceeds ${maxMB}MB limit`);
   }
 }
 
 export function sanitizeMetadata(metadata: any): any {
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
+    throw new Error("Metadata must be an object");
+  }
+
   const allowed = [
     "title",
     "notes",

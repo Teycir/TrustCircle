@@ -9,10 +9,15 @@ export function useIdentity() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadIdentity(IDENTITY_KEY).then(id => {
-      setIdentity(id)
-      setLoading(false)
-    })
+    loadIdentity(IDENTITY_KEY)
+      .then(id => {
+        setIdentity(id)
+        setLoading(false)
+      })
+      .catch(error => {
+        console.error('Failed to load identity:', error)
+        setLoading(false)
+      })
   }, [])
 
   const create = async () => {

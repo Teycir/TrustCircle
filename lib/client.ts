@@ -6,15 +6,16 @@ let clientInstance: CapsuleManager | null = null
 
 export function getClient(): CapsuleManager {
   if (!clientInstance) {
-    const pinata = new PinataClient(
-      process.env.NEXT_PUBLIC_PINATA_API_KEY || '',
-      process.env.NEXT_PUBLIC_PINATA_GATEWAY
-    )
+    const apiKey = process.env.NEXT_PUBLIC_PINATA_API_KEY
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     
-    const db = new TrustCircleDB(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    )
+    if (!apiKey) throw new Error('NEXT_PUBLIC_PINATA_API_KEY not configured')
+    if (!supabaseUrl) throw new Error('NEXT_PUBLIC_SUPABASE_URL not configured')
+    if (!supabaseKey) throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY not configured')
+    
+    const pinata = new PinataClient(apiKey, process.env.NEXT_PUBLIC_PINATA_GATEWAY)
+    const db = new TrustCircleDB(supabaseUrl, supabaseKey)
     
     clientInstance = new CapsuleManager(pinata, db)
   }
@@ -28,6 +29,9 @@ export async function fileToUint8Array(file: File): Promise<Uint8Array> {
 }
 
 export function downloadFile(data: Uint8Array, filename: string) {
+  if (!data || data.length === 0) throw new Error('Data cannot be empty')
+  if (!filename || !filename.trim()) throw new Error('Filename cannot be empty')
+  
   const blob = new Blob([data])
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
