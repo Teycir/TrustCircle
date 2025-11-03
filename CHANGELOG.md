@@ -2,6 +2,17 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [2.0.0] - 2025-01-29
+
+### Added
+- **Capsule Analytics**: Usage statistics and insights dashboard
+  - Total capsules created and received
+  - Total capsules unlocked
+  - Average days to unlock
+  - Capsules expiring soon count
+  - Unlock rate percentage
+  - Accessible from home page
+
 ## [1.8.0] - 2025-01-29
 
 ### Added

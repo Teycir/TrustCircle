@@ -140,7 +140,7 @@ This document outlines planned features and improvements for TrustCircle.
   - One-click unlock from extension
 
 #### 12. Capsule Analytics
-- **Status**: Planned
+- **Status**: ✅ Completed (v2.0.0)
 - **Effort**: 1 hour
 - **Value**: Low
 - **Description**: Usage statistics and insights

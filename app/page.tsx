@@ -111,6 +111,14 @@ export default function Home() {
               Manage your cryptographic keys and identity
             </p>
           </Link>
+
+          <Link href="/analytics" className="block p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow">
+            <div className="text-blue-600 text-4xl mb-4">📈</div>
+            <h3 className="text-2xl font-semibold text-gray-900 mb-2">Analytics</h3>
+            <p className="text-gray-600">
+              View usage statistics and insights
+            </p>
+          </Link>
         </div>
 
         <div className="mt-16 max-w-3xl mx-auto">
