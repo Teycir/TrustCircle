@@ -203,7 +203,9 @@ function IdentityContent() {
 }
 
 export default function Identity() {
-  // Note: ProtectedRoute removed for E2E testing
-  // In production, consider re-enabling authentication
-  return <IdentityContent />
+  return (
+    <ProtectedRoute>
+      <IdentityContent />
+    </ProtectedRoute>
+  )
 }
