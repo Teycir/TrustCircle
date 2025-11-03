@@ -6,6 +6,9 @@ import { useIdentity } from '@/lib/hooks'
 import { getClient } from '@/lib/client'
 import { toBase64 } from '@/lib/crypto'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { CopyButton } from '@/components/CopyButton'
+import { UnlockConditions } from '@/components/UnlockConditions'
+import type { CapsuleMetadata } from '@/lib/capsule'
 
 function DashboardContent() {
   const { identity, loading: identityLoading } = useIdentity()
@@ -15,7 +18,10 @@ function DashboardContent() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!identity) return
+    if (!identity) {
+      setLoading(false)
+      return
+    }
 
     const loadCapsules = async () => {
       setLoading(true)
@@ -75,8 +81,8 @@ function DashboardContent() {
         </div>
       </nav>
 
-      <main className="max-w-5xl mx-auto px-4 py-12">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8">Dashboard</h2>
+      <main className="max-w-5xl mx-auto px-4 py-6 sm:py-12">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">Dashboard</h2>
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
@@ -97,9 +103,10 @@ function DashboardContent() {
           </div>
 
           <div className="p-6">
-            {loading ? (
+            {loading && (
               <div className="text-center py-8 text-gray-500">Loading capsules...</div>
-            ) : capsules.length === 0 ? (
+            )}
+            {!loading && capsules.length === 0 && (
               <div className="text-center py-8">
                 <p className="text-gray-500 mb-4">No capsules found</p>
                 {tab === 'created' && (
@@ -108,34 +115,60 @@ function DashboardContent() {
                   </Link>
                 )}
               </div>
-            ) : (
+            )}
+            {!loading && capsules.length > 0 && (
               <div className="space-y-4">
-                {capsules.map((capsule) => (
-                  <div key={capsule.id} className="border rounded-lg p-4 hover:bg-gray-50">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-semibold text-gray-900">{capsule.title || 'Untitled'}</h3>
-                        <p className="text-sm text-gray-500 font-mono">{capsule.id}</p>
-                        <p className="text-sm text-gray-500">
-                          Created: {new Date(capsule.created_at).toLocaleDateString()}
-                        </p>
-                        {capsule.notes && (
-                          <p className="text-sm text-gray-600 mt-1">{capsule.notes}</p>
+                {capsules.map((capsule) => {
+                  const metadata = capsule.metadata as CapsuleMetadata
+                  return (
+                    <div key={capsule.id} className="border rounded-lg p-3 sm:p-4 hover:bg-gray-50">
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-900 text-lg">{capsule.title || 'Untitled'}</h3>
+                            {capsule.notes && (
+                              <p className="text-sm text-gray-600 mt-1">{capsule.notes}</p>
+                            )}
+                            <p className="text-sm text-gray-500 mt-2">
+                              Created: {new Date(capsule.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <span className={`px-3 py-1 rounded-full text-sm ${capsule.status === 'locked' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
+                            {capsule.status}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <code className="flex-1 text-xs bg-gray-100 px-2 py-1 rounded font-mono text-gray-700">
+                            {capsule.id}
+                          </code>
+                          <CopyButton text={capsule.id} label="Copy ID" />
+                        </div>
+
+                        {tab === 'sent' && metadata && (
+                          <UnlockConditions policy={metadata.unlock_policy} />
                         )}
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <span className={`px-3 py-1 rounded-full text-sm ${capsule.status === 'locked' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
-                          {capsule.status}
-                        </span>
-                        {tab === 'sent' && capsule.status === 'locked' && (
-                          <Link href={`/unlock?id=${capsule.id}`} className="text-indigo-600 hover:text-indigo-800">
-                            Unlock →
+
+                        <div className="flex gap-2">
+                          <Link
+                            href={`/capsule/${capsule.id}`}
+                            className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                          >
+                            View Details →
                           </Link>
-                        )}
+                          {tab === 'sent' && capsule.status === 'locked' && (
+                            <Link
+                              href={`/unlock?id=${capsule.id}`}
+                              className="text-green-600 hover:text-green-800 text-sm font-medium"
+                            >
+                              Unlock →
+                            </Link>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>

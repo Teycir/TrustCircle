@@ -2,6 +2,80 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [1.6.1] - 2025-01-29
+
+### Added
+- **Delete Identity**: Added ability to delete current identity to import old backups
+  - Delete button on Identity page with confirmation dialog
+  - Clears identity from IndexedDB to allow fresh import
+  - Enables recovery of old capsules with backup files
+
+### Improved
+- **Unlock Page Workflow**: Simplified lock/unlock workflow
+  - Lock/Unlock toggle button shows current state (green for unlock, yellow for lock)
+  - Download button always visible, enabled when capsule is unlocked
+  - Removed confusing intermediate states
+  - Status based on database state, not client-side memory
+
+- **Mobile Responsiveness**: Made entire app mobile-friendly
+  - Responsive padding and text sizes across all pages
+  - Buttons wrap and resize appropriately on small screens
+  - Flex layouts stack vertically on mobile
+  - Optimized spacing for mobile devices
+
+### Fixed
+- **Dashboard Loading**: Fixed infinite loading state when no identity exists
+- **Button Size Consistency**: Fixed buttons changing size during state transitions
+- **Code Quality**: Fixed SonarQube warnings
+  - Used optional chaining for null checks
+  - Fixed TypeScript compilation errors
+  - Improved error handling
+
+## [1.6.0] - 2025-01-29
+
+### Added
+- **Shareable Capsule Links**: Generate and share direct URLs to capsules
+  - Format: trustcircle.app/capsule/[id]
+  - Copy Link button on create success page
+  - Copy Link button on dashboard for each capsule
+  - Dedicated capsule detail page with full information
+  - Direct unlock capability for designated approvers
+  - Share capsules without manually copying IDs
+
+- **Capsule Preview & Unlock Conditions**: Display unlock requirements before attempting unlock
+  - Shows unlock date and time with countdown timer
+  - Displays location requirement if set
+  - Real-time countdown for time-locked capsules
+  - Visual indicators for met and unmet conditions
+  - Appears on dashboard, unlock page, and capsule detail page
+  - Helps users understand why they cannot unlock yet
+
+- **Quick Copy Capsule ID**: One-click copy functionality
+  - Copy button next to capsule ID on dashboard
+  - Copy button on unlock page
+  - Copy button on capsule detail page
+  - Visual feedback with checkmark animation
+  - Faster capsule sharing workflow
+
+### Improved
+- **Create Page Success**: Enhanced success message with shareable link
+  - Prominent display of capsule ID and share link
+  - Quick copy buttons for both ID and link
+  - View Capsule button to see details immediately
+  - Better visual design with icons and color coding
+
+- **Dashboard**: Enhanced capsule cards with more information
+  - Copy ID and Copy Link buttons for each capsule
+  - View Details link to dedicated capsule page
+  - Unlock conditions preview for received capsules
+  - Better visual organization and spacing
+
+- **Unlock Page**: Improved capsule list with unlock conditions
+  - Shows unlock requirements for each locked capsule
+  - Copy button for quick ID sharing
+  - Countdown timers for time-locked capsules
+  - Better understanding of unlock status
+
 ## [1.5.0] - 2025-01-29
 
 ### Added

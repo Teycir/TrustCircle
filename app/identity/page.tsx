@@ -8,7 +8,7 @@ import { useState } from 'react'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 
 function IdentityContent() {
-  const { identity, loading, create, getPublicKeyString, exportKeys, importKeys } = useIdentity()
+  const { identity, loading, create, getPublicKeyString, exportKeys, importKeys, deleteIdentity } = useIdentity()
   const { user, savePublicKeys: savePublicKeysToServer } = useAuth()
   const [importing, setImporting] = useState(false)
   const [error, setError] = useState('')
@@ -173,7 +173,14 @@ function IdentityContent() {
               </div>
 
               <div className="border-t pt-6">
-                <button className="text-red-600 hover:text-red-800 text-sm font-medium">
+                <button
+                  onClick={() => {
+                    if (confirm('Are you sure you want to delete your identity? This cannot be undone and you will lose access to all your capsules unless you have a backup.')) {
+                      deleteIdentity();
+                    }
+                  }}
+                  className="text-red-600 hover:text-red-800 text-sm font-medium"
+                >
                   🗑️ Delete Identity
                 </button>
               </div>

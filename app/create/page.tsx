@@ -6,8 +6,9 @@ import { useIdentity } from '@/lib/hooks'
 import { getClient, fileToUint8Array } from '@/lib/client'
 import { getCurrentLocation } from '@/lib/geolocation'
 import { buildLocationHash } from '@/lib/policy'
-import { fromBase64, ed25519PublicKeyToX25519 } from '@/lib/crypto'
+import { fromBase64 } from '@/lib/crypto'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { CopyButton } from '@/components/CopyButton'
 
 function CreateCapsuleContent() {
   const { identity, getPublicKeyString } = useIdentity()
@@ -102,8 +103,8 @@ function CreateCapsuleContent() {
         </div>
       </nav>
 
-      <main className="max-w-3xl mx-auto px-4 py-12">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8">Create Capsule</h2>
+      <main className="max-w-3xl mx-auto px-4 py-6 sm:py-12">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">Create Capsule</h2>
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
@@ -112,34 +113,58 @@ function CreateCapsuleContent() {
         )}
 
         {result ? (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-green-900 mb-2">Success!</h3>
-            <p className="text-green-700 mb-2">Capsule ID:</p>
-            <code className="block bg-white p-3 rounded text-sm mb-4">{result}</code>
-            <button onClick={() => setResult(null)} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
-              Create Another
-            </button>
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-8 space-y-6">
+            <div className="text-center">
+              <div className="text-6xl mb-4">✅</div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Capsule Created Successfully!</h3>
+              <p className="text-gray-600">Your capsule has been encrypted and stored securely</p>
+            </div>
+
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <h4 className="font-semibold text-green-900 mb-3">Capsule ID</h4>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 bg-white p-3 rounded text-sm font-mono break-all">{result}</code>
+                <CopyButton text={result} label="Copy ID" />
+              </div>
+            </div>
+
+
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link
+                href={`/capsule/${result}`}
+                className="flex-1 bg-indigo-600 text-white py-3 rounded-lg text-center font-semibold hover:bg-indigo-700"
+              >
+                View Capsule
+              </Link>
+              <button
+                onClick={() => setResult(null)}
+                className="flex-1 bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-700"
+              >
+                Create Another
+              </button>
+            </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-8 space-y-6">
+          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-4 sm:p-8 space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">File to Encrypt</label>
-              <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700" required />
+              <label htmlFor="file" className="block text-sm font-medium text-gray-700 mb-2">File to Encrypt</label>
+              <input id="file" type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700" required />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-              <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-4 py-2 border rounded-lg" placeholder="My Secret Document" required />
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+              <input id="title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-4 py-2 border rounded-lg" placeholder="My Secret Document" required />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-              <textarea value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full px-4 py-2 border rounded-lg" rows={3} />
+              <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+              <textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full px-4 py-2 border rounded-lg" rows={3} />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-gray-700">Approver Public Key</label>
+                <label htmlFor="approverKey" className="block text-sm font-medium text-gray-700">Approver Public Key</label>
                 <button
                   type="button"
                   onClick={() => setApproverKey(getPublicKeyString())}
@@ -148,7 +173,7 @@ function CreateCapsuleContent() {
                   🔑 Use My Key
                 </button>
               </div>
-              <input type="text" value={approverKey} onChange={(e) => setApproverKey(e.target.value)} className="w-full px-4 py-2 border rounded-lg font-mono text-sm" placeholder="ed25519:...,x25519:..." required />
+              <input id="approverKey" type="text" value={approverKey} onChange={(e) => setApproverKey(e.target.value)} className="w-full px-4 py-2 border rounded-lg font-mono text-sm" placeholder="ed25519:...,x25519:..." required />
               <div className="mt-2 bg-blue-50 border border-blue-200 rounded p-3">
                 <p className="text-xs text-blue-900 font-semibold mb-1">How to get the approver's key:</p>
                 <ol className="text-xs text-blue-800 space-y-1">
@@ -163,8 +188,8 @@ function CreateCapsuleContent() {
             <div className="border-t pt-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Unlock Conditions</h3>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Available After Date</label>
-                <input type="datetime-local" value={dateAfter} onChange={(e) => setDateAfter(e.target.value)} className="w-full px-4 py-2 border rounded-lg" required />
+                <label htmlFor="dateAfter" className="block text-sm font-medium text-gray-700 mb-2">Available After Date</label>
+                <input id="dateAfter" type="datetime-local" value={dateAfter} onChange={(e) => setDateAfter(e.target.value)} className="w-full px-4 py-2 border rounded-lg" required />
               </div>
               <div className="flex items-center">
                 <input type="checkbox" id="useLocation" checked={useLocation} onChange={(e) => setUseLocation(e.target.checked)} className="h-4 w-4 text-indigo-600 rounded" />

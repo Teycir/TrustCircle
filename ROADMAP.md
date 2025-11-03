@@ -7,7 +7,7 @@ This document outlines planned features and improvements for TrustCircle.
 ### High Priority
 
 #### 1. Shareable Capsule Links
-- **Status**: Planned
+- **Status**: ✅ Completed (v1.6.0)
 - **Effort**: 30 minutes
 - **Value**: High
 - **Description**: Generate shareable URLs for capsules
@@ -18,7 +18,7 @@ This document outlines planned features and improvements for TrustCircle.
 - **Benefits**: Eliminates need to manually copy/paste capsule IDs
 
 #### 2. Capsule Preview & Unlock Conditions
-- **Status**: Planned
+- **Status**: ✅ Completed (v1.6.0)
 - **Effort**: 20 minutes
 - **Value**: High
 - **Description**: Display unlock requirements before attempting unlock
@@ -29,7 +29,7 @@ This document outlines planned features and improvements for TrustCircle.
 - **Benefits**: Users understand why they can't unlock yet
 
 #### 3. Quick Copy Capsule ID
-- **Status**: Planned
+- **Status**: ✅ Completed (v1.6.0)
 - **Effort**: 10 minutes
 - **Value**: Medium
 - **Description**: One-click copy functionality

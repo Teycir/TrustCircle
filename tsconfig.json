@@ -4,7 +4,8 @@
     "module": "ESNext",
     "lib": [
       "ES2020",
-      "DOM"
+      "DOM",
+      "DOM.Iterable"
     ],
     "moduleResolution": "node",
     "esModuleInterop": true,

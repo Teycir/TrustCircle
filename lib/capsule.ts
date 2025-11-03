@@ -189,9 +189,7 @@ export class CapsuleManager {
         throw error;
       }
       if (error instanceof Error) {
-        throw new Error(`Capsule unlock failed: ${error.message}`, {
-          cause: error,
-        });
+        throw new Error(`Capsule unlock failed: ${error.message}`);
       }
       throw error;
     }

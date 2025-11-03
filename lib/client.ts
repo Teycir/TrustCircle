@@ -29,10 +29,10 @@ export async function fileToUint8Array(file: File): Promise<Uint8Array> {
 }
 
 export function downloadFile(data: Uint8Array, filename: string) {
-  if (!data || data.length === 0) throw new Error('Data cannot be empty')
-  if (!filename || !filename.trim()) throw new Error('Filename cannot be empty')
+  if (!data?.length) throw new Error('Data cannot be empty')
+  if (!filename?.trim()) throw new Error('Filename cannot be empty')
 
-  const blob = new Blob([data])
+  const blob = new Blob([data.buffer])
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url

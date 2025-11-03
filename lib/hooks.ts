@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { generateIdentity, toBase64, fromBase64 } from './crypto'
-import { saveIdentity, loadIdentity } from './keystore'
+import { saveIdentity, loadIdentity, deleteIdentity as deleteIdentityFromStore } from './keystore'
 
 const IDENTITY_KEY = 'default'
 
@@ -84,5 +84,10 @@ export function useIdentity() {
     setIdentity(importedIdentity)
   }
 
-  return { identity, loading, create, getPublicKeys, getPublicKeyString, exportKeys, importKeys }
+  const deleteIdentity = async () => {
+    await deleteIdentityFromStore(IDENTITY_KEY)
+    setIdentity(null)
+  }
+
+  return { identity, loading, create, getPublicKeys, getPublicKeyString, exportKeys, importKeys, deleteIdentity }
 }
