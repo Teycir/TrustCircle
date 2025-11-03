@@ -188,6 +188,13 @@ function DashboardContent() {
                             {capsule.id}
                           </code>
                           <CopyButton text={capsule.id} label="Copy ID" />
+                          <a
+                            href={`mailto:?subject=Secure Capsule Shared with You&body=I've shared a secure capsule with you on TrustCircle.%0D%0A%0D%0ACapsule ID: ${capsule.id}%0D%0A%0D%0ATo access it:%0D%0A1. Log in to TrustCircle%0D%0A2. Go to the Unlock page%0D%0A3. Find the capsule in your list%0D%0A4. Unlock it when conditions are met%0D%0A%0D%0AYou'll need your TrustCircle identity to unlock this capsule.`}
+                            className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 font-medium"
+                            title="Send capsule ID via email with instructions"
+                          >
+                            📧 Share
+                          </a>
                         </div>
 
                         {tab === 'sent' && metadata && (
