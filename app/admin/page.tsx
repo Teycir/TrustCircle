@@ -8,8 +8,10 @@ export default function AdminPage() {
   const [config, setConfig] = useState<AppConfig>({})
   const [saved, setSaved] = useState(false)
   const [showKeys, setShowKeys] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const stored = getConfig()
     setConfig({
       pinataJWT: stored.pinataJWT || process.env.NEXT_PUBLIC_PINATA_JWT || '',
@@ -32,12 +34,16 @@ export default function AdminPage() {
     }
   }
 
+  if (!mounted) {
+    return null
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold text-indigo-600 flex items-center gap-2">
-            <span>🔐</span> TrustCircle
+            TrustCircle
           </Link>
           <Link href="/" className="text-gray-600 hover:text-gray-900">← Back</Link>
         </div>
@@ -45,12 +51,12 @@ export default function AdminPage() {
 
       <main className="max-w-3xl mx-auto px-4 py-12">
         <div className="bg-white rounded-lg shadow-md p-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">⚙️ Admin Configuration</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Admin Configuration</h2>
           <p className="text-gray-600 mb-8">Update API keys and configuration settings</p>
 
           {saved && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-              <p className="text-green-800 font-medium">✓ Configuration saved successfully</p>
+              <p className="text-green-800 font-medium">Configuration saved successfully</p>
             </div>
           )}
 
@@ -112,13 +118,13 @@ export default function AdminPage() {
                 onClick={handleSave}
                 className="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700"
               >
-                💾 Save Configuration
+                Save Configuration
               </button>
               <button
                 onClick={handleReset}
                 className="px-6 bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-700"
               >
-                🔄 Reset
+                Reset
               </button>
             </div>
           </div>
