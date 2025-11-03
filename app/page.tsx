@@ -41,7 +41,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen gradient-bg">
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-indigo-600 flex items-center gap-2">
@@ -80,7 +80,7 @@ export default function Home() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          <Link href="/admin" className="block p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow">
+          <Link href="/admin" className="card-hover block p-8 glass rounded-xl shadow-lg">
             <div className="text-red-600 text-4xl mb-4">⚙️</div>
             <h3 className="text-2xl font-semibold text-gray-900 mb-2">Admin</h3>
             <p className="text-gray-600">
@@ -88,7 +88,7 @@ export default function Home() {
             </p>
           </Link>
 
-          <Link href="/create" className="block p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow">
+          <Link href="/create" className="card-hover block p-8 glass rounded-xl shadow-lg">
             <div className="text-indigo-600 text-4xl mb-4">🔒</div>
             <h3 className="text-2xl font-semibold text-gray-900 mb-2">Create Capsule</h3>
             <p className="text-gray-600">
@@ -96,7 +96,7 @@ export default function Home() {
             </p>
           </Link>
 
-          <Link href="/unlock" className="block p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow">
+          <Link href="/unlock" className="card-hover block p-8 glass rounded-xl shadow-lg">
             <div className="text-green-600 text-4xl mb-4">🔓</div>
             <h3 className="text-2xl font-semibold text-gray-900 mb-2">Unlock Capsule</h3>
             <p className="text-gray-600">
@@ -104,7 +104,7 @@ export default function Home() {
             </p>
           </Link>
 
-          <Link href="/dashboard" className="block p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow">
+          <Link href="/dashboard" className="card-hover block p-8 glass rounded-xl shadow-lg">
             <div className="text-purple-600 text-4xl mb-4">📊</div>
             <h3 className="text-2xl font-semibold text-gray-900 mb-2">Dashboard</h3>
             <p className="text-gray-600">
@@ -112,7 +112,7 @@ export default function Home() {
             </p>
           </Link>
 
-          <Link href="/identity" className="block p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow">
+          <Link href="/identity" className="card-hover block p-8 glass rounded-xl shadow-lg">
             <div className="text-orange-600 text-4xl mb-4">🔑</div>
             <h3 className="text-2xl font-semibold text-gray-900 mb-2">Identity</h3>
             <p className="text-gray-600">
@@ -120,7 +120,7 @@ export default function Home() {
             </p>
           </Link>
 
-          <Link href="/analytics" className="block p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow">
+          <Link href="/analytics" className="card-hover block p-8 glass rounded-xl shadow-lg">
             <div className="text-blue-600 text-4xl mb-4">📈</div>
             <h3 className="text-2xl font-semibold text-gray-900 mb-2">Analytics</h3>
             <p className="text-gray-600">

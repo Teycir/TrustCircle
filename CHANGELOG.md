@@ -2,6 +2,15 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [2.1.1] - 2025-01-29
+
+### Improved
+- **Home Page UI**: Enhanced visual design with modern styling
+  - Added gradient background with blue to purple color scheme
+  - Glass morphism effect on navigation cards
+  - Smooth hover animations with scale and shadow effects
+  - Utility classes for reusable button and card styles
+
 ## [2.1.0] - 2025-11-03
 
 ### Added
