@@ -8,28 +8,28 @@ import { toBase64 } from '@/lib/crypto'
 
 export default function Dashboard() {
   const { identity, loading: identityLoading } = useIdentity()
-  const [tab, setTab] = useState<'created' | 'received'>('created')
+  const [tab, setTab] = useState<'created' | 'sent'>('created')
   const [capsules, setCapsules] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!identity) return
-    
+
     const loadCapsules = async () => {
       setLoading(true)
       setError(null)
-      
+
       try {
         const client = getClient()
         const publicKey = `ed25519:${toBase64(identity.ed25519.publicKey)}`
-        
+
         const data = await client['db'].listCapsules(
-          tab === 'created' 
+          tab === 'created'
             ? { creator: publicKey }
             : { approver: publicKey }
         )
-        
+
         setCapsules(data)
       } catch (err) {
         setError((err as Error).message)
@@ -37,7 +37,7 @@ export default function Dashboard() {
         setLoading(false)
       }
     }
-    
+
     loadCapsules()
   }, [identity, tab])
 
@@ -89,8 +89,8 @@ export default function Dashboard() {
               <button onClick={() => setTab('created')} className={`px-6 py-4 font-medium ${tab === 'created' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-600'}`}>
                 Created by Me
               </button>
-              <button onClick={() => setTab('received')} className={`px-6 py-4 font-medium ${tab === 'received' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-600'}`}>
-                Received
+              <button onClick={() => setTab('sent')} className={`px-6 py-4 font-medium ${tab === 'sent' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-600'}`}>
+                Sent to Me
               </button>
             </div>
           </div>
@@ -126,7 +126,7 @@ export default function Dashboard() {
                         <span className={`px-3 py-1 rounded-full text-sm ${capsule.status === 'locked' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
                           {capsule.status}
                         </span>
-                        {tab === 'received' && capsule.status === 'locked' && (
+                        {tab === 'sent' && capsule.status === 'locked' && (
                           <Link href={`/unlock?id=${capsule.id}`} className="text-indigo-600 hover:text-indigo-800">
                             Unlock →
                           </Link>

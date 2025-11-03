@@ -5,21 +5,21 @@ describe('Policy Engine', () => {
   it('builds location hash with precision', async () => {
     const hash1 = await buildLocationHash(37.7749, -122.4194, new Date('2025-01-01'), 2, 'salt123')
     const hash2 = await buildLocationHash(37.7749, -122.4194, new Date('2025-01-01'), 2, 'salt123')
-    
+
     expect(hash1).toBe(hash2)
   })
 
   it('produces different hashes for different locations', async () => {
     const hash1 = await buildLocationHash(37.77, -122.42, new Date('2025-01-01'), 2, 'salt')
     const hash2 = await buildLocationHash(37.78, -122.42, new Date('2025-01-01'), 2, 'salt')
-    
+
     expect(hash1).not.toBe(hash2)
   })
 
   it('produces different hashes for different dates', async () => {
     const hash1 = await buildLocationHash(37.77, -122.42, new Date('2025-01-01'), 2, 'salt')
     const hash2 = await buildLocationHash(37.77, -122.42, new Date('2025-01-02'), 2, 'salt')
-    
+
     expect(hash1).not.toBe(hash2)
   })
 
@@ -28,10 +28,10 @@ describe('Policy Engine', () => {
       conditions: [{ type: 'DATE_AFTER' as const, value: '2025-01-01T00:00:00Z' }],
       logic: 'ALL' as const
     }
-    
+
     const pass = await evaluate(policy, { now: new Date('2025-01-02') })
     expect(pass).toBe(true)
-    
+
     await expect(evaluate(policy, { now: new Date('2024-12-31') }))
       .rejects.toThrow('This capsule is not available yet.')
   })
@@ -41,9 +41,9 @@ describe('Policy Engine', () => {
     const lon = -122.4194
     const date = new Date('2025-01-01')
     const salt = 'test-salt'
-    
+
     const hash = await buildLocationHash(lat, lon, date, 2, salt)
-    
+
     const policy = {
       conditions: [{
         type: 'LOCATION_HASH_EQ' as const,
@@ -53,10 +53,10 @@ describe('Policy Engine', () => {
       }],
       logic: 'ALL' as const
     }
-    
+
     const pass = await evaluate(policy, { now: date, lat, lon })
     expect(pass).toBe(true)
-    
+
     await expect(evaluate(policy, { now: date, lat: 40.0, lon }))
       .rejects.toThrow('You are not in the required unlock area.')
   })
@@ -69,10 +69,10 @@ describe('Policy Engine', () => {
       ],
       logic: 'ALL' as const
     }
-    
+
     const pass = await evaluate(policy, { now: new Date('2025-01-03') })
     expect(pass).toBe(true)
-    
+
     await expect(evaluate(policy, { now: new Date('2025-01-01T12:00:00Z') }))
       .rejects.toThrow('This capsule is not available yet.')
   })
@@ -85,10 +85,10 @@ describe('Policy Engine', () => {
       ],
       logic: 'ANY' as const
     }
-    
+
     const pass = await evaluate(policy, { now: new Date('2025-01-02') })
     expect(pass).toBe(true)
-    
+
     await expect(evaluate(policy, { now: new Date('2024-12-31') }))
       .rejects.toThrow('This capsule is not available yet.')
   })
@@ -103,7 +103,7 @@ describe('Policy Engine', () => {
       }],
       logic: 'ALL' as const
     }
-    
+
     await expect(evaluate(policy, { now: new Date() }))
       .rejects.toThrow('You are not in the required unlock area.')
   })

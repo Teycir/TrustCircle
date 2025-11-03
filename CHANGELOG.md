@@ -2,6 +2,46 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [1.3.0] - 2025-01-29
+
+### Added
+- **UI/UX Improvements**:
+  - Replaced static "How It Works" with collapsible FAQ component on home page
+  - Added FAQ explaining how to send capsules to recipients
+  - Redesigned Identity page with color-coded sections for sharing and backup
+  - Added "Save as TXT" button to export public key as text file
+  - Added "Export Full Backup" button for complete key backup as JSON
+  - Improved security status display with 3 clear checkpoints
+
+- **Dashboard Improvements**:
+  - Changed "Received" tab to "Sent to Me" for clarity
+  - Better visual organization of capsule lists
+
+- **Unlock Page Redesign**:
+  - Complete redesign showing list of available capsules
+  - Display capsule title, status, date, time, and ID for each capsule
+  - One-click unlock and automatic download
+  - Added delete button for each capsule
+  - Enhanced error messages with common reasons for unlock failures
+  - Removed manual ID entry in favor of visual selection
+
+- **Create Page Improvements**:
+  - Added quick link to Identity page to get approver's public key
+  - Added step-by-step instructions for obtaining approver's key
+  - Blue info box with clear 4-step process
+
+- **Delete Functionality**:
+  - Added deleteCapsule method to database client
+  - Automatic deletion of IPFS files when capsule is deleted
+  - Added unpin method to Pinata client for storage cleanup
+  - Confirmation dialog before deletion
+
+### Fixed
+- **Code Quality**:
+  - Removed all trailing whitespace from TypeScript files
+  - Extracted nested ternary operations into independent statements
+  - Added DOM library to tsconfig for browser API support
+
 ## [1.2.0] - 2025-01-29
 
 ### Added

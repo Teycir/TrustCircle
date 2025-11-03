@@ -23,14 +23,14 @@ export default function CreateCapsule() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!identity || !file) return
-    
+
     setLoading(true)
     setError(null)
-    
+
     try {
       const client = getClient()
       const fileData = await fileToUint8Array(file)
-      
+
       const conditions: any[] = [{
         type: 'DATE_AFTER',
         value: new Date(dateAfter).toISOString()
@@ -41,7 +41,7 @@ export default function CreateCapsule() {
         const salt = crypto.getRandomValues(new Uint8Array(16))
         const saltB64 = btoa(String.fromCharCode(...salt))
         const hash = await buildLocationHash(location.lat, location.lon, new Date(), 2, saltB64)
-        
+
         conditions.push({
           type: 'LOCATION_HASH_EQ',
           value: hash,
@@ -137,9 +137,22 @@ export default function CreateCapsule() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Approver Public Key</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">Approver Public Key</label>
+                <Link href="/identity" target="_blank" className="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
+                  🔑 Get from Identity →
+                </Link>
+              </div>
               <input type="text" value={approverKey} onChange={(e) => setApproverKey(e.target.value)} className="w-full px-4 py-2 border rounded-lg font-mono text-sm" placeholder="ed25519:...,x25519:..." required />
-              <p className="text-xs text-gray-500 mt-1">Paste the approver's public key from their Identity page</p>
+              <div className="mt-2 bg-blue-50 border border-blue-200 rounded p-3">
+                <p className="text-xs text-blue-900 font-semibold mb-1">How to get the approver's key:</p>
+                <ol className="text-xs text-blue-800 space-y-1">
+                  <li>1. Ask the recipient to go to their Identity page</li>
+                  <li>2. They click "Copy to Clipboard" or "Save as File"</li>
+                  <li>3. They share the key with you (via email, message, etc.)</li>
+                  <li>4. Paste it here in the format: ed25519:...,x25519:...</li>
+                </ol>
+              </div>
             </div>
 
             <div className="border-t pt-6">

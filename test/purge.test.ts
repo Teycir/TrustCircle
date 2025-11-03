@@ -35,10 +35,10 @@ describe('Pinata Storage Management', () => {
     if (usage.percentage >= 90) {
       console.log('Storage above 90%, testing purge...')
       await pinata.purgeOldFiles(0.9)
-      
+
       const newUsage = await pinata.getStorageUsage()
       console.log(`After purge: ${newUsage.percentage.toFixed(2)}%`)
-      
+
       expect(newUsage.percentage).toBeLessThan(usage.percentage)
     } else {
       console.log('Storage below 90%, skipping purge test')

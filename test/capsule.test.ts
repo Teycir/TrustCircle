@@ -64,7 +64,7 @@ describe('Capsule Integration', () => {
 
   it('unlocks capsule when policy met', async () => {
     const originalData = new TextEncoder().encode('secret data')
-    
+
     const policy = {
       conditions: [{ type: 'DATE_AFTER' as const, value: '2025-01-01T00:00:00Z' }],
       logic: 'ALL' as const
@@ -137,7 +137,7 @@ describe('Capsule Integration', () => {
 
     const savedMetadata = mockDb.saveCapsule.mock.calls[0][0].metadata
     const tamperedMetadata = { ...savedMetadata, payload_cid: 'QmTampered' }
-    
+
     mockDb.getCapsule.mockResolvedValueOnce({
       id: capsuleId,
       metadata: { ...tamperedMetadata, capsule_id: capsuleId }

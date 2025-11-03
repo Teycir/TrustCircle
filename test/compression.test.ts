@@ -6,7 +6,7 @@ describe('Compression', () => {
     const original = new TextEncoder().encode('test data '.repeat(100))
     const compressed = compress(original)
     const decompressed = decompress(compressed)
-    
+
     expect(decompressed).toEqual(original)
     expect(compressed.length).toBeLessThan(original.length)
   })
@@ -15,7 +15,7 @@ describe('Compression', () => {
     const original = new TextEncoder().encode('hi')
     const compressed = compress(original)
     const decompressed = decompress(compressed)
-    
+
     expect(decompressed).toEqual(original)
   })
 })

@@ -11,7 +11,7 @@ export class PinataClient {
 
   async uploadBytes(data: Uint8Array, filename?: string): Promise<string> {
     if (!data || data.length === 0) throw new Error('Data cannot be empty')
-    
+
     return withRetry(async () => {
       const formData = new FormData()
       formData.append('file', new Blob([data]), filename || 'capsule.bin')
@@ -33,7 +33,7 @@ export class PinataClient {
 
   async getBytes(cid: string): Promise<Uint8Array> {
     if (!cid || !cid.trim()) throw new Error('CID cannot be empty')
-    
+
     return withRetry(async () => {
       const response = await fetch(`${this.gateway}/ipfs/${cid}`)
 
@@ -56,13 +56,24 @@ export class PinataClient {
     const data = await response.json()
     const used = data.rows.reduce((sum: number, row: any) => sum + row.size, 0)
     const limit = 1073741824
-    
+
     return { used, limit, percentage: (used / limit) * 100 }
+  }
+
+  async unpin(cid: string): Promise<void> {
+    if (!cid || !cid.trim()) throw new Error('CID cannot be empty')
+
+    const response = await fetch(`https://api.pinata.cloud/pinning/unpin/${cid}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${this.apiKey}` }
+    })
+
+    if (!response.ok) throw new Error(`Failed to unpin file: ${response.statusText}`)
   }
 
   async purgeOldFiles(threshold: number = 0.9): Promise<void> {
     const usage = await this.getStorageUsage()
-    
+
     if (usage.percentage < threshold * 100) return
 
     const response = await fetch('https://api.pinata.cloud/data/pinList?status=pinned&pageLimit=1000&sortBy=date_pinned&sortOrder=ASC', {
@@ -78,11 +89,7 @@ export class PinataClient {
     for (const file of data.rows) {
       if (currentSize <= targetSize) break
 
-      await fetch(`https://api.pinata.cloud/pinning/unpin/${file.ipfs_pin_hash}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${this.apiKey}` }
-      })
-
+      await this.unpin(file.ipfs_pin_hash)
       currentSize -= file.size
     }
   }

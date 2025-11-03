@@ -15,9 +15,11 @@ export interface CapsuleRecord {
 
 export class TrustCircleDB {
   private client: SupabaseClient
+  private pinataClient?: any
 
-  constructor(url: string, key: string) {
+  constructor(url: string, key: string, pinataClient?: any) {
     this.client = createClient(url, key)
+    this.pinataClient = pinataClient
   }
 
   async saveCapsule(record: CapsuleRecord): Promise<string> {
@@ -61,5 +63,24 @@ export class TrustCircleDB {
       .eq('id', id)
 
     if (error) throw new Error(`Failed to update status: ${error.message}`)
+  }
+
+  async deleteCapsule(id: string): Promise<void> {
+    const capsule = await this.getCapsule(id)
+
+    const { error } = await this.client
+      .from('capsules')
+      .delete()
+      .eq('id', id)
+
+    if (error) throw new Error(`Failed to delete capsule: ${error.message}`)
+
+    if (this.pinataClient && capsule.payload_cid) {
+      try {
+        await this.pinataClient.unpin(capsule.payload_cid)
+      } catch (err) {
+        console.error('Failed to unpin from IPFS:', err)
+      }
+    }
   }
 }

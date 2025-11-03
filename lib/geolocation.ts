@@ -9,22 +9,22 @@ export async function getCurrentLocation(): Promise<Coordinates> {
       reject(new Error('Geolocation not supported'))
       return
     }
-    
+
     const timeoutId = setTimeout(() => {
       reject(new Error('Geolocation timeout'))
     }, 15000)
-    
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
         clearTimeout(timeoutId)
         const lat = position.coords.latitude
         const lon = position.coords.longitude
-        
+
         if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
           reject(new Error('Invalid coordinates'))
           return
         }
-        
+
         resolve({ lat, lon })
       },
       (error) => {

@@ -40,5 +40,26 @@ export function useIdentity() {
     return `ed25519:${toBase64(identity.ed25519.publicKey)},x25519:${toBase64(identity.x25519.publicKey)}`
   }
 
-  return { identity, loading, create, getPublicKeys, getPublicKeyString }
+  const exportKeys = () => {
+    if (!identity) return
+    const exportData = {
+      ed25519: {
+        privateKey: toBase64(identity.ed25519.privateKey),
+        publicKey: toBase64(identity.ed25519.publicKey)
+      },
+      x25519: {
+        privateKey: toBase64(identity.x25519.privateKey),
+        publicKey: toBase64(identity.x25519.publicKey)
+      }
+    }
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `trustcircle-keys-${Date.now()}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  return { identity, loading, create, getPublicKeys, getPublicKeyString, exportKeys }
 }

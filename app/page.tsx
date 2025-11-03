@@ -4,6 +4,29 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { getStorageUsage } from '@/lib/client'
 
+function FAQItem({ question, answer }: { question: string; answer: string }) {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <div className="border-b border-gray-200 last:border-0">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full py-5 px-6 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+      >
+        <span className="font-semibold text-gray-900 pr-8">{question}</span>
+        <span className={`text-indigo-600 text-xl transition-transform ${isOpen ? 'rotate-180' : ''}`}>
+          ▼
+        </span>
+      </button>
+      {isOpen && (
+        <div className="px-6 pb-5 text-gray-600 leading-relaxed">
+          {answer}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function Home() {
   const [storage, setStorage] = useState<{ used: number; limit: number; percentage: number } | null>(null)
 
@@ -71,29 +94,36 @@ export default function Home() {
         </div>
 
         <div className="mt-16 max-w-3xl mx-auto">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">How It Works</h3>
-          <div className="space-y-4">
-            <div className="flex items-start gap-4 bg-white p-6 rounded-lg">
-              <div className="text-2xl">1️⃣</div>
-              <div>
-                <h4 className="font-semibold text-gray-900 mb-1">Client-Side Encryption</h4>
-                <p className="text-gray-600">All encryption happens in your browser before upload</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4 bg-white p-6 rounded-lg">
-              <div className="text-2xl">2️⃣</div>
-              <div>
-                <h4 className="font-semibold text-gray-900 mb-1">Set Conditions</h4>
-                <p className="text-gray-600">Define date/time and location requirements for unlock</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4 bg-white p-6 rounded-lg">
-              <div className="text-2xl">3️⃣</div>
-              <div>
-                <h4 className="font-semibold text-gray-900 mb-1">Secure Storage</h4>
-                <p className="text-gray-600">Encrypted data stored on IPFS, metadata on Supabase</p>
-              </div>
-            </div>
+          <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Frequently Asked Questions</h3>
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <FAQItem
+              question="How does TrustCircle work?"
+              answer="TrustCircle encrypts your files in your browser before uploading. You set unlock conditions like date and location, and only the designated approver can decrypt the files when conditions are met."
+            />
+            <FAQItem
+              question="Is my data secure?"
+              answer="Yes. All encryption happens client-side in your browser using AES-256-GCM. Your files are encrypted before leaving your device, and only you and the designated approver have the keys."
+            />
+            <FAQItem
+              question="What are unlock conditions?"
+              answer="You can set a date and time when the capsule becomes unlockable, and optionally require the approver to be within a certain distance of a specific location."
+            />
+            <FAQItem
+              question="Where is my data stored?"
+              answer="Encrypted files are stored on IPFS via Pinata for decentralized storage. Metadata is stored on Supabase. Your encryption keys never leave your browser."
+            />
+            <FAQItem
+              question="What happens to my keys?"
+              answer="Your cryptographic keys are stored locally in your browser using IndexedDB. You can export them for backup and import them on other devices."
+            />
+            <FAQItem
+              question="How do I send a capsule to someone?"
+              answer="To send a capsule: 1) Ask the recipient to share their public key from their Identity page. 2) Create a capsule and paste their public key in the Approver field. 3) Share the Capsule ID with them. They can then view it in their Dashboard under Sent to Me and unlock it when conditions are met."
+            />
+            <FAQItem
+              question="Can I share capsules with multiple people?"
+              answer="Currently, each capsule has one creator and one approver. The approver is the person who can unlock and access the encrypted files."
+            />
           </div>
         </div>
       </main>

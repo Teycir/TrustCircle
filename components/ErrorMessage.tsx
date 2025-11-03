@@ -2,25 +2,25 @@ import { PolicyError } from '@/lib/policy'
 
 export function ErrorMessage({ error }: { error: Error | string | null | undefined }) {
   if (!error) return null
-  
+
   const message = typeof error === 'string' ? error : error.message || 'Unknown error'
-  
+
   const getUserFriendlyMessage = (err: Error | string): string => {
     const msg = typeof err === 'string' ? err : (err.message || 'Unknown error')
-    
+
     if (err instanceof PolicyError) {
       return msg
     }
-    
+
     if (msg.includes('fetch')) return 'Network error. Please check your connection.'
     if (msg.includes('IPFS') || msg.includes('Pinata')) return 'Storage service unavailable. Please try again.'
     if (msg.includes('Supabase') || msg.includes('database')) return 'Database error. Please try again later.'
     if (msg.includes('permission')) return 'Permission denied. Please check your browser settings.'
     if (msg.includes('Geolocation')) return 'Location access required. Please enable location services.'
-    
+
     return msg
   }
-  
+
   return (
     <div className="bg-red-50 border border-red-200 rounded-lg p-4">
       <div className="flex items-start gap-3">
