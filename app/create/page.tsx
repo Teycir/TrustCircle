@@ -18,6 +18,7 @@ function CreateCapsuleContent() {
   const [notes, setNotes] = useState('')
   const [dateAfter, setDateAfter] = useState('')
   const [useLocation, setUseLocation] = useState(false)
+  const [expiresAt, setExpiresAt] = useState('')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -30,6 +31,18 @@ function CreateCapsuleContent() {
     setError(null)
 
     try {
+      if (expiresAt) {
+        const expiryDate = new Date(expiresAt)
+        const unlockDate = new Date(dateAfter)
+        const now = new Date()
+
+        if (expiryDate <= now) {
+          throw new Error('Expiration date must be in the future')
+        }
+        if (expiryDate <= unlockDate) {
+          throw new Error('Expiration date must be after unlock date')
+        }
+      }
       const client = getClient()
       const fileData = await fileToUint8Array(file)
 
@@ -67,7 +80,8 @@ function CreateCapsuleContent() {
         creatorKeys: identity,
         policy: { conditions, logic: 'ALL' },
         title,
-        notes
+        notes,
+        expiresAt: expiresAt ? new Date(expiresAt).toISOString() : undefined
       })
 
       setResult(capsuleId)
@@ -190,6 +204,11 @@ function CreateCapsuleContent() {
               <div className="mb-4">
                 <label htmlFor="dateAfter" className="block text-sm font-medium text-gray-700 mb-2">Available After Date</label>
                 <input id="dateAfter" type="datetime-local" value={dateAfter} onChange={(e) => setDateAfter(e.target.value)} className="w-full px-4 py-2 border rounded-lg" required />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="expiresAt" className="block text-sm font-medium text-gray-700 mb-2">Expires At (Optional)</label>
+                <input id="expiresAt" type="datetime-local" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} className="w-full px-4 py-2 border rounded-lg" />
+                <p className="text-xs text-gray-500 mt-1">Must be after unlock date. Capsule will be auto-deleted after this date.</p>
               </div>
               <div className="flex items-center">
                 <input type="checkbox" id="useLocation" checked={useLocation} onChange={(e) => setUseLocation(e.target.checked)} className="h-4 w-4 text-indigo-600 rounded" />

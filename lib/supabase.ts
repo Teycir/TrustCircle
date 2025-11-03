@@ -27,6 +27,7 @@ export interface CapsuleRecord {
   status?: string;
   created_at?: string;
   unlocked_at?: string;
+  expires_at?: string;
 }
 
 export class TrustCircleDB {
@@ -79,6 +80,22 @@ export class TrustCircleDB {
 
     if (error) throw new Error(`Failed to list capsules: ${error.message}`);
     return data || [];
+  }
+
+  async deleteExpiredCapsules(): Promise<number> {
+    const { data: expired } = await this.client
+      .from("capsules")
+      .select("id, payload_cid")
+      .lt("expires_at", new Date().toISOString())
+      .not("expires_at", "is", null);
+
+    if (!expired?.length) return 0;
+
+    for (const capsule of expired) {
+      await this.deleteCapsule(capsule.id);
+    }
+
+    return expired.length;
   }
 
   async updateStatus(id: string, status: string): Promise<void> {

@@ -83,7 +83,7 @@ This document outlines planned features and improvements for TrustCircle.
 - **Benefits**: Better management for power users with many capsules
 
 #### 7. Capsule Expiration & Auto-Delete
-- **Status**: Planned
+- **Status**: ✅ Completed (v1.8.0)
 - **Effort**: 30 minutes
 - **Value**: Medium
 - **Description**: Automatic capsule lifecycle management

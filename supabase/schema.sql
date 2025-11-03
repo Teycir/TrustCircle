@@ -8,7 +8,8 @@ create table capsules (
   metadata jsonb not null,
   status text default 'locked',
   created_at timestamp default now(),
-  unlocked_at timestamp
+  unlocked_at timestamp,
+  expires_at timestamp
 );
 
 create index idx_capsules_creator on capsules(creator_pubkey);

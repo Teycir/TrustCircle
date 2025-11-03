@@ -168,6 +168,15 @@ function DashboardContent() {
                             <p className="text-sm text-gray-500 mt-2">
                               Created: {new Date(capsule.created_at).toLocaleDateString()}
                             </p>
+                            {capsule.expires_at && (
+                              <p className={`text-sm mt-1 ${
+                                new Date(capsule.expires_at) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                                  ? 'text-red-600 font-medium'
+                                  : 'text-gray-500'
+                              }`}>
+                                Expires: {new Date(capsule.expires_at).toLocaleDateString()}
+                              </p>
+                            )}
                           </div>
                           <span className={`px-3 py-1 rounded-full text-sm ${capsule.status === 'locked' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
                             {capsule.status}

@@ -2,6 +2,22 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [1.8.0] - 2025-01-29
+
+### Added
+- **Capsule Expiration & Auto-Delete**: Automatic capsule lifecycle management
+  - Optional expiration date field when creating capsules
+  - Auto-delete from IPFS and database after expiration
+  - Expiration date display on dashboard with warning for capsules expiring within 7 days
+  - Supabase Edge Function for automated cleanup
+  - Database schema updated with expires_at column and index
+
+### Technical
+- Added expires_at column to capsules table
+- Created cleanup-expired Edge Function for daily cron job
+- Added deleteExpiredCapsules method to TrustCircleDB
+- Updated CapsuleRecord interface with expires_at field
+
 ## [1.7.0] - 2025-01-29
 
 ### Added

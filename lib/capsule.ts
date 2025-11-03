@@ -51,6 +51,7 @@ export interface CreateCapsuleParams {
   policy: UnlockPolicy;
   title?: string;
   notes?: string;
+  expiresAt?: string;
 }
 
 export interface UnlockCapsuleParams {
@@ -122,6 +123,7 @@ export class CapsuleManager {
         notes: params.notes,
         payload_cid: payloadCid,
         metadata: fullMetadata,
+        expires_at: params.expiresAt,
       };
 
       return await this.db.saveCapsule(record);
