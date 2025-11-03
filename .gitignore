@@ -10,3 +10,5 @@ build
 .history
 .vscode
 .aider.chat.history.md
+setup-vercel-env.sh
+.vercel-env-instructions.md
