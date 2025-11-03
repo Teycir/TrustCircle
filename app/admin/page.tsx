@@ -2,13 +2,24 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { getConfig, saveConfig, AppConfig } from '@/lib/config'
+import { useAuth } from '@/lib/useAuth'
+import Loading from '@/components/Loading'
 
 export default function AdminPage() {
+  const { user, loading } = useAuth()
+  const router = useRouter()
   const [config, setConfig] = useState<AppConfig>({})
   const [saved, setSaved] = useState(false)
   const [showKeys, setShowKeys] = useState(false)
   const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login')
+    }
+  }, [user, loading, router])
 
   useEffect(() => {
     setMounted(true)
@@ -34,7 +45,11 @@ export default function AdminPage() {
     }
   }
 
-  if (!mounted) {
+  if (loading || !mounted) {
+    return <Loading />
+  }
+
+  if (!user) {
     return null
   }
 
