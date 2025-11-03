@@ -144,3 +144,7 @@ export function toBase64(data: Uint8Array): string {
 export function fromBase64(data: string): Uint8Array {
   return Uint8Array.from(atob(data), c => c.charCodeAt(0))
 }
+
+export function ed25519PublicKeyToX25519(ed25519Pub: Uint8Array): Uint8Array {
+  return ed25519.getPublicKey(ed25519Pub.slice(0, 32))
+}

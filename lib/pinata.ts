@@ -9,12 +9,12 @@ export class PinataClient {
     this.gateway = gateway
   }
 
-  async uploadBytes(data: Uint8Array): Promise<string> {
+  async uploadBytes(data: Uint8Array, filename?: string): Promise<string> {
     if (!data || data.length === 0) throw new Error('Data cannot be empty')
     
     return withRetry(async () => {
       const formData = new FormData()
-      formData.append('file', new Blob([data]))
+      formData.append('file', new Blob([data]), filename || 'capsule.bin')
 
       const response = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
         method: 'POST',

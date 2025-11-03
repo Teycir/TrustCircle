@@ -6,11 +6,11 @@ let clientInstance: CapsuleManager | null = null
 
 export function getClient(): CapsuleManager {
   if (!clientInstance) {
-    const apiKey = process.env.NEXT_PUBLIC_PINATA_API_KEY
+    const apiKey = process.env.NEXT_PUBLIC_PINATA_JWT || process.env.NEXT_PUBLIC_PINATA_API_KEY
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     
-    if (!apiKey) throw new Error('NEXT_PUBLIC_PINATA_API_KEY not configured')
+    if (!apiKey) throw new Error('NEXT_PUBLIC_PINATA_JWT not configured')
     if (!supabaseUrl) throw new Error('NEXT_PUBLIC_SUPABASE_URL not configured')
     if (!supabaseKey) throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY not configured')
     

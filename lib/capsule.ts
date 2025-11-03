@@ -72,7 +72,9 @@ export class CapsuleManager {
       const cmk = crypto.getRandomValues(new Uint8Array(32));
       const compressed = compress(params.files);
       const cipherArchive = await aesGcmEncrypt(cmk, compressed);
-      const payloadCid = await this.pinata.uploadBytes(cipherArchive);
+      const timestamp = Date.now();
+      const filename = params.title ? `${params.title}_${timestamp}.encrypted` : `capsule_${timestamp}.encrypted`;
+      const payloadCid = await this.pinata.uploadBytes(cipherArchive, filename);
 
       const wrap = await wrapCmkForRecipient(cmk, params.approverPubkey.x25519);
 
@@ -119,7 +121,7 @@ export class CapsuleManager {
     }
   }
 
-  async unlockCapsule(params: UnlockCapsuleParams): Promise<Uint8Array> {
+  async unlockCapsule(params: UnlockCapsuleParams): Promise<{ data: Uint8Array; filename: string }> {
     try {
       const capsule = await this.db.getCapsule(params.capsuleId);
       const metadata = capsule.metadata as CapsuleMetadata;
@@ -166,7 +168,10 @@ export class CapsuleManager {
 
       await this.db.updateStatus(params.capsuleId, "unlocked");
 
-      return archive;
+      const timestamp = new Date(metadata.created_at).getTime();
+      const filename = metadata.hints?.title ? `${metadata.hints.title}_${timestamp}` : `capsule_${timestamp}`;
+
+      return { data: archive, filename };
     } catch (error) {
       if (error instanceof PolicyError) {
         throw error;

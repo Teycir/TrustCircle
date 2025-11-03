@@ -35,5 +35,10 @@ export function useIdentity() {
     }
   }
 
-  return { identity, loading, create, getPublicKeys }
+  const getPublicKeyString = () => {
+    if (!identity) return ''
+    return `ed25519:${toBase64(identity.ed25519.publicKey)},x25519:${toBase64(identity.x25519.publicKey)}`
+  }
+
+  return { identity, loading, create, getPublicKeys, getPublicKeyString }
 }

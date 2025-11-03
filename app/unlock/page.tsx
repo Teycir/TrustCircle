@@ -12,6 +12,7 @@ export default function UnlockCapsule() {
   const [unlocked, setUnlocked] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [fileData, setFileData] = useState<Uint8Array | null>(null)
+  const [filename, setFilename] = useState<string>('unlocked-file')
 
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -22,15 +23,17 @@ export default function UnlockCapsule() {
     
     try {
       const client = getClient()
-      const data = await client.unlockCapsule({
+      const result = await client.unlockCapsule({
         capsuleId,
         approverKeys: identity,
         context: { now: new Date() }
       })
       
-      setFileData(data)
+      setFileData(result.data)
+      setFilename(result.filename || 'unlocked-file')
       setUnlocked(true)
     } catch (err) {
+      console.error('Unlock error:', err)
       setError((err as Error).message)
     } finally {
       setLoading(false)
@@ -39,7 +42,7 @@ export default function UnlockCapsule() {
 
   const handleDownload = () => {
     if (fileData) {
-      downloadFile(fileData, 'unlocked-file')
+      downloadFile(fileData, filename)
     }
   }
 
@@ -85,7 +88,7 @@ export default function UnlockCapsule() {
               <button onClick={handleDownload} className="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700">
                 Download File
               </button>
-              <button onClick={() => { setUnlocked(false); setFileData(null); setCapsuleId('') }} className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg hover:bg-gray-200">
+              <button onClick={() => { setUnlocked(false); setFileData(null); setFilename('unlocked-file'); setCapsuleId('') }} className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg hover:bg-gray-200">
                 Unlock Another
               </button>
             </div>

@@ -4,14 +4,13 @@ import { useIdentity } from '@/lib/hooks'
 import Link from 'next/link'
 
 export default function Identity() {
-  const { identity, loading, create, getPublicKeys } = useIdentity()
+  const { identity, loading, create, getPublicKeyString } = useIdentity()
 
   const handleGenerate = async () => {
     await create()
   }
 
-  const publicKeys = getPublicKeys()
-  const publicKey = publicKeys ? `ed25519:${publicKeys.ed25519}` : ''
+  const publicKey = getPublicKeyString()
 
   if (loading) {
     return (

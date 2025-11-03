@@ -6,7 +6,7 @@ import { useIdentity } from '@/lib/hooks'
 import { getClient, fileToUint8Array } from '@/lib/client'
 import { getCurrentLocation } from '@/lib/geolocation'
 import { buildLocationHash } from '@/lib/policy'
-import { fromBase64 } from '@/lib/crypto'
+import { fromBase64, ed25519PublicKeyToX25519 } from '@/lib/crypto'
 
 export default function CreateCapsule() {
   const { identity } = useIdentity()
@@ -51,6 +51,9 @@ export default function CreateCapsule() {
       }
 
       const [ed25519Str, x25519Str] = approverKey.split(',').map(k => k.trim())
+      if (!ed25519Str || !x25519Str) {
+        throw new Error('Both ed25519 and x25519 keys are required')
+      }
       const approverPubkey = {
         ed25519: fromBase64(ed25519Str.replace('ed25519:', '')),
         x25519: fromBase64(x25519Str.replace('x25519:', ''))
@@ -123,7 +126,7 @@ export default function CreateCapsule() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-              <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-4 py-2 border rounded-lg" placeholder="My Secret Document" />
+              <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-4 py-2 border rounded-lg" placeholder="My Secret Document" required />
             </div>
 
             <div>
@@ -132,9 +135,9 @@ export default function CreateCapsule() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Approver Public Keys</label>
-              <input type="text" value={approverKey} onChange={(e) => setApproverKey(e.target.value)} className="w-full px-4 py-2 border rounded-lg font-mono text-sm" placeholder="ed25519:..., x25519:..." required />
-              <p className="text-xs text-gray-500 mt-1">Format: ed25519:key, x25519:key</p>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Approver Public Key</label>
+              <input type="text" value={approverKey} onChange={(e) => setApproverKey(e.target.value)} className="w-full px-4 py-2 border rounded-lg font-mono text-sm" placeholder="ed25519:...,x25519:..." required />
+              <p className="text-xs text-gray-500 mt-1">Paste the approver's public key from their Identity page</p>
             </div>
 
             <div className="border-t pt-6">
