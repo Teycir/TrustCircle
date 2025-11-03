@@ -1,5 +1,7 @@
 import './globals.css'
 import type { Metadata } from 'next'
+import OfflineIndicator from '@/components/OfflineIndicator'
+import SyncManager from '@/components/SyncManager'
 
 export const metadata: Metadata = {
   title: 'TrustCircle',
@@ -16,7 +18,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <OfflineIndicator />
+        <SyncManager />
+        {children}
+      </body>
     </html>
   )
 }

@@ -2,6 +2,36 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [2.1.0] - 2025-11-03
+
+### Added
+- **Offline-First Capabilities**: Full functionality without internet connectivity
+  - IndexedDB for local capsule storage
+  - Operation queue for offline actions
+  - Auto-sync every 30 seconds when online
+  - Instant sync when connection restored
+  - Visual offline indicator banner
+  - Service worker for static asset caching
+  - React hooks for offline state management
+
+- **Admin Configuration Panel**: Runtime API key management
+  - Admin page at /admin for updating API keys
+  - Configure Pinata JWT token
+  - Configure Supabase URL and anon key
+  - Settings stored in browser localStorage
+  - Auto-populate from environment variables
+  - Show/hide API keys toggle
+  - Reset to environment variables option
+  - Dynamic client reconfiguration on config change
+
+### Technical
+- Added idb library for IndexedDB wrapper
+- Created offline manager with sync queue
+- Service worker for offline caching
+- Config manager with localStorage persistence
+- Client singleton with dynamic reconfiguration
+- Offline indicator and sync manager components
+
 ## [2.0.0] - 2025-01-29
 
 ### Added

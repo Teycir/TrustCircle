@@ -79,7 +79,15 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <Link href="/admin" className="block p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow">
+            <div className="text-red-600 text-4xl mb-4">⚙️</div>
+            <h3 className="text-2xl font-semibold text-gray-900 mb-2">Admin</h3>
+            <p className="text-gray-600">
+              Configure API keys and settings
+            </p>
+          </Link>
+
           <Link href="/create" className="block p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow">
             <div className="text-indigo-600 text-4xl mb-4">🔒</div>
             <h3 className="text-2xl font-semibold text-gray-900 mb-2">Create Capsule</h3>
