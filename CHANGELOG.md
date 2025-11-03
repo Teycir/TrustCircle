@@ -21,6 +21,15 @@ All notable changes to TrustCircle will be documented in this file.
   - Fixed BlobPart type issues in file operations
   - Removed unused update operation in sync.ts
 
+- **Test Suite Improvements**:
+  - Configured environment variables for tests via vitest config
+  - Added fake-indexeddb for IndexedDB mocking in Node.js environment
+  - Fixed Pinata test mocks to include text() method
+  - Fixed policy test expectations for location hash behavior
+  - Added missing mock methods (getStorageUsage, purgeOldFiles)
+  - Fixed capsule test to handle correct return type
+  - All 86 tests now passing (100% pass rate)
+
 ## [2.3.0] - 2025-01-29
 
 ### Added
