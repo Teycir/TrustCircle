@@ -1,16 +1,14 @@
-import './globals.css'
 import type { Metadata } from 'next'
-import OfflineIndicator from '@/components/OfflineIndicator'
-import SyncManager from '@/components/SyncManager'
-import ClientInitializer from '@/components/ClientInitializer'
+import { Inter } from 'next/font/google'
+import './globals.css'
+import { ConfigLoader } from '@/components/ConfigLoader'
 import { CacheProvider } from '@/lib/cache'
+
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'TrustCircle',
-  description: 'Privacy-first secure data sharing with time and location locks',
-  icons: {
-    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🔐</text></svg>',
-  },
+  description: 'Privacy-first secure data sharing',
 }
 
 export default function RootLayout({
@@ -20,11 +18,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body className={inter.className}>
         <CacheProvider>
-          <OfflineIndicator />
-          <SyncManager />
-          <ClientInitializer />
+          <ConfigLoader />
           {children}
         </CacheProvider>
       </body>

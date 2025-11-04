@@ -86,14 +86,6 @@ export default function Home() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          <Link href="/admin" className="card-hover block p-8 glass rounded-xl shadow-lg">
-            <div className="text-red-600 text-4xl mb-4">⚙️</div>
-            <h3 className="text-2xl font-semibold text-gray-900 mb-2">Admin</h3>
-            <p className="text-gray-600">
-              Configure API keys and settings
-            </p>
-          </Link>
-
           <Link href="/create" className="card-hover block p-8 glass rounded-xl shadow-lg">
             <div className="text-indigo-600 text-4xl mb-4">🔒</div>
             <h3 className="text-2xl font-semibold text-gray-900 mb-2">Create Capsule</h3>
@@ -356,23 +348,7 @@ export default function Home() {
                 </div>
               }
             />
-            <FAQItem
-              question="What is the Admin page for?"
-              answer={
-                <div className="space-y-3">
-                  <p>The Admin page is for configuring API keys and system settings:</p>
-                  <div className="space-y-2">
-                    <p><strong>1.</strong> Configure Pinata JWT token for IPFS storage</p>
-                    <p><strong>2.</strong> Set Supabase URL for database connection</p>
-                    <p><strong>3.</strong> Configure Supabase Anon Key for authentication</p>
-                    <p><strong>4.</strong> Settings are stored in browser localStorage</p>
-                    <p><strong>5.</strong> Environment variables override localStorage settings</p>
-                    <p><strong>6.</strong> Reset to default environment variables if needed</p>
-                  </div>
-                  <p className="pt-2">Note: Regular users don't need to configure this. It's only for deployment administrators.</p>
-                </div>
-              }
-            />
+
           </div>
         </div>
       </main>

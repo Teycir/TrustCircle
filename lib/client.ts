@@ -1,15 +1,15 @@
 import { CapsuleManager } from './capsule'
 import { PinataClient } from './pinata'
 import { TrustCircleDB } from './supabase'
-import { getEnvOrConfig } from './config'
+import { getConfig } from './config'
 
 let clientInstance: CapsuleManager | null = null
 let lastConfig = ''
 
 export function getClient(): CapsuleManager {
-  const apiKey = getEnvOrConfig('NEXT_PUBLIC_PINATA_JWT', 'pinataJWT') || getEnvOrConfig('NEXT_PUBLIC_PINATA_API_KEY', 'pinataJWT')
-  const supabaseUrl = getEnvOrConfig('NEXT_PUBLIC_SUPABASE_URL', 'supabaseUrl')
-  const supabaseKey = getEnvOrConfig('NEXT_PUBLIC_SUPABASE_ANON_KEY', 'supabaseAnonKey')
+  const apiKey = getConfig('pinataJWT')
+  const supabaseUrl = getConfig('supabaseUrl')
+  const supabaseKey = getConfig('supabaseAnonKey')
 
   if (!apiKey) throw new Error('NEXT_PUBLIC_PINATA_JWT not configured')
   if (!supabaseUrl) throw new Error('NEXT_PUBLIC_SUPABASE_URL not configured')
@@ -45,7 +45,7 @@ export function downloadFile(data: Uint8Array, filename: string) {
 }
 
 export async function getStorageUsage(): Promise<{ used: number; limit: number; percentage: number }> {
-  const apiKey = process.env.NEXT_PUBLIC_PINATA_JWT || process.env.NEXT_PUBLIC_PINATA_API_KEY
+  const apiKey = getConfig('pinataJWT')
   if (!apiKey) throw new Error('NEXT_PUBLIC_PINATA_JWT not configured')
 
   const pinata = new PinataClient(apiKey)

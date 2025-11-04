@@ -2,6 +2,32 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [2.5.0] - 2025-01-09
+
+### Added
+- Configuration stored in Supabase app_config table
+- IndexedDB caching for offline config support
+- ConfigLoader component for automatic config initialization
+- Offline mode sync on reconnection
+- Styled tooltips for checkbox options with white background and rounded edges
+- CacheProvider wrapper in root layout
+
+### Changed
+- Removed admin panel UI completely
+- Configuration now loaded from database into global variable
+- Environment variables used only for initial Supabase connection
+- Improved UI with tooltips explaining Dead Hand and location features
+- Removed "Dead Hand Configuration" label for cleaner interface
+
+### Fixed
+- TypeScript error in unlock page with null identity check
+- Cache provider missing error by adding to root layout
+
+### Removed
+- Admin page and all references from main page
+- Admin FAQ section
+- LocalStorage config management
+
 ## [2.4.0] - 2025-01-08
 
 ### Added

@@ -88,6 +88,9 @@ npm install
 cp .env.example .env.local
 # Edit .env.local with your Pinata and Supabase credentials
 
+# Setup database configuration
+# Run scripts/setup-config.sql in your Supabase SQL Editor
+
 # Run development server
 npm run dev
 
@@ -95,14 +98,15 @@ npm run dev
 npm test
 ```
 
-### Environment Variables
+### Configuration
 
-```env
-NEXT_PUBLIC_PINATA_JWT=your_pinata_jwt_token
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-RESEND_API_KEY=your_resend_api_key
-```
+API credentials are stored in Supabase `app_config` table:
+
+1. Run `supabase/sql/app-config-schema.sql` to create the table
+2. Run `scripts/setup-config.sql` to populate your credentials
+3. Environment variables in `.env.local` take priority over database config
+
+See [SETUP.md](SETUP.md) for detailed configuration instructions.
 
 ---
 
@@ -171,14 +175,13 @@ Row Level Security policies ensure users can only access their own capsules.
 
 ---
 
-## Recent Updates (v2.4.0)
+## Recent Updates (v2.5.0)
 
-- 🚀 Removed RPC dependencies for simpler architecture
-- ⚡ Added comprehensive caching for analytics, lists, and capsules
-- 📊 Optimized analytics with database-level aggregation
-- 🔄 Smart cache invalidation on all mutations
-- 💾 5-minute TTL for all cached data
-- 🎯 Parallel queries for faster analytics loading
+- 🔧 Removed admin panel UI
+- 💾 Configuration stored in Supabase `app_config` table
+- 🔒 Environment variables prioritized for security
+- 📝 Added setup scripts for easy deployment
+- 🚀 Simplified configuration management
 
 See [CHANGELOG.md](CHANGELOG.md) for full version history.
 

@@ -244,17 +244,21 @@ function CreateCapsuleContent() {
                 <input id="expiresAt" type="datetime-local" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} className="w-full px-4 py-2 border rounded-lg" />
                 <p className="text-xs text-gray-500 mt-1">Must be after unlock date. Capsule will be auto-deleted after this date.</p>
               </div>
-              <div className="flex items-center">
+              <div className="border-t pt-4 mb-4"></div>
+              <div className="flex items-center group relative">
                 <input type="checkbox" id="useLocation" checked={useLocation} onChange={(e) => setUseLocation(e.target.checked)} className="h-4 w-4 text-indigo-600 rounded" />
-                <label htmlFor="useLocation" className="ml-2 text-sm text-gray-700">Require current location</label>
+                <label htmlFor="useLocation" className="ml-2 text-sm text-gray-700 cursor-pointer">Require current location</label>
+                <span className="ml-2 text-gray-400 cursor-help peer">ℹ️</span>
+                <span className="invisible peer-hover:visible absolute left-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-xs text-gray-700 w-80 z-10">Approver must be at this exact location to unlock the capsule. Uses GPS coordinates with 1km radius.</span>
               </div>
             </div>
 
             <div className="border-t pt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Dead Hand Configuration</h3>
-              <div className="flex items-center mb-4">
+              <div className="flex items-center mb-4 group relative">
                 <input type="checkbox" id="enableDeadHand" checked={enableDeadHand} onChange={(e) => setEnableDeadHand(e.target.checked)} className="h-4 w-4 text-indigo-600 rounded" />
-                <label htmlFor="enableDeadHand" className="ml-2 text-sm text-gray-700">Enable automatic unlock if not reset</label>
+                <label htmlFor="enableDeadHand" className="ml-2 text-sm text-gray-700 cursor-pointer">Enable automatic unlock if not reset</label>
+                <span className="ml-2 text-gray-400 cursor-help peer">ℹ️</span>
+                <span className="invisible peer-hover:visible absolute left-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-xs text-gray-700 w-80 z-10">Automatically unlock capsule if you become inactive. You will receive warnings before trigger date and can reset anytime to prevent unlock.</span>
               </div>
               {enableDeadHand && (
                 <div className="space-y-4 pl-6 border-l-2 border-indigo-200">
