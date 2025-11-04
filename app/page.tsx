@@ -317,6 +317,46 @@ export default function Home() {
               }
             />
             <FAQItem
+              question="What is Dead Hand and how does it work?"
+              answer={
+                <div className="space-y-3">
+                  <p>Dead Hand is an automatic unlock feature that ensures your capsule reaches recipients even if you become inactive:</p>
+                  <div className="space-y-2">
+                    <p><strong>Setup:</strong></p>
+                    <p>• When creating a capsule, enable Dead Hand and set a trigger date</p>
+                    <p>• Trigger date must be between unlock date and expiry date</p>
+                    <p>• No email configuration needed - uses in-app notifications</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p><strong>Warning Phase (2 days before trigger):</strong></p>
+                    <p>• System creates a warning notification in your Dashboard</p>
+                    <p>• Check Dashboard to see the warning</p>
+                    <p>• You can postpone by resetting the trigger date</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p><strong>Grace Period (trigger date + 2 days):</strong></p>
+                    <p>• If you don't reset, grace period begins</p>
+                    <p>• You have 2 more days to reset the date</p>
+                    <p>• Capsule still locked during grace period</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p><strong>Auto-Unlock (after grace period):</strong></p>
+                    <p>• Capsule automatically unlocks</p>
+                    <p>• Notification appears in Dashboard</p>
+                    <p>• Capsule becomes available in Unlock page</p>
+                    <p>• Status changes to triggered</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p><strong>Management:</strong></p>
+                    <p>• View status in Dashboard under created capsules</p>
+                    <p>• Reset trigger date anytime to postpone</p>
+                    <p>• Disable Dead Hand completely if needed</p>
+                  </div>
+                  <p className="pt-2">Use cases: Estate planning, emergency access, business continuity, digital legacy.</p>
+                </div>
+              }
+            />
+            <FAQItem
               question="What is the Admin page for?"
               answer={
                 <div className="space-y-3">
@@ -327,8 +367,7 @@ export default function Home() {
                     <p><strong>3.</strong> Configure Supabase Anon Key for authentication</p>
                     <p><strong>4.</strong> Settings are stored in browser localStorage</p>
                     <p><strong>5.</strong> Environment variables override localStorage settings</p>
-                    <p><strong>6.</strong> Toggle visibility of API keys for security</p>
-                    <p><strong>7.</strong> Reset to default environment variables if needed</p>
+                    <p><strong>6.</strong> Reset to default environment variables if needed</p>
                   </div>
                   <p className="pt-2">Note: Regular users don't need to configure this. It's only for deployment administrators.</p>
                 </div>

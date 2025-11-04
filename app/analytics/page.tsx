@@ -14,7 +14,10 @@ function AnalyticsContent() {
     totalReceived: 0,
     totalUnlocked: 0,
     avgUnlockTime: 0,
-    expiringSoon: 0
+    expiringSoon: 0,
+    deadHandEnabled: 0,
+    deadHandActive: 0,
+    deadHandTriggered: 0
   })
   const [loading, setLoading] = useState(true)
 
@@ -25,29 +28,8 @@ function AnalyticsContent() {
       try {
         const client = getClient()
         const publicKey = `ed25519:${toBase64(identity.ed25519.publicKey)}`
-
-        const created = await client['db'].listCapsules({ creator: publicKey })
-        const received = await client['db'].listCapsules({ approver: publicKey })
-
-        const unlocked = created.filter(c => c.status === 'unlocked')
-        const expiringSoon = created.filter(c => 
-          c.expires_at && new Date(c.expires_at) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-        )
-
-        let totalUnlockTime = 0
-        unlocked.forEach(c => {
-          if (c.unlocked_at && c.created_at) {
-            totalUnlockTime += new Date(c.unlocked_at).getTime() - new Date(c.created_at).getTime()
-          }
-        })
-
-        setStats({
-          totalCreated: created.length,
-          totalReceived: received.length,
-          totalUnlocked: unlocked.length,
-          avgUnlockTime: unlocked.length > 0 ? totalUnlockTime / unlocked.length / (1000 * 60 * 60 * 24) : 0,
-          expiringSoon: expiringSoon.length
-        })
+        const analytics = await client['db'].getAnalytics(publicKey)
+        setStats(analytics)
       } catch (err) {
         console.error(err)
       } finally {
@@ -125,6 +107,24 @@ function AnalyticsContent() {
                 {stats.totalCreated > 0 ? ((stats.totalUnlocked / stats.totalCreated) * 100).toFixed(0) : 0}%
               </h3>
               <p className="text-gray-600">Unlock Rate</p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="text-4xl mb-2">🤚</div>
+              <h3 className="text-2xl font-bold text-gray-900">{stats.deadHandEnabled}</h3>
+              <p className="text-gray-600">Dead Hand Enabled</p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="text-4xl mb-2">⏳</div>
+              <h3 className="text-2xl font-bold text-gray-900">{stats.deadHandActive}</h3>
+              <p className="text-gray-600">Dead Hand Active</p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="text-4xl mb-2">💥</div>
+              <h3 className="text-2xl font-bold text-gray-900">{stats.deadHandTriggered}</h3>
+              <p className="text-gray-600">Dead Hand Triggered</p>
             </div>
           </div>
         )}

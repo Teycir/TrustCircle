@@ -1,4 +1,17 @@
--- Enable Row Level Security
+-- Complete RLS Setup with Security
+-- Run this script in your Supabase SQL Editor
+
+-- Drop existing policies
+DROP POLICY IF EXISTS "Users can read own capsules" ON capsules;
+DROP POLICY IF EXISTS "Users can create capsules" ON capsules;
+DROP POLICY IF EXISTS "Approvers can unlock capsules" ON capsules;
+DROP POLICY IF EXISTS "Creators can delete their capsules" ON capsules;
+DROP POLICY IF EXISTS "Creators can update dead hand" ON capsules;
+
+-- Drop function if exists
+DROP FUNCTION IF EXISTS set_user_context(text);
+
+-- Enable RLS
 ALTER TABLE capsules ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Users can read capsules where they are creator or approver

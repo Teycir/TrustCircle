@@ -21,18 +21,20 @@ export async function saveIdentity(id: string, keys: Awaited<ReturnType<typeof g
   if (!id || !id.trim()) throw new Error('ID cannot be empty')
   if (!keys) throw new Error('Keys cannot be null')
 
+  const serialized = {
+    id,
+    ed25519_priv: toBase64(keys.ed25519.privateKey),
+    ed25519_pub: toBase64(keys.ed25519.publicKey),
+    x25519_priv: toBase64(keys.x25519.privateKey),
+    x25519_pub: toBase64(keys.x25519.publicKey)
+  }
+
+  localStorage.setItem(`${DB_NAME}-${id}`, JSON.stringify(serialized))
+
   const db = await openDB()
   try {
     const tx = db.transaction(STORE_NAME, 'readwrite')
     const store = tx.objectStore(STORE_NAME)
-
-    const serialized = {
-      id,
-      ed25519_priv: toBase64(keys.ed25519.privateKey),
-      ed25519_pub: toBase64(keys.ed25519.publicKey),
-      x25519_priv: toBase64(keys.x25519.privateKey),
-      x25519_pub: toBase64(keys.x25519.publicKey)
-    }
 
     await new Promise((resolve, reject) => {
       const request = store.put(serialized)
@@ -47,6 +49,21 @@ export async function saveIdentity(id: string, keys: Awaited<ReturnType<typeof g
 export async function loadIdentity(id: string): Promise<Awaited<ReturnType<typeof generateIdentity>> | null> {
   if (!id || !id.trim()) throw new Error('ID cannot be empty')
 
+  const localData = localStorage.getItem(`${DB_NAME}-${id}`)
+  if (localData) {
+    const result = JSON.parse(localData)
+    return {
+      ed25519: {
+        privateKey: fromBase64(result.ed25519_priv),
+        publicKey: fromBase64(result.ed25519_pub)
+      },
+      x25519: {
+        privateKey: fromBase64(result.x25519_priv),
+        publicKey: fromBase64(result.x25519_pub)
+      }
+    }
+  }
+
   const db = await openDB()
   try {
     const tx = db.transaction(STORE_NAME, 'readonly')
@@ -59,6 +76,8 @@ export async function loadIdentity(id: string): Promise<Awaited<ReturnType<typeo
     })
 
     if (!result) return null
+
+    localStorage.setItem(`${DB_NAME}-${id}`, JSON.stringify(result))
 
     return {
       ed25519: {
@@ -77,6 +96,8 @@ export async function loadIdentity(id: string): Promise<Awaited<ReturnType<typeo
 
 export async function deleteIdentity(id: string): Promise<void> {
   if (!id || !id.trim()) throw new Error('ID cannot be empty')
+
+  localStorage.removeItem(`${DB_NAME}-${id}`)
 
   const db = await openDB()
   try {

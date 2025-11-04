@@ -12,5 +12,8 @@ create table capsules (
   expires_at timestamp
 );
 
+-- Enable RLS immediately after table creation
+ALTER TABLE capsules ENABLE ROW LEVEL SECURITY;
+
 create index idx_capsules_creator on capsules(creator_pubkey);
 create index idx_capsules_approver on capsules(approver_pubkey);

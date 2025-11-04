@@ -8,10 +8,13 @@ import { toBase64 } from '@/lib/crypto'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { CopyButton } from '@/components/CopyButton'
 import { UnlockConditions } from '@/components/UnlockConditions'
+import { DeadHandStatus } from '@/components/DeadHandStatus'
+import { useCache } from '@/lib/cache'
 import type { CapsuleMetadata } from '@/lib/capsule'
 
 function UnlockCapsuleContent() {
   const { identity } = useIdentity()
+  const cache = useCache()
   const [capsules, setCapsules] = useState<any[]>([])
   const [loadingList, setLoadingList] = useState(true)
   const [unlockingId, setUnlockingId] = useState('')
@@ -27,17 +30,28 @@ function UnlockCapsuleContent() {
       try {
         const client = getClient()
         const publicKey = `ed25519:${toBase64(identity.ed25519.publicKey)}`
+        const cacheKey = `capsules:${publicKey}`
+        
+        const cached = cache.get(cacheKey)
+        if (cached) {
+          setCapsules([...cached].sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()))
+          setLoadingList(false)
+          return
+        }
+        
         const data = await client['db'].listCapsules({ approver: publicKey })
+        cache.set(cacheKey, data, 30000)
         setCapsules([...data].sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()))
       } catch (err) {
         console.error('Failed to load capsules:', err)
+        setError((err as Error).message)
       } finally {
         setLoadingList(false)
       }
     }
 
     loadCapsules()
-  }, [identity])
+  }, [identity, cache])
 
   const handleToggleLock = async (capsuleId: string, currentStatus: string) => {
     if (!identity) return
@@ -57,6 +71,9 @@ function UnlockCapsuleContent() {
 
         await client['db'].updateStatus(capsuleId, 'unlocked')
 
+        const publicKey = `ed25519:${toBase64(identity.ed25519.publicKey)}`
+        cache.invalidate(`capsules:${publicKey}`)
+
         setUnlockedData(prev => new Map(prev).set(capsuleId, {
           data: result.data,
           filename: result.filename || 'unlocked-file'
@@ -67,6 +84,9 @@ function UnlockCapsuleContent() {
         ))
       } else {
         await client['db'].updateStatus(capsuleId, 'locked')
+
+        const publicKey = `ed25519:${toBase64(identity.ed25519.publicKey)}`
+        cache.invalidate(`capsules:${publicKey}`)
 
         setUnlockedData(prev => {
           const newMap = new Map(prev)
@@ -128,6 +148,10 @@ function UnlockCapsuleContent() {
     try {
       const client = getClient()
       await client['db'].deleteCapsule(capsuleId)
+      
+      const publicKey = `ed25519:${toBase64(identity.ed25519.publicKey)}`
+      cache.invalidate(`capsules:${publicKey}`)
+      
       setCapsules(capsules.filter(c => c.id !== capsuleId))
     } catch (err) {
       console.error('Delete error:', err)
@@ -279,6 +303,10 @@ function UnlockCapsuleContent() {
 
                           {metadata && capsule.status === 'locked' && (
                             <UnlockConditions policy={metadata.unlock_policy} />
+                          )}
+
+                          {capsule.dead_hand_trigger_date && (
+                            <DeadHandStatus capsuleId={capsule.id} />
                           )}
                         </div>
                       </div>

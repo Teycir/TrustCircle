@@ -191,6 +191,34 @@ export default function CapsulePage() {
 
             <UnlockConditions policy={metadata.unlock_policy} />
 
+            {capsule.dead_hand_trigger_date && (
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">Dead Hand</h3>
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-orange-700 font-medium">⚠️ Dead Hand Enabled</span>
+                  </div>
+                  <div className="text-sm space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-600">Trigger Date:</span>
+                      <span className="text-gray-900 font-medium">
+                        {new Date(capsule.dead_hand_trigger_date).toLocaleString()}
+                      </span>
+                    </div>
+                    {capsule.dead_hand_status && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-600">Status:</span>
+                        <span className="text-gray-900">{capsule.dead_hand_status}</span>
+                      </div>
+                    )}
+                    <p className="text-gray-600 mt-2">
+                      If not reset by the trigger date, this capsule will be automatically unlocked.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {!identity && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <p className="text-yellow-800 text-sm mb-3">

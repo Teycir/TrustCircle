@@ -69,49 +69,49 @@ function haversineDistance(
   lat1: number,
   lon1: number,
   lat2: number,
-  lon2: number
+  lon2: number,
 ): number {
-  const R = 6371000
-  const toRad = (deg: number) => (deg * Math.PI) / 180
-  const dLat = toRad(lat2 - lat1)
-  const dLon = toRad(lon2 - lon1)
+  const R = 6371000;
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRad(lat1)) *
       Math.cos(toRad(lat2)) *
       Math.sin(dLon / 2) *
-      Math.sin(dLon / 2)
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  return R * c
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
 }
 
 export function checkLocationCondition(
   policy: any,
-  currentLocation: { latitude: number; longitude: number }
+  currentLocation: { latitude: number; longitude: number },
 ): void {
-  if (!policy.location) return
+  if (!policy.location) return;
 
-  const { latitude, longitude, radius } = policy.location
+  const { latitude, longitude, radius } = policy.location;
 
   if (latitude < -90 || latitude > 90) {
-    throw new Error('Invalid latitude')
+    throw new Error("Invalid latitude");
   }
   if (longitude < -180 || longitude > 180) {
-    throw new Error('Invalid longitude')
+    throw new Error("Invalid longitude");
   }
   if (radius < 0) {
-    throw new Error('Invalid radius')
+    throw new Error("Invalid radius");
   }
 
   const distance = haversineDistance(
     latitude,
     longitude,
     currentLocation.latitude,
-    currentLocation.longitude
-  )
+    currentLocation.longitude,
+  );
 
   if (distance > radius) {
-    throw new Error('Location requirement not met')
+    throw new Error("Location requirement not met");
   }
 }
 
@@ -132,7 +132,9 @@ export class CapsuleManager {
       if (estimatedSize > availableSpace) {
         const availableMB = (availableSpace / 1024 / 1024).toFixed(2);
         const requiredMB = (estimatedSize / 1024 / 1024).toFixed(2);
-        throw new Error(`Not enough storage space. Available: ${availableMB} MB, Required: ${requiredMB} MB`);
+        throw new Error(
+          `Not enough storage space. Available: ${availableMB} MB, Required: ${requiredMB} MB`,
+        );
       }
 
       await this.pinata.purgeOldFiles(0.9);
@@ -141,7 +143,9 @@ export class CapsuleManager {
       const compressed = compress(params.files);
       const cipherArchive = await aesGcmEncrypt(cmk, compressed);
       const timestamp = Date.now();
-      const filename = params.title ? `${params.title}_${timestamp}.encrypted` : `capsule_${timestamp}.encrypted`;
+      const filename = params.title
+        ? `${params.title}_${timestamp}.encrypted`
+        : `capsule_${timestamp}.encrypted`;
       const payloadCid = await this.pinata.uploadBytes(cipherArchive, filename);
 
       const wrap = await wrapCmkForRecipient(cmk, params.approverPubkey.x25519);
@@ -181,7 +185,7 @@ export class CapsuleManager {
         expires_at: params.expiresAt,
       };
 
-      return await this.db.saveCapsule(record);
+      return await this.db.saveCapsule(record, metadata.creator_pubkey);
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`Capsule creation failed: ${error.message}`);
@@ -190,7 +194,9 @@ export class CapsuleManager {
     }
   }
 
-  async unlockCapsule(params: UnlockCapsuleParams): Promise<{ data: Uint8Array; filename: string }> {
+  async unlockCapsule(
+    params: UnlockCapsuleParams,
+  ): Promise<{ data: Uint8Array; filename: string }> {
     try {
       const capsule = await this.db.getCapsule(params.capsuleId);
       const metadata = capsule.metadata as CapsuleMetadata;
@@ -235,10 +241,13 @@ export class CapsuleManager {
       const compressed = await aesGcmDecrypt(cmk, cipherArchive);
       const archive = decompress(compressed);
 
-      await this.db.updateStatus(params.capsuleId, "unlocked");
+      const approverPubkey = `ed25519:${toBase64(params.approverKeys.ed25519.publicKey)}`;
+      await this.db.updateStatus(params.capsuleId, "unlocked", approverPubkey);
 
       const timestamp = new Date(metadata.created_at).getTime();
-      const filename = metadata.hints?.title ? `${metadata.hints.title}_${timestamp}` : `capsule_${timestamp}`;
+      const filename = metadata.hints?.title
+        ? `${metadata.hints.title}_${timestamp}`
+        : `capsule_${timestamp}`;
 
       return { data: archive, filename };
     } catch (error) {

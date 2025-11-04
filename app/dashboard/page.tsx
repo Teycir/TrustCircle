@@ -8,6 +8,7 @@ import { toBase64 } from '@/lib/crypto'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { CopyButton } from '@/components/CopyButton'
 import { UnlockConditions } from '@/components/UnlockConditions'
+import { DeadHandStatus } from '@/components/DeadHandStatus'
 import type { CapsuleMetadata } from '@/lib/capsule'
 
 function DashboardContent() {
@@ -156,12 +157,24 @@ function DashboardContent() {
               <div className="space-y-4">
                 {filteredCapsules.map((capsule) => {
                   const metadata = capsule.metadata as CapsuleMetadata
+                  const now = new Date()
+                  const triggerDate = capsule.dead_hand_trigger_date ? new Date(capsule.dead_hand_trigger_date) : null
+                  const daysUntilTrigger = triggerDate ? Math.ceil((triggerDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) : null
+                  const inCriticalPeriod = daysUntilTrigger !== null && daysUntilTrigger >= -2 && daysUntilTrigger <= 2
+                  
                   return (
                     <div key={capsule.id} className="border rounded-lg p-3 sm:p-4 hover:bg-gray-50">
                       <div className="space-y-3">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900 text-lg">{capsule.title || 'Untitled'}</h3>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-semibold text-gray-900 text-lg">{capsule.title || 'Untitled'}</h3>
+                              {inCriticalPeriod && (
+                                <span className="px-2 py-1 bg-red-100 text-red-800 text-xs font-bold rounded animate-pulse">
+                                  ⚠️ DEAD HAND ALERT
+                                </span>
+                              )}
+                            </div>
                             {capsule.notes && (
                               <p className="text-sm text-gray-600 mt-1">{capsule.notes}</p>
                             )}
@@ -199,6 +212,10 @@ function DashboardContent() {
 
                         {tab === 'sent' && metadata && (
                           <UnlockConditions policy={metadata.unlock_policy} />
+                        )}
+
+                        {tab === 'created' && (
+                          <DeadHandStatus capsuleId={capsule.id} />
                         )}
 
                         <div className="flex gap-2">

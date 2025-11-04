@@ -12,7 +12,6 @@ export default function AdminPage() {
   const router = useRouter()
   const [config, setConfig] = useState<AppConfig>({})
   const [saved, setSaved] = useState(false)
-  const [showKeys, setShowKeys] = useState(false)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -25,9 +24,9 @@ export default function AdminPage() {
     setMounted(true)
     const stored = getConfig()
     setConfig({
-      pinataJWT: stored.pinataJWT || process.env.NEXT_PUBLIC_PINATA_JWT || '',
-      supabaseUrl: stored.supabaseUrl || process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      supabaseAnonKey: stored.supabaseAnonKey || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+      pinataJWT: stored.pinataJWT || '',
+      supabaseUrl: stored.supabaseUrl || '',
+      supabaseAnonKey: stored.supabaseAnonKey || ''
     })
   }, [])
 
@@ -81,7 +80,7 @@ export default function AdminPage() {
                 Pinata JWT Token
               </label>
               <input
-                type={showKeys ? 'text' : 'password'}
+                type="password"
                 value={config.pinataJWT || ''}
                 onChange={(e) => setConfig({ ...config, pinataJWT: e.target.value })}
                 placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -107,25 +106,12 @@ export default function AdminPage() {
                 Supabase Anon Key
               </label>
               <input
-                type={showKeys ? 'text' : 'password'}
+                type="password"
                 value={config.supabaseAnonKey || ''}
                 onChange={(e) => setConfig({ ...config, supabaseAnonKey: e.target.value })}
                 placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
-            </div>
-
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="showKeys"
-                checked={showKeys}
-                onChange={(e) => setShowKeys(e.target.checked)}
-                className="rounded"
-              />
-              <label htmlFor="showKeys" className="text-sm text-gray-700">
-                Show API keys
-              </label>
             </div>
 
             <div className="flex gap-4 pt-8">

@@ -22,6 +22,8 @@ function CreateCapsuleContent() {
   const [dateAfter, setDateAfter] = useState(defaultDate)
   const [useLocation, setUseLocation] = useState(false)
   const [expiresAt, setExpiresAt] = useState('')
+  const [enableDeadHand, setEnableDeadHand] = useState(false)
+  const [deadHandDate, setDeadHandDate] = useState('')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -34,16 +36,32 @@ function CreateCapsuleContent() {
     setError(null)
 
     try {
+      const unlockDate = new Date(dateAfter)
+      const now = new Date()
+
       if (expiresAt) {
         const expiryDate = new Date(expiresAt)
-        const unlockDate = new Date(dateAfter)
-        const now = new Date()
 
         if (expiryDate <= now) {
           throw new Error('Expiration date must be in the future')
         }
         if (expiryDate <= unlockDate) {
           throw new Error('Expiration date must be after unlock date')
+        }
+      }
+
+      if (enableDeadHand && deadHandDate) {
+        const triggerDate = new Date(deadHandDate)
+
+        if (triggerDate < unlockDate) {
+          throw new Error('Dead hand trigger date must be on or after the unlock date')
+        }
+
+        if (expiresAt) {
+          const expiryDate = new Date(expiresAt)
+          if (triggerDate > expiryDate) {
+            throw new Error('Dead hand trigger date must be on or before the expiration date')
+          }
         }
       }
       const client = getClient()
@@ -86,6 +104,19 @@ function CreateCapsuleContent() {
         notes,
         expiresAt: expiresAt ? new Date(expiresAt).toISOString() : undefined
       })
+
+      if (enableDeadHand && deadHandDate) {
+        const { enableDeadHand: enableDeadHandFn } = await import('@/lib/dead-hand')
+        const { TrustCircleDB } = await import('@/lib/supabase')
+        const db = new TrustCircleDB(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        )
+        
+        await enableDeadHandFn(db, capsuleId, {
+          triggerDate: new Date(deadHandDate)
+        })
+      }
 
       setResult(capsuleId)
     } catch (err) {
@@ -217,6 +248,33 @@ function CreateCapsuleContent() {
                 <input type="checkbox" id="useLocation" checked={useLocation} onChange={(e) => setUseLocation(e.target.checked)} className="h-4 w-4 text-indigo-600 rounded" />
                 <label htmlFor="useLocation" className="ml-2 text-sm text-gray-700">Require current location</label>
               </div>
+            </div>
+
+            <div className="border-t pt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Dead Hand Configuration</h3>
+              <div className="flex items-center mb-4">
+                <input type="checkbox" id="enableDeadHand" checked={enableDeadHand} onChange={(e) => setEnableDeadHand(e.target.checked)} className="h-4 w-4 text-indigo-600 rounded" />
+                <label htmlFor="enableDeadHand" className="ml-2 text-sm text-gray-700">Enable automatic unlock if not reset</label>
+              </div>
+              {enableDeadHand && (
+                <div className="space-y-4 pl-6 border-l-2 border-indigo-200">
+                  <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4">
+                    <p className="text-xs text-blue-900 font-semibold mb-1">How Dead Hand Works:</p>
+                    <ul className="text-xs text-blue-800 space-y-1">
+                      <li>• Warning notification in Dashboard 2 days before trigger</li>
+                      <li>• 2 day grace period after trigger date</li>
+                      <li>• Auto unlock if not reset during grace period</li>
+                      <li>• You can reset the date anytime to prevent unlock</li>
+                      <li>• No email needed - all notifications in-app</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <label htmlFor="deadHandDate" className="block text-sm font-medium text-gray-700 mb-2">Trigger Date</label>
+                    <input id="deadHandDate" type="datetime-local" value={deadHandDate} onChange={(e) => setDeadHandDate(e.target.value)} className="w-full px-4 py-2 border rounded-lg" required={enableDeadHand} />
+                    <p className="text-xs text-gray-500 mt-1">Check your Dashboard for warnings 2 days before this date</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-indigo-400 to-purple-400 hover:from-indigo-500 hover:to-purple-500 text-white py-3 rounded-lg font-semibold disabled:bg-gray-300 disabled:from-gray-300 disabled:to-gray-300 shadow-sm">
