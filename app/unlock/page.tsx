@@ -143,7 +143,7 @@ function UnlockCapsuleContent() {
 
 
   const handleDelete = async (capsuleId: string) => {
-    if (!confirm('Are you sure you want to delete this capsule?')) return
+    if (!identity || !confirm('Are you sure you want to delete this capsule?')) return
 
     try {
       const client = getClient()
