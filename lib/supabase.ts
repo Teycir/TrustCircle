@@ -33,6 +33,22 @@ export interface CapsuleRecord {
   warning_sent_at?: string;
 }
 
+export interface VaultRecord {
+  id?: string;
+  creator_pubkey: string;
+  title: string;
+  notes?: string;
+  document_type: string;
+  issuer: string;
+  document_id?: string;
+  payload_cid: string;
+  metadata: any;
+  file_name?: string;
+  file_size?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export class TrustCircleDB {
   private client: SupabaseClient;
   private pinataClient?: any;
@@ -258,5 +274,62 @@ export class TrustCircleDB {
 
     this.analyticsCache.set(userPubkey, { data: result, timestamp: Date.now() });
     return result;
+  }
+
+  async saveVault(
+    record: VaultRecord,
+    userPubkey?: string,
+  ): Promise<string> {
+    const { data, error } = await this.client
+      .from("vaults")
+      .insert(record)
+      .select("id")
+      .single();
+
+    if (error) {
+      console.error('Insert error details:', error);
+      throw new Error(`Failed to save vault: ${error.message}`);
+    }
+    return data.id;
+  }
+
+  async getVault(id: string): Promise<VaultRecord> {
+    const { data, error } = await this.client
+      .from("vaults")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (error) throw new Error(`Failed to get vault: ${error.message}`);
+    if (!data) throw new Error("Vault not found");
+    
+    return data;
+  }
+
+  async listVaults(creatorPubkey: string): Promise<VaultRecord[]> {
+    const { data, error } = await this.client
+      .from("vaults")
+      .select("*")
+      .eq("creator_pubkey", creatorPubkey)
+      .order("created_at", { ascending: false });
+
+    if (error) throw new Error(`Failed to list vaults: ${error.message}`);
+    return data || [];
+  }
+
+  async deleteVault(id: string, userPubkey?: string): Promise<void> {
+    const vault = await this.getVault(id);
+
+    const { error } = await this.client.from("vaults").delete().eq("id", id);
+
+    if (error) throw new Error(`Failed to delete vault: ${error.message}`);
+
+    if (this.pinataClient && vault.payload_cid) {
+      try {
+        await this.pinataClient.unpin(vault.payload_cid);
+      } catch (err) {
+        console.error("Failed to unpin from IPFS:", err);
+      }
+    }
   }
 }

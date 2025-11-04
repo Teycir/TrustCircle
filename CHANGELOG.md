@@ -2,6 +2,54 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [2.7.1] - 2025-01-09
+
+### Changed
+- Simplified storage display to show only total Pinata storage
+- Storage now displays used/max format for both capsules and vaults
+- Changed capsule icon from box to lock emoji to match card design
+- Improved storage precision to 2 decimal places
+
+### Removed
+- Per-user storage tracking in favor of total storage only
+- Database-based storage calculations replaced with Pinata API
+
+## [2.7.0] - 2025-01-09
+
+### Added
+- Storage usage display in navigation bar on home page and dashboard
+- Real-time Pinata storage usage from API
+- Storage FAQ section with limits and usage information
+- Granular storage display for capsules and vaults
+
+### Changed
+- Improved FAQ interaction with single-click responsiveness
+- Storage data now fetched from Pinata API for accuracy
+- Optimized storage loading with proper async handling
+
+### Fixed
+- FAQ cards now respond instantly without lag
+- Storage display shows actual file sizes from IPFS
+- Removed blocking operations from page load
+
+## [2.6.0] - 2025-01-09
+
+### Added
+- Professional Vault feature for document storage with cryptographic proof
+- Separate vaults table in database for better performance and security
+- Create Vault page with gold theme and safe icon
+- Vaults tab in Dashboard with vault specific display
+- Vault view page with document download and metadata display
+- Public verification page for shareable proof of document existence
+- Vault CRUD operations in database layer
+- Document metadata fields: document type issuer document ID
+- Gold gradient theme for all vault related UI
+- IPFS storage integration for vault documents
+
+### Changed
+- Dashboard now supports three tabs: Created Sent and Vaults
+- Main page includes Create Vault card alongside Create Capsule
+
 ## [2.5.0] - 2025-01-09
 
 ### Added

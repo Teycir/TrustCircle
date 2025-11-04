@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { getStorageUsage } from '@/lib/client'
 import { useAuth } from '@/lib/useAuth'
+import { useIdentity } from '@/lib/hooks'
+import { toBase64 } from '@/lib/crypto'
 
 function FAQItem({ question, answer }: Readonly<{ question: string; answer: string | React.ReactNode }>) {
   const [isOpen, setIsOpen] = useState(false)
@@ -11,11 +12,12 @@ function FAQItem({ question, answer }: Readonly<{ question: string; answer: stri
   return (
     <div className="border-b border-gray-200 last:border-0">
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full py-5 px-6 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+        className="w-full py-5 px-6 flex items-center justify-between text-left hover:bg-gray-50 transition-colors cursor-pointer"
       >
-        <span className="font-semibold text-gray-900 pr-8">{question}</span>
-        <span className={`text-indigo-600 text-xl transition-transform ${isOpen ? 'rotate-180' : ''}`}>
+        <span className="font-semibold text-gray-900 pr-8 pointer-events-none">{question}</span>
+        <span className={`text-indigo-600 text-xl transition-transform pointer-events-none ${isOpen ? 'rotate-180' : ''}`}>
           ▼
         </span>
       </button>
@@ -29,48 +31,62 @@ function FAQItem({ question, answer }: Readonly<{ question: string; answer: stri
 }
 
 export default function Home() {
-  const [storage, setStorage] = useState<{ used: number; limit: number; percentage: number } | null>(null)
-  const [mounted, setMounted] = useState(false)
   const { user, signOut } = useAuth()
+  const [storage, setStorage] = useState<{ capsules: number; vaults: number; limit: number } | null>(null)
 
   useEffect(() => {
-    setMounted(true)
-    getStorageUsage().then(setStorage).catch(() => setStorage(null))
+    import('@/lib/client').then(({ getStorageUsage, getVaultStorageUsage }) => {
+      return Promise.all([getStorageUsage(), getVaultStorageUsage()])
+    }).then(([capsulesData, vaultsData]) => {
+      setStorage({
+        capsules: capsulesData.used,
+        vaults: vaultsData.used,
+        limit: capsulesData.limit
+      })
+    }).catch((err) => {
+      console.error('[HOME] Storage load error:', err)
+    })
   }, [])
 
-  const handleSignOut = async () => {
-    await signOut()
-  }
-
-  if (!mounted) {
-    return null
+  const handleSignOut = () => {
+    signOut()
   }
 
   return (
     <div className="min-h-screen gradient-bg">
       <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-indigo-600 flex items-center gap-2">
-            <span>🔐</span> TrustCircle
-          </h1>
-          <div className="flex items-center gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-indigo-600 flex items-center gap-2">
+              <span>🔐</span> TrustCircle
+            </h1>
+            
             {storage && (
-              <div className="text-sm text-gray-600">
-                Storage: {(storage.used / 1024 / 1024).toFixed(2)} MB / {(storage.limit / 1024 / 1024).toFixed(0)} MB
+              <div className="absolute left-1/2 transform -translate-x-1/2">
+                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg px-3 py-1.5 shadow-sm">
+                  <div className="text-xs font-medium text-gray-700 flex items-center gap-2">
+                    <span>🔒 {(storage.capsules / 1024 / 1024).toFixed(2)}/{(storage.limit / 1024 / 1024).toFixed(0)}MB</span>
+                    <span className="text-gray-400">|</span>
+                    <span>🔐 {(storage.vaults / 1024 / 1024).toFixed(2)}/{(storage.limit / 1024 / 1024).toFixed(0)}MB</span>
+                  </div>
+                </div>
               </div>
             )}
-            {user ? (
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-600">{user.email}</span>
-                <button onClick={handleSignOut} className="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
-                  Sign Out
-                </button>
-              </div>
-            ) : (
-              <Link href="/login" className="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
-                Sign In
-              </Link>
-            )}
+            
+            <div className="flex items-center gap-3">
+              {user ? (
+                <>
+                  <span className="text-sm text-gray-600">{user.email}</span>
+                  <button onClick={handleSignOut} className="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <Link href="/login" className="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+                  Sign In
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </nav>
@@ -91,6 +107,14 @@ export default function Home() {
             <h3 className="text-2xl font-semibold text-gray-900 mb-2">Create Capsule</h3>
             <p className="text-gray-600">
               Encrypt files and set unlock conditions for a designated approver
+            </p>
+          </Link>
+
+          <Link href="/create-vault" className="card-hover block p-8 glass rounded-xl shadow-lg bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200">
+            <div className="text-amber-600 text-4xl mb-4">🔐</div>
+            <h3 className="text-2xl font-semibold text-gray-900 mb-2">Create Vault</h3>
+            <p className="text-gray-600">
+              Store professional documents with cryptographic proof
             </p>
           </Link>
 
@@ -179,7 +203,7 @@ export default function Home() {
             />
             <FAQItem
               question="Where is my data stored?"
-              answer="Encrypted files are stored on IPFS via Pinata for decentralized storage. Metadata is stored on Supabase. Your encryption keys never leave your browser."
+              answer="Encrypted files are stored on IPFS via Pinata for decentralized storage. Capsules and Vaults use separate IPFS accounts for isolation. Metadata is stored on Supabase. Your encryption keys never leave your browser."
             />
             <FAQItem
               question="What happens to my keys?"
@@ -309,6 +333,30 @@ export default function Home() {
               }
             />
             <FAQItem
+              question="What is a Vault and how is it different from a Capsule?"
+              answer={
+                <div className="space-y-3">
+                  <p>Vaults are designed for professional document storage with cryptographic proof:</p>
+                  <div className="space-y-2">
+                    <p><strong>Capsules:</strong></p>
+                    <p>• Time and location-based unlocking</p>
+                    <p>• Designated approver required</p>
+                    <p>• Perfect for secure file sharing</p>
+                    <p>• Dead Hand protocol support</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p><strong>Vaults:</strong></p>
+                    <p>• Permanent encrypted storage</p>
+                    <p>• Self-access with your own keys</p>
+                    <p>• Cryptographic proof of authenticity</p>
+                    <p>• Separate IPFS storage for isolation</p>
+                    <p>• Ideal for professional documents, certificates, contracts</p>
+                  </div>
+                  <p className="pt-2">Both use client-side encryption, but Vaults focus on long-term storage and proof of authenticity.</p>
+                </div>
+              }
+            />
+            <FAQItem
               question="What is Dead Hand and how does it work?"
               answer={
                 <div className="space-y-3">
@@ -345,6 +393,38 @@ export default function Home() {
                     <p>• Disable Dead Hand completely if needed</p>
                   </div>
                   <p className="pt-2">Use cases: Estate planning, emergency access, business continuity, digital legacy.</p>
+                </div>
+              }
+            />
+            <FAQItem
+              question="What are the storage limits?"
+              answer={
+                <div className="space-y-3">
+                  <p>TrustCircle has storage limits to ensure fair usage across all users:</p>
+                  <div className="space-y-2">
+                    <p><strong>Personal Limits:</strong></p>
+                    <p>• Each user has 250MB total storage</p>
+                    <p>• Capsules: Up to 250MB</p>
+                    <p>• Vaults: Up to 250MB</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p><strong>Global Limits:</strong></p>
+                    <p>• Total Capsules across all users: 1GB</p>
+                    <p>• Total Vaults across all users: 1GB</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p><strong>Monitoring:</strong></p>
+                    <p>• Storage usage shown in navigation bar</p>
+                    <p>• Warning appears at 80% personal usage</p>
+                    <p>• Warning appears when global storage below 20%</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p><strong>Managing Storage:</strong></p>
+                    <p>• Delete old or expired capsules to free space</p>
+                    <p>• Storage calculated from encrypted file size</p>
+                    <p>• Compression applied before encryption</p>
+                  </div>
+                  <p className="pt-2">Check the navigation bar to monitor your current usage and available storage.</p>
                 </div>
               }
             />

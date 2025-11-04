@@ -1,0 +1,3 @@
+-- No cron job needed
+-- Storage is checked before insert and blocks if over quota
+-- Users are warned at 80% usage via check_storage_warning() function

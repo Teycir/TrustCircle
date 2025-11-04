@@ -56,14 +56,19 @@ export class PinataClient {
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => response.statusText)
+      console.error('[Pinata] Storage API error:', response.status, errorText)
       throw new Error(`Failed to get storage usage: ${errorText}`)
     }
 
     const data = await response.json()
+    console.log('[Pinata] Storage API response:', { rowCount: data?.rows?.length, data })
+    
     if (!data?.rows || !Array.isArray(data.rows)) throw new Error('Invalid response format')
 
     const used = data.rows.reduce((sum: number, row: any) => sum + (row.size || 0), 0)
     const limit = 1073741824
+    
+    console.log('[Pinata] Calculated storage:', { used, limit, percentage: (used / limit) * 100, fileCount: data.rows.length })
 
     return { used, limit, percentage: (used / limit) * 100 }
   }

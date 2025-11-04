@@ -59,7 +59,7 @@ Automatic capsule unlocking if the owner becomes inactive, ensuring important in
 - **Deployment**: Vercel
 - **UI**: Tailwind CSS with gradient design system
 - **Crypto**: noble-curves for Ed25519/X25519, Web Crypto API for AES-GCM
-- **Storage**: Pinata for IPFS, Supabase for metadata
+- **Storage**: Dual Pinata IPFS (separate for Capsules and Vaults), Supabase for metadata
 - **Caching**: In-memory with 5-minute TTL and smart invalidation
 - **Geolocation**: Browser Geolocation API
 - **Local Storage**: IndexedDB for keys and preferences
@@ -86,10 +86,14 @@ npm install
 
 # Configure environment
 cp .env.example .env.local
-# Edit .env.local with your Pinata and Supabase credentials
+# Edit .env.local with:
+# - Supabase credentials
+# - Pinata credentials for Capsules (PINATA_JWT, PINATA_API_KEY, PINATA_API_SECRET)
+# - Pinata credentials for Vaults (PINATA_VAULT_JWT, PINATA_VAULT_API_KEY, PINATA_VAULT_API_SECRET)
 
 # Setup database configuration
 # Run scripts/setup-config.sql in your Supabase SQL Editor
+# Then run scripts/setup-config.local.sql with your actual credentials
 
 # Run development server
 npm run dev
@@ -103,8 +107,13 @@ npm test
 API credentials are stored in Supabase `app_config` table:
 
 1. Run `supabase/sql/app-config-schema.sql` to create the table
-2. Run `scripts/setup-config.sql` to populate your credentials
-3. Environment variables in `.env.local` take priority over database config
+2. Run `scripts/setup-config.sql` to create schema with placeholders
+3. Run `scripts/setup-config.local.sql` to populate with actual credentials (local only)
+4. Environment variables in `.env.local` take priority over database config
+
+Dual IPFS storage:
+- Capsules use primary Pinata account (PINATA_JWT)
+- Vaults use secondary Pinata account (PINATA_VAULT_JWT)
 
 See [SETUP.md](SETUP.md) for detailed configuration instructions.
 
@@ -184,6 +193,41 @@ Row Level Security policies ensure users can only access their own capsules.
 - 🚀 Simplified configuration management
 
 See [CHANGELOG.md](CHANGELOG.md) for full version history.
+
+---
+
+## FAQ
+
+### Storage
+
+**Q: What are the storage limits?**
+
+A: Each user has 250MB total storage limit split between:
+- Capsules: Up to 250MB
+- Vaults: Up to 250MB
+
+Global limits:
+- Total Capsules: 1GB across all users
+- Total Vaults: 1GB across all users
+
+**Q: How do I check my storage usage?**
+
+A: Storage usage is displayed in the navigation bar on the home page showing:
+- Your current usage for Capsules and Vaults
+- Available global storage for both types
+- Warning indicator when approaching limits
+
+**Q: What happens when I reach the storage limit?**
+
+A: When you reach 80% of your personal limit or global storage drops below 20%, you'll see a warning indicator. You won't be able to create new capsules or vaults until you delete existing ones or storage becomes available.
+
+**Q: How is storage calculated?**
+
+A: Storage is calculated based on the encrypted file size stored on IPFS. Compression is applied before encryption to minimize storage usage.
+
+**Q: Can I increase my storage limit?**
+
+A: Storage limits are currently fixed. Consider deleting old or expired capsules to free up space.
 
 ---
 

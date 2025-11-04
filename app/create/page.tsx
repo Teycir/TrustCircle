@@ -196,8 +196,15 @@ function CreateCapsuleContent() {
         ) : (
           <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-4 sm:p-8 space-y-6">
             <div>
-              <label htmlFor="file" className="block text-sm font-medium text-gray-700 mb-2">File to Encrypt</label>
-              <input id="file" type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700" required />
+              <label className="block text-sm font-medium text-gray-700 mb-2">File to Encrypt</label>
+              <div className="relative">
+                <input id="file" type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} className="hidden" required />
+                <label htmlFor="file" className="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed border-indigo-300 rounded-lg cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 transition-colors">
+                  <span className="text-sm text-gray-600">
+                    {file ? `📄 ${file.name}` : '📁 Click to select file'}
+                  </span>
+                </label>
+              </div>
             </div>
 
             <div>

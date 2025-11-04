@@ -12,6 +12,7 @@ create table if not exists app_config (
 -- Insert default configuration
 insert into app_config (key, value) values
   ('pinata_jwt', 'your_pinata_jwt_here'),
+  ('vault_pinata_jwt', 'your_vault_pinata_jwt_here'),
   ('supabase_url', 'your_supabase_url_here'),
   ('supabase_anon_key', 'your_supabase_anon_key_here')
 on conflict (key) do nothing;

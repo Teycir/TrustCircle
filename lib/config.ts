@@ -3,6 +3,7 @@ import { openDB } from 'idb'
 
 let globalConfig: {
   pinataJWT?: string
+  vaultPinataJWT?: string
   supabaseUrl?: string
   supabaseAnonKey?: string
 } = {}
@@ -63,6 +64,7 @@ export async function loadConfig() {
 
     data?.forEach(item => {
       if (item.key === 'pinata_jwt') globalConfig.pinataJWT = item.value
+      if (item.key === 'vault_pinata_jwt') globalConfig.vaultPinataJWT = item.value
       if (item.key === 'supabase_url') globalConfig.supabaseUrl = item.value
       if (item.key === 'supabase_anon_key') globalConfig.supabaseAnonKey = item.value
     })
@@ -77,6 +79,6 @@ export async function loadConfig() {
   }
 }
 
-export function getConfig(key: 'pinataJWT' | 'supabaseUrl' | 'supabaseAnonKey'): string | undefined {
+export function getConfig(key: 'pinataJWT' | 'vaultPinataJWT' | 'supabaseUrl' | 'supabaseAnonKey'): string | undefined {
   return globalConfig[key]
 }

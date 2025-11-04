@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useIdentity } from '@/lib/hooks'
-import { getClient } from '@/lib/client'
+import { getClient, getStorageUsage } from '@/lib/client'
 import { toBase64 } from '@/lib/crypto'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { CopyButton } from '@/components/CopyButton'
@@ -13,12 +13,28 @@ import type { CapsuleMetadata } from '@/lib/capsule'
 
 function DashboardContent() {
   const { identity, loading: identityLoading } = useIdentity()
-  const [tab, setTab] = useState<'created' | 'sent'>('created')
+  const [tab, setTab] = useState<'created' | 'sent' | 'vaults'>('created')
   const [capsules, setCapsules] = useState<any[]>([])
+  const [vaults, setVaults] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'locked' | 'unlocked'>('all')
+  const [storage, setStorage] = useState<{ capsules: number; vaults: number; limit: number } | null>(null)
+
+  useEffect(() => {
+    import('@/lib/client').then(({ getStorageUsage, getVaultStorageUsage }) => {
+      return Promise.all([getStorageUsage(), getVaultStorageUsage()])
+    }).then(([capsulesData, vaultsData]) => {
+      setStorage({
+        capsules: capsulesData.used,
+        vaults: vaultsData.used,
+        limit: capsulesData.limit
+      })
+    }).catch((err) => {
+      console.error('[DASHBOARD] Storage error:', err)
+    })
+  }, [])
 
   useEffect(() => {
     if (!identity) {
@@ -26,7 +42,7 @@ function DashboardContent() {
       return
     }
 
-    const loadCapsules = async () => {
+    const loadData = async () => {
       setLoading(true)
       setError(null)
 
@@ -34,13 +50,17 @@ function DashboardContent() {
         const client = getClient()
         const publicKey = `ed25519:${toBase64(identity.ed25519.publicKey)}`
 
-        const data = await client['db'].listCapsules(
-          tab === 'created'
-            ? { creator: publicKey }
-            : { approver: publicKey }
-        )
-
-        setCapsules(data.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()))
+        if (tab === 'vaults') {
+          const data = await client['db'].listVaults(publicKey)
+          setVaults(data)
+        } else {
+          const data = await client['db'].listCapsules(
+            tab === 'created'
+              ? { creator: publicKey }
+              : { approver: publicKey }
+          )
+          setCapsules(data.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()))
+        }
       } catch (err) {
         setError((err as Error).message)
       } finally {
@@ -48,7 +68,7 @@ function DashboardContent() {
       }
     }
 
-    loadCapsules()
+    loadData()
   }, [identity, tab])
 
   const filteredCapsules = capsules.filter(capsule => {
@@ -58,6 +78,14 @@ function DashboardContent() {
       capsule.id.toLowerCase().includes(search.toLowerCase())
     const matchesStatus = statusFilter === 'all' || capsule.status === statusFilter
     return matchesSearch && matchesStatus
+  })
+
+  const filteredVaults = vaults.filter(vault => {
+    return !search ||
+      vault.title?.toLowerCase().includes(search.toLowerCase()) ||
+      vault.document_type?.toLowerCase().includes(search.toLowerCase()) ||
+      vault.issuer?.toLowerCase().includes(search.toLowerCase()) ||
+      vault.id.toLowerCase().includes(search.toLowerCase())
   })
 
   if (identityLoading) {
@@ -85,11 +113,24 @@ function DashboardContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold text-indigo-600 flex items-center gap-2">
-            <span>🔐</span> TrustCircle
-          </Link>
-          <Link href="/" className="text-gray-600 hover:text-gray-900">← Back</Link>
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="text-2xl font-bold text-indigo-600 flex items-center gap-2">
+              <span>🔐</span> TrustCircle
+            </Link>
+            <div className="flex items-center gap-3">
+              {storage && (
+                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg px-3 py-1.5 shadow-sm">
+                  <div className="text-xs font-medium text-gray-700 flex items-center gap-2">
+                    <span>🔒 {(storage.capsules / 1024 / 1024).toFixed(2)}/{(storage.limit / 1024 / 1024).toFixed(0)}MB</span>
+                    <span className="text-gray-400">|</span>
+                    <span>🔐 {(storage.vaults / 1024 / 1024).toFixed(2)}/{(storage.limit / 1024 / 1024).toFixed(0)}MB</span>
+                  </div>
+                </div>
+              )}
+              <Link href="/" className="text-gray-600 hover:text-gray-900">← Back</Link>
+            </div>
+          </div>
         </div>
       </nav>
 
@@ -111,10 +152,99 @@ function DashboardContent() {
               <button onClick={() => setTab('sent')} className={`px-6 py-4 font-medium ${tab === 'sent' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-600'}`}>
                 Sent to Me
               </button>
+              <button onClick={() => setTab('vaults')} className={`px-6 py-4 font-medium ${tab === 'vaults' ? 'text-amber-600 border-b-2 border-amber-600' : 'text-gray-600'}`}>
+                🔐 Vaults
+              </button>
             </div>
           </div>
 
           <div className="p-6">
+            {tab === 'vaults' ? (
+              <>
+                {vaults.length > 0 && (
+                  <div className="mb-4">
+                    <input
+                      type="text"
+                      placeholder="Search by title, type, issuer, or ID"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    />
+                  </div>
+                )}
+                {loading && (
+                  <div className="text-center py-8 text-gray-500">Loading vaults...</div>
+                )}
+                {!loading && vaults.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500 mb-4">No vaults found</p>
+                    <Link href="/create-vault" className="text-amber-600 hover:text-amber-800">
+                      Create your first vault →
+                    </Link>
+                  </div>
+                )}
+                {!loading && filteredVaults.length === 0 && vaults.length > 0 && (
+                  <div className="text-center py-8 text-gray-500">No vaults match your search</div>
+                )}
+                {!loading && filteredVaults.length > 0 && (
+                  <div className="space-y-4">
+                    {filteredVaults.map((vault) => (
+                      <div key={vault.id} className="border-2 border-amber-200 rounded-lg p-3 sm:p-4 hover:bg-amber-50 bg-gradient-to-br from-amber-50 to-yellow-50">
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-amber-600">🔐</span>
+                                <h3 className="font-semibold text-gray-900 text-lg">{vault.title}</h3>
+                              </div>
+                              {vault.notes && (
+                                <p className="text-sm text-gray-600 mt-1">{vault.notes}</p>
+                              )}
+                              <div className="mt-2 space-y-1">
+                                <p className="text-sm text-gray-700">
+                                  <span className="font-medium">Type:</span> {vault.document_type}
+                                </p>
+                                <p className="text-sm text-gray-700">
+                                  <span className="font-medium">Issuer:</span> {vault.issuer}
+                                </p>
+                                {vault.document_id && (
+                                  <p className="text-sm text-gray-700">
+                                    <span className="font-medium">ID:</span> {vault.document_id}
+                                  </p>
+                                )}
+                                <p className="text-sm text-gray-500">
+                                  Created: {new Date(vault.created_at).toLocaleDateString()}
+                                </p>
+                              </div>
+                            </div>
+                            <span className="px-3 py-1 rounded-full text-sm bg-amber-100 text-amber-800 font-medium">
+                              Vault
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <code className="flex-1 text-xs bg-white px-2 py-1 rounded font-mono text-gray-700 border border-amber-200">
+                              {vault.id}
+                            </code>
+                            <CopyButton text={vault.id} label="Copy ID" />
+                          </div>
+
+                          <div className="flex gap-2">
+                            <Link
+                              href={`/vault/${vault.id}`}
+                              className="text-amber-600 hover:text-amber-800 text-sm font-medium"
+                            >
+                              Open Vault →
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
             {capsules.length > 0 && (
               <div className="mb-4 space-y-3">
                 <input
@@ -239,6 +369,8 @@ function DashboardContent() {
                   )
                 })}
               </div>
+            )}
+              </>
             )}
           </div>
         </div>
