@@ -173,6 +173,19 @@ function VaultViewContent() {
             </div>
           </div>
 
+          {vault.metadata?.verification_cid && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-semibold text-blue-900 mb-3">🌐 Eternal Verification Link</h4>
+              <p className="text-sm text-blue-800 mb-3">This verification proof is stored permanently on IPFS and will exist forever, independent of any website.</p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 text-xs bg-white p-2 rounded font-mono text-gray-700 break-all">
+                  {`https://gateway.pinata.cloud/ipfs/${vault.metadata.verification_cid}`}
+                </code>
+                <CopyButton text={`https://gateway.pinata.cloud/ipfs/${vault.metadata.verification_cid}`} label="Copy" />
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={handleDownload}
@@ -181,12 +194,6 @@ function VaultViewContent() {
             >
               {decrypting ? 'Decrypting...' : '📥 Download Document'}
             </button>
-            <Link
-              href={`/verify/${vault.id}`}
-              className="flex-1 bg-gradient-to-r from-blue-400 to-cyan-400 hover:from-blue-500 hover:to-cyan-500 text-white py-3 rounded-lg text-center font-semibold shadow-sm"
-            >
-              🔗 View Verification Page
-            </Link>
           </div>
         </div>
       </main>

@@ -12,8 +12,7 @@ CREATE TABLE IF NOT EXISTS global_storage_limits (
 
 INSERT INTO global_storage_limits (storage_type, total_limit) VALUES
   ('capsules', 1073741824),
-  ('vaults', 1073741824),
-  ('total', 2147483648)
+  ('vaults', 1073741824)
 ON CONFLICT (storage_type) DO NOTHING;
 
 ALTER TABLE global_storage_limits ENABLE ROW LEVEL SECURITY;
@@ -61,24 +60,24 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION update_global_storage()
 RETURNS TRIGGER AS $$
 DECLARE
-  storage_type text;
+  v_storage_type text;
 BEGIN
   IF TG_TABLE_NAME = 'capsules' THEN
-    storage_type := 'capsules';
+    v_storage_type := 'capsules';
   ELSE
-    storage_type := 'vaults';
+    v_storage_type := 'vaults';
   END IF;
 
   IF TG_OP = 'INSERT' THEN
     UPDATE global_storage_limits
     SET current_usage = current_usage + COALESCE(NEW.file_size, 0),
         last_updated = now()
-    WHERE storage_type = storage_type;
+    WHERE storage_type = v_storage_type;
   ELSIF TG_OP = 'DELETE' THEN
     UPDATE global_storage_limits
     SET current_usage = GREATEST(0, current_usage - COALESCE(OLD.file_size, 0)),
         last_updated = now()
-    WHERE storage_type = storage_type;
+    WHERE storage_type = v_storage_type;
   END IF;
   RETURN NULL;
 END;
@@ -93,17 +92,17 @@ DECLARE
   new_size bigint;
   global_usage bigint;
   global_limit bigint;
-  storage_type text;
+  v_storage_type text;
 BEGIN
   IF TG_TABLE_NAME = 'capsules' THEN
-    storage_type := 'capsules';
+    v_storage_type := 'capsules';
   ELSE
-    storage_type := 'vaults';
+    v_storage_type := 'vaults';
   END IF;
 
   SELECT current_usage, total_limit INTO global_usage, global_limit
   FROM global_storage_limits
-  WHERE global_storage_limits.storage_type = storage_type;
+  WHERE storage_type = v_storage_type;
 
   IF (global_usage + COALESCE(NEW.file_size, 0)) > (global_limit * 0.95) THEN
     RAISE EXCEPTION 'Global storage capacity reached. System is at 95%% capacity. New uploads are temporarily disabled.';

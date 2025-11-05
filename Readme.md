@@ -16,6 +16,7 @@ TrustCircle lets you lock files so that exactly one designated approver can unlo
 - ✅ **Time-Based Unlocking**: Set unlock dates for future access
 - ✅ **Location-Based Unlocking**: Require specific GPS location with 1km radius
 - ✅ **Dead Hand Protocol**: Automatic unlock if owner becomes inactive
+- ✅ **Professional Vaults**: Store documents with cryptographic proof and public verification
 - ✅ **Dashboard Management**: Track created and received capsules
 - ✅ **Search & Filter**: Find capsules by title, notes, or status
 - ✅ **Analytics**: View usage statistics with optimized caching
@@ -23,6 +24,101 @@ TrustCircle lets you lock files so that exactly one designated approver can unlo
 - ✅ **Auto-Expiration**: Optional capsule expiration dates
 - ✅ **Offline Support**: Works without internet connectivity
 - ✅ **Mobile Responsive**: Works on all devices
+
+---
+
+## Professional Vaults
+
+Secure storage for professional documents with cryptographic proof of existence and public verification capabilities.
+
+### What are Vaults?
+
+Vaults are encrypted document storage containers designed for professional use cases like certifications, contracts, diplomas, and licenses. Unlike time capsules that unlock at specific times, vaults are always accessible by the owner and provide verifiable proof of document existence.
+
+### Key Differences from Capsules
+
+**Capsules:**
+- Time locked until specific date
+- Shared with designated approver
+- Location based unlocking optional
+- Dead hand protocol support
+- Temporary secure sharing
+
+**Vaults:**
+- Always accessible by owner
+- No time or location restrictions
+- Public verification without content disclosure
+- Professional document metadata
+- Permanent secure storage
+
+### Vault Features
+
+1. **Instant Access**: No waiting period, access your documents anytime
+2. **Document Metadata**: Store document type, issuer, and reference ID
+3. **Public Verification**: Generate shareable links that prove document existence without revealing content
+4. **Cryptographic Proof**: IPFS CID and timestamp provide immutable proof
+5. **Separate Storage**: Dedicated IPFS storage separate from capsules
+
+### How Vaults Work
+
+1. **Upload**: Select document and add metadata like type, issuer, document ID
+2. **Encrypt**: File encrypted client side with AES 256 GCM
+3. **Store**: Encrypted file uploaded to dedicated Pinata IPFS vault storage
+4. **Access**: Retrieve and decrypt anytime from your dashboard
+5. **Verify**: Generate public verification links showing metadata and proof without exposing content
+
+### Understanding CID vs Vault ID
+
+**Vault ID (UUID):**
+- Database identifier for the vault record
+- Used to query vault metadata from Supabase
+- Mutable - can be deleted from database
+- Links to application features like dashboard, access control
+- Example: `83353b20-5ca7-43ac-b0e6-5f7433526216`
+
+**CID (Content Identifier):**
+- IPFS hash of the encrypted file content
+- Immutable - content cannot be changed
+- Permanent - exists on IPFS forever
+- Cryptographic proof of file integrity
+- Example: `QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG`
+
+**Why Both?**
+- **Vault ID**: Application layer for access control, metadata, and user management
+- **CID**: Storage layer for immutable content and cryptographic verification
+- **Separation**: Database can be rebuilt from CIDs, but CIDs provide eternal proof independent of any database
+
+**Verification CID:**
+Each vault also has a separate verification CID pointing to a JSON file on IPFS containing:
+- Document metadata (type, issuer, timestamp)
+- Vault CID reference
+- Creator public key
+- File information
+
+This verification file is eternal and can prove document existence even if the TrustCircle website disappears.
+
+### Verification Links
+
+Verification links allow third parties to confirm:
+- Document exists and was uploaded at specific timestamp
+- Document type and issuer information
+- File hash (CID) and size for integrity verification
+- Owner public key for authenticity
+- Immutable proof via IPFS that survives website changes
+
+Verification links do NOT reveal:
+- Encrypted document content
+- Decryption keys
+- File preview or download
+
+### Use Cases
+
+- Professional certifications and credentials
+- Legal contracts and agreements
+- Academic diplomas and transcripts
+- Professional licenses
+- Important business documents
+- Proof of document existence for legal purposes
 
 ---
 
@@ -112,8 +208,9 @@ API credentials are stored in Supabase `app_config` table:
 4. Environment variables in `.env.local` take priority over database config
 
 Dual IPFS storage:
-- Capsules use primary Pinata account (PINATA_JWT)
-- Vaults use secondary Pinata account (PINATA_VAULT_JWT)
+- Capsules use primary Pinata account with PINATA_JWT credentials
+- Vaults use secondary Pinata account with PINATA_VAULT_JWT credentials
+- Separate storage ensures isolation and independent quota management
 
 See [SETUP.md](SETUP.md) for detailed configuration instructions.
 
@@ -132,9 +229,17 @@ User cryptographic keys are generated entirely client-side:
 
 ### Data Flow
 
+**Capsules:**
 ```
 Create: Browser Crypto -> Pinata IPFS -> Supabase metadata
 Unlock: Supabase metadata -> Pinata IPFS -> Browser Crypto decrypt
+```
+
+**Vaults:**
+```
+Create: Browser Crypto -> Pinata Vault IPFS -> Supabase vaults table
+Access: Supabase vaults table -> Pinata Vault IPFS -> Browser Crypto decrypt
+Verify: Supabase vaults table -> Public metadata only no decryption
 ```
 
 ### Security
@@ -158,6 +263,7 @@ Unlock: Supabase metadata -> Pinata IPFS -> Browser Crypto decrypt
 
 ## Database Schema
 
+**Capsules Table:**
 ```sql
 create table capsules (
   id uuid primary key default gen_random_uuid(),
@@ -175,12 +281,28 @@ create table capsules (
   dead_hand_status text,
   warning_sent_at timestamp
 );
-
-create index idx_capsules_creator on capsules(creator_pubkey);
-create index idx_capsules_approver on capsules(approver_pubkey);
 ```
 
-Row Level Security policies ensure users can only access their own capsules.
+**Vaults Table:**
+```sql
+create table vaults (
+  id uuid primary key default gen_random_uuid(),
+  creator_pubkey text not null,
+  title text not null,
+  notes text,
+  document_type text not null,
+  issuer text not null,
+  document_id text,
+  payload_cid text not null,
+  metadata jsonb not null,
+  file_name text,
+  file_size bigint,
+  created_at timestamp default now(),
+  updated_at timestamp default now()
+);
+```
+
+Row Level Security policies ensure users can only access their own capsules and vaults. Public verification access is read only for vault metadata.
 
 ---
 
@@ -197,6 +319,39 @@ See [CHANGELOG.md](CHANGELOG.md) for full version history.
 ---
 
 ## FAQ
+
+### Vaults vs Capsules
+
+**Q: What is the difference between a Vault and a Capsule?**
+
+A: Capsules are time locked containers for sharing files with specific unlock conditions like date, time, and location. Vaults are always accessible encrypted storage for professional documents with public verification capabilities. Use capsules for temporary secure sharing and vaults for permanent document storage.
+
+**Q: When should I use a Vault instead of a Capsule?**
+
+A: Use vaults for:
+- Professional certifications and credentials
+- Legal contracts requiring proof of existence
+- Academic diplomas and transcripts
+- Documents you need to access anytime
+- Documents requiring public verification
+
+Use capsules for:
+- Time sensitive information sharing
+- Location based access requirements
+- Dead hand protocol scenarios
+- Temporary secure file sharing
+
+**Q: Can I share vault contents with others?**
+
+A: Vault contents remain encrypted and accessible only to you. However, you can generate public verification links that prove the document exists and show metadata like document type, issuer, and timestamp without revealing the actual content.
+
+**Q: How does vault verification work?**
+
+A: Verification links display public metadata including document type, issuer, creation timestamp, file hash, and file size. This provides cryptographic proof the document exists without exposing encrypted content or decryption keys. Anyone with the link can verify but cannot access the document.
+
+**Q: Are vaults and capsules stored separately?**
+
+A: Yes, vaults use dedicated Pinata IPFS storage separate from capsules. This ensures isolation, independent quota management, and better organization. Each has separate storage limits and tracking.
 
 ### Storage
 

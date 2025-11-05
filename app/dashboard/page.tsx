@@ -114,21 +114,21 @@ function DashboardContent() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="text-2xl font-bold text-indigo-600 flex items-center gap-2">
-              <span>🔐</span> TrustCircle
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <Link href="/" className="text-xl sm:text-2xl font-bold text-indigo-600 flex items-center gap-2">
+              <span>🔐</span> <span className="hidden sm:inline">TrustCircle</span><span className="sm:hidden">TC</span>
             </Link>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 text-sm">
               {storage && (
-                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg px-3 py-1.5 shadow-sm">
-                  <div className="text-xs font-medium text-gray-700 flex items-center gap-2">
-                    <span>🔒 {(storage.capsules / 1024 / 1024).toFixed(2)}/{(storage.limit / 1024 / 1024).toFixed(0)}MB</span>
+                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg px-2 py-1 sm:px-3 sm:py-1.5 shadow-sm">
+                  <div className="text-xs font-medium text-gray-700 flex items-center gap-1 sm:gap-2">
+                    <span>🔒 {(storage.capsules / 1024 / 1024).toFixed(1)}/{(storage.limit / 1024 / 1024).toFixed(0)}MB</span>
                     <span className="text-gray-400">|</span>
-                    <span>🔐 {(storage.vaults / 1024 / 1024).toFixed(2)}/{(storage.limit / 1024 / 1024).toFixed(0)}MB</span>
+                    <span>🔐 {(storage.vaults / 1024 / 1024).toFixed(1)}/{(storage.limit / 1024 / 1024).toFixed(0)}MB</span>
                   </div>
                 </div>
               )}
-              <Link href="/" className="text-gray-600 hover:text-gray-900">← Back</Link>
+              <Link href="/" className="text-gray-600 hover:text-gray-900 text-sm">← Back</Link>
             </div>
           </div>
         </div>
@@ -144,15 +144,15 @@ function DashboardContent() {
         )}
 
         <div className="bg-white rounded-lg shadow-md">
-          <div className="border-b">
-            <div className="flex">
-              <button onClick={() => setTab('created')} className={`px-6 py-4 font-medium ${tab === 'created' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-600'}`}>
+          <div className="border-b overflow-x-auto">
+            <div className="flex min-w-max">
+              <button onClick={() => setTab('created')} className={`px-3 sm:px-6 py-3 sm:py-4 font-medium text-sm sm:text-base whitespace-nowrap ${tab === 'created' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-600'}`}>
                 Created by Me
               </button>
-              <button onClick={() => setTab('sent')} className={`px-6 py-4 font-medium ${tab === 'sent' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-600'}`}>
+              <button onClick={() => setTab('sent')} className={`px-3 sm:px-6 py-3 sm:py-4 font-medium text-sm sm:text-base whitespace-nowrap ${tab === 'sent' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-600'}`}>
                 Sent to Me
               </button>
-              <button onClick={() => setTab('vaults')} className={`px-6 py-4 font-medium ${tab === 'vaults' ? 'text-amber-600 border-b-2 border-amber-600' : 'text-gray-600'}`}>
+              <button onClick={() => setTab('vaults')} className={`px-3 sm:px-6 py-3 sm:py-4 font-medium text-sm sm:text-base whitespace-nowrap ${tab === 'vaults' ? 'text-amber-600 border-b-2 border-amber-600' : 'text-gray-600'}`}>
                 🔐 Vaults
               </button>
             </div>

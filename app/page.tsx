@@ -3,8 +3,6 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/lib/useAuth'
-import { useIdentity } from '@/lib/hooks'
-import { toBase64 } from '@/lib/crypto'
 
 function FAQItem({ question, answer }: Readonly<{ question: string; answer: string | React.ReactNode }>) {
   const [isOpen, setIsOpen] = useState(false)
@@ -56,24 +54,24 @@ export default function Home() {
     <div className="min-h-screen gradient-bg">
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-indigo-600 flex items-center gap-2">
-              <span>🔐</span> TrustCircle
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold text-indigo-600 flex items-center gap-2">
+              <span>🔐</span> <span className="hidden sm:inline">TrustCircle</span><span className="sm:hidden">TC</span>
             </h1>
             
             {storage && (
-              <div className="absolute left-1/2 transform -translate-x-1/2">
-                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg px-3 py-1.5 shadow-sm">
-                  <div className="text-xs font-medium text-gray-700 flex items-center gap-2">
-                    <span>🔒 {(storage.capsules / 1024 / 1024).toFixed(2)}/{(storage.limit / 1024 / 1024).toFixed(0)}MB</span>
+              <div className="order-last sm:order-none sm:absolute sm:left-1/2 sm:transform sm:-translate-x-1/2 w-full sm:w-auto">
+                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg px-2 py-1 sm:px-3 sm:py-1.5 shadow-sm">
+                  <div className="text-xs font-medium text-gray-700 flex items-center justify-center gap-1 sm:gap-2">
+                    <span>🔒 {(storage.capsules / 1024 / 1024).toFixed(1)}/{(storage.limit / 1024 / 1024).toFixed(0)}MB</span>
                     <span className="text-gray-400">|</span>
-                    <span>🔐 {(storage.vaults / 1024 / 1024).toFixed(2)}/{(storage.limit / 1024 / 1024).toFixed(0)}MB</span>
+                    <span>🔐 {(storage.vaults / 1024 / 1024).toFixed(1)}/{(storage.limit / 1024 / 1024).toFixed(0)}MB</span>
                   </div>
                 </div>
               </div>
             )}
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
               {user ? (
                 <>
                   <span className="text-sm text-gray-600">{user.email}</span>
@@ -336,23 +334,120 @@ export default function Home() {
               question="What is a Vault and how is it different from a Capsule?"
               answer={
                 <div className="space-y-3">
-                  <p>Vaults are designed for professional document storage with cryptographic proof:</p>
+                  <p>Vaults and Capsules serve different purposes for secure file management:</p>
                   <div className="space-y-2">
-                    <p><strong>Capsules:</strong></p>
-                    <p>• Time and location-based unlocking</p>
-                    <p>• Designated approver required</p>
-                    <p>• Perfect for secure file sharing</p>
-                    <p>• Dead Hand protocol support</p>
+                    <p><strong>Capsules - Time Locked Sharing:</strong></p>
+                    <p>• Time and location based unlocking conditions</p>
+                    <p>• Shared with designated approver using their public key</p>
+                    <p>• Perfect for scheduled secure file delivery</p>
+                    <p>• Dead Hand protocol for automatic unlock if inactive</p>
+                    <p>• Temporary secure sharing with unlock countdown</p>
                   </div>
                   <div className="space-y-2">
-                    <p><strong>Vaults:</strong></p>
-                    <p>• Permanent encrypted storage</p>
-                    <p>• Self-access with your own keys</p>
-                    <p>• Cryptographic proof of authenticity</p>
-                    <p>• Separate IPFS storage for isolation</p>
-                    <p>• Ideal for professional documents, certificates, contracts</p>
+                    <p><strong>Vaults - Professional Document Storage:</strong></p>
+                    <p>• Always accessible by you no time locks or waiting</p>
+                    <p>• Store professional documents like certifications, contracts, diplomas</p>
+                    <p>• Generate public verification links to prove document exists</p>
+                    <p>• Document metadata: type, issuer, document ID, timestamp</p>
+                    <p>• Separate IPFS storage isolated from capsules</p>
+                    <p>• Cryptographic proof with IPFS CID and creation timestamp</p>
                   </div>
-                  <p className="pt-2">Both use client-side encryption, but Vaults focus on long-term storage and proof of authenticity.</p>
+                  <p className="pt-2">Use Capsules for sharing files with unlock conditions. Use Vaults for permanent encrypted storage with public verification.</p>
+                </div>
+              }
+            />
+            <FAQItem
+              question="How do Vault verification links work?"
+              answer={
+                <div className="space-y-3">
+                  <p>Verification links let you prove a document exists without revealing its contents:</p>
+                  <div className="space-y-2">
+                    <p><strong>What Verification Shows:</strong></p>
+                    <p>• Document type and category</p>
+                    <p>• Issuer organization or person</p>
+                    <p>• Document ID or reference number</p>
+                    <p>• Creation timestamp proving when uploaded</p>
+                    <p>• IPFS CID file hash for integrity verification</p>
+                    <p>• File size and name</p>
+                    <p>• Your public key for authenticity</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p><strong>What Verification Does NOT Show:</strong></p>
+                    <p>• Encrypted document content</p>
+                    <p>• Decryption keys</p>
+                    <p>• File preview or download</p>
+                    <p>• Any sensitive information from the document</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p><strong>How to Use:</strong></p>
+                    <p>• Open your vault from Dashboard</p>
+                    <p>• Click Generate Verification Link button</p>
+                    <p>• Copy the public URL and share it</p>
+                    <p>• Anyone with the link can verify but not access content</p>
+                  </div>
+                  <p className="pt-2">Perfect for proving credentials to employers, verifying contracts, or demonstrating document authenticity.</p>
+                </div>
+              }
+            />
+            <FAQItem
+              question="When should I use a Vault instead of a Capsule?"
+              answer={
+                <div className="space-y-3">
+                  <p>Choose based on your use case:</p>
+                  <div className="space-y-2">
+                    <p><strong>Use Vaults For:</strong></p>
+                    <p>• Professional certifications and credentials you need to access anytime</p>
+                    <p>• Legal contracts requiring proof of existence and timestamp</p>
+                    <p>• Academic diplomas and transcripts for verification</p>
+                    <p>• Professional licenses that need public verification</p>
+                    <p>• Important business documents you access frequently</p>
+                    <p>• Documents where you need to prove authenticity to third parties</p>
+                    <p>• Long term storage without unlock conditions</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p><strong>Use Capsules For:</strong></p>
+                    <p>• Sharing files that unlock at specific future date and time</p>
+                    <p>• Location restricted access requiring GPS verification</p>
+                    <p>• Dead Hand scenarios for emergency access if inactive</p>
+                    <p>• Temporary secure file sharing with another person</p>
+                    <p>• Time sensitive information delivery</p>
+                    <p>• Files that need approval from designated recipient</p>
+                  </div>
+                  <p className="pt-2">Vaults are for your own permanent storage with verification. Capsules are for conditional sharing with others.</p>
+                </div>
+              }
+            />
+            <FAQItem
+              question="How do I create and manage Vaults?"
+              answer={
+                <div className="space-y-3">
+                  <p>Creating and managing vaults is simple:</p>
+                  <div className="space-y-2">
+                    <p><strong>Creating a Vault:</strong></p>
+                    <p>• Click Create Vault from home page</p>
+                    <p>• Upload your document file</p>
+                    <p>• Enter title and optional description</p>
+                    <p>• Select document type: Certification, Contract, Diploma, License, etc</p>
+                    <p>• Enter issuer name: organization or person who issued document</p>
+                    <p>• Add document ID or reference number if applicable</p>
+                    <p>• Click Create Vault to encrypt and store</p>
+                    <p>• File encrypted client side before upload to IPFS</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p><strong>Accessing Your Vaults:</strong></p>
+                    <p>• Go to Dashboard and click Vaults tab</p>
+                    <p>• See all your vaults with metadata</p>
+                    <p>• Click any vault to view and download</p>
+                    <p>• No waiting period, instant access anytime</p>
+                    <p>• Decrypt happens in your browser with your keys</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p><strong>Verification:</strong></p>
+                    <p>• Open vault and click Generate Verification Link</p>
+                    <p>• Share link with employers, institutions, or anyone</p>
+                    <p>• They can verify document exists without seeing content</p>
+                  </div>
+                  <p className="pt-2">Vaults use separate IPFS storage from capsules for better organization and quota management.</p>
                 </div>
               }
             />
@@ -393,6 +488,46 @@ export default function Home() {
                     <p>• Disable Dead Hand completely if needed</p>
                   </div>
                   <p className="pt-2">Use cases: Estate planning, emergency access, business continuity, digital legacy.</p>
+                </div>
+              }
+            />
+            <FAQItem
+              question="What is the difference between Vault ID and CID?"
+              answer={
+                <div className="space-y-3">
+                  <p>Vaults use two different identifiers that serve distinct purposes:</p>
+                  <div className="space-y-2">
+                    <p><strong>Vault ID (UUID):</strong></p>
+                    <p>• Database identifier like 83353b20-5ca7-43ac-b0e6-5f7433526216</p>
+                    <p>• Used to query vault metadata from Supabase database</p>
+                    <p>• Mutable - can be deleted from database</p>
+                    <p>• Links to application features like dashboard and access control</p>
+                    <p>• Needed to access vault through TrustCircle website</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p><strong>CID (Content Identifier):</strong></p>
+                    <p>• IPFS hash like QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG</p>
+                    <p>• Cryptographic hash of the encrypted file content</p>
+                    <p>• Immutable - content cannot be changed</p>
+                    <p>• Permanent - exists on IPFS forever</p>
+                    <p>• Provides cryptographic proof of file integrity</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p><strong>Why Both?</strong></p>
+                    <p>• Vault ID: Application layer for user management and features</p>
+                    <p>• CID: Storage layer for immutable content and verification</p>
+                    <p>• Separation: Database can be rebuilt from CIDs</p>
+                    <p>• CIDs provide eternal proof independent of any database or website</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p><strong>Verification CID:</strong></p>
+                    <p>• Each vault also has a verification CID</p>
+                    <p>• Points to JSON file on IPFS with document metadata</p>
+                    <p>• Contains: type, issuer, timestamp, vault CID, creator key</p>
+                    <p>• Eternal proof that survives even if TrustCircle website disappears</p>
+                    <p>• Share verification CID to prove document existence forever</p>
+                  </div>
+                  <p className="pt-2">The verification link uses the verification CID to provide permanent, immutable proof of your document on IPFS.</p>
                 </div>
               }
             />

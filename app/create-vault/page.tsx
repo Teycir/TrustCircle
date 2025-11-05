@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useIdentity } from '@/lib/hooks'
-import { getClient, fileToUint8Array } from '@/lib/client'
+import { getVaultClient, fileToUint8Array } from '@/lib/client'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { CopyButton } from '@/components/CopyButton'
 
@@ -27,10 +27,10 @@ function CreateVaultContent() {
     setError(null)
 
     try {
-      const client = getClient()
+      const vaultClient = getVaultClient()
       const fileData = await fileToUint8Array(file)
 
-      const vaultId = await client.createVault({
+      const vaultId = await vaultClient.createVault({
         files: fileData,
         creatorKeys: identity,
         title,

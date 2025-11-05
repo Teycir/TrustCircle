@@ -2,6 +2,34 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [2.8.0] - 2025-01-09
+
+### Added
+- Separate VaultManager class for better code organization
+- Common storage utilities module for shared functions
+- Eternal IPFS verification links for vaults independent of website
+- Verification JSON files uploaded to IPFS with vault metadata
+- FAQ explaining difference between Vault ID and CID
+- Comprehensive CID vs Vault ID documentation in README
+
+### Changed
+- Refactored vault creation to use dedicated VaultManager
+- Extracted common encryption and storage functions to storage-common module
+- Vault verification now uses direct IPFS links instead of website URLs
+- Improved mobile responsiveness for storage display and dashboard tabs
+- Storage display shows abbreviated "TC" on mobile devices
+- Reduced storage decimal precision from 2 to 1 for compact display
+
+### Fixed
+- Ambiguous storage_type column reference in SQL triggers
+- RLS policies for user_storage_quota and global_storage_limits tables
+- Mobile layout issues with storage frame and navigation
+- Dashboard tabs now scroll horizontally on mobile
+
+### Removed
+- Obsolete 'total' storage_type from global_storage_limits table
+- Unused imports in capsule and vault modules
+
 ## [2.7.1] - 2025-01-09
 
 ### Changed

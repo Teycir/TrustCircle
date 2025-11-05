@@ -1,9 +1,11 @@
 import { CapsuleManager } from "./capsule";
+import { VaultManager } from "./vault";
 import { PinataClient } from "./pinata";
 import { TrustCircleDB } from "./supabase";
 import { getConfig } from "./config";
 
 let clientInstance: CapsuleManager | null = null;
+let vaultInstance: VaultManager | null = null;
 let lastConfig = "";
 
 export function getClient(): CapsuleManager {
@@ -28,6 +30,26 @@ export function getClient(): CapsuleManager {
   }
 
   return clientInstance;
+}
+
+export function getVaultClient(): VaultManager {
+  const vaultApiKey = getConfig("vaultPinataJWT");
+  const supabaseUrl = getConfig("supabaseUrl");
+  const supabaseKey = getConfig("supabaseAnonKey");
+
+  if (!vaultApiKey) throw new Error("NEXT_PUBLIC_VAULT_PINATA_JWT not configured");
+  if (!supabaseUrl) throw new Error("NEXT_PUBLIC_SUPABASE_URL not configured");
+  if (!supabaseKey) throw new Error("NEXT_PUBLIC_SUPABASE_ANON_KEY not configured");
+
+  const currentConfig = `${vaultApiKey}|${supabaseUrl}|${supabaseKey}`;
+  if (!vaultInstance || lastConfig !== currentConfig) {
+    const pinata = new PinataClient(vaultApiKey, process.env.NEXT_PUBLIC_PINATA_GATEWAY);
+    const db = new TrustCircleDB(supabaseUrl, supabaseKey, pinata);
+    vaultInstance = new VaultManager(pinata, db);
+    lastConfig = currentConfig;
+  }
+
+  return vaultInstance;
 }
 
 export async function fileToUint8Array(file: File): Promise<Uint8Array> {
@@ -63,5 +85,4 @@ export async function getVaultStorageUsage(): Promise<{ used: number; limit: num
   const pinata = new PinataClient(apiKey)
   return await pinata.getStorageUsage()
 }
-
 

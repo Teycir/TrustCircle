@@ -1,6 +1,5 @@
 import {
   generateIdentity,
-  aesGcmEncrypt,
   aesGcmDecrypt,
   wrapCmkForRecipient,
   unwrapCmk,
@@ -17,8 +16,8 @@ import {
 } from "./policy";
 import { PinataClient } from "./pinata";
 import { TrustCircleDB, type CapsuleRecord } from "./supabase";
-import { compress, decompress } from "./compression";
-import { validateFileSize } from "./validation";
+import { decompress } from "./compression";
+import { checkStorageSpace, prepareAndEncryptFile, uploadEncryptedFile } from "./storage-common";
 
 export interface CapsuleMetadata {
   version: string;
@@ -63,18 +62,6 @@ export interface UnlockCapsuleParams {
   capsuleId: string;
   approverKeys: Awaited<ReturnType<typeof generateIdentity>>;
   context: DeviceContext;
-}
-
-export interface CreateVaultParams {
-  files: Uint8Array;
-  creatorKeys: Awaited<ReturnType<typeof generateIdentity>>;
-  title: string;
-  notes?: string;
-  documentType: string;
-  issuer: string;
-  documentId?: string;
-  fileName: string;
-  fileSize: number;
 }
 
 function haversineDistance(
@@ -135,30 +122,15 @@ export class CapsuleManager {
 
   async createCapsule(params: CreateCapsuleParams): Promise<string> {
     try {
-      validateFileSize(params.files.length);
-
-      const usage = await this.pinata.getStorageUsage();
-      const availableSpace = usage.limit - usage.used;
-      const estimatedSize = params.files.length * 1.2;
-
-      if (estimatedSize > availableSpace) {
-        const availableMB = (availableSpace / 1024 / 1024).toFixed(2);
-        const requiredMB = (estimatedSize / 1024 / 1024).toFixed(2);
-        throw new Error(
-          `Not enough storage space. Available: ${availableMB} MB, Required: ${requiredMB} MB`,
-        );
-      }
-
-      await this.pinata.purgeOldFiles(0.9);
+      await checkStorageSpace(this.pinata, params.files.length);
 
       const cmk = crypto.getRandomValues(new Uint8Array(32));
-      const compressed = compress(params.files);
-      const cipherArchive = await aesGcmEncrypt(cmk, compressed);
+      const cipherArchive = await prepareAndEncryptFile(params.files, cmk);
       const timestamp = Date.now();
       const filename = params.title
         ? `${params.title}_${timestamp}.encrypted`
         : `capsule_${timestamp}.encrypted`;
-      const payloadCid = await this.pinata.uploadBytes(cipherArchive, filename);
+      const payloadCid = await uploadEncryptedFile(this.pinata, cipherArchive, filename);
 
       const wrap = await wrapCmkForRecipient(cmk, params.approverPubkey.x25519);
 
@@ -273,70 +245,4 @@ export class CapsuleManager {
     }
   }
 
-  async createVault(params: CreateVaultParams): Promise<string> {
-    try {
-      validateFileSize(params.files.length);
-
-      const { getConfig } = await import('./config');
-      const vaultPinataJWT = getConfig('vaultPinataJWT') || process.env.NEXT_PUBLIC_VAULT_PINATA_JWT;
-      
-      if (!vaultPinataJWT) {
-        throw new Error('Vault Pinata JWT not configured');
-      }
-
-      const { PinataClient } = await import('./pinata');
-      const vaultPinata = new PinataClient(vaultPinataJWT, process.env.NEXT_PUBLIC_PINATA_GATEWAY);
-
-      const usage = await vaultPinata.getStorageUsage();
-      const availableSpace = usage.limit - usage.used;
-      const estimatedSize = params.files.length * 1.2;
-
-      if (estimatedSize > availableSpace) {
-        const availableMB = (availableSpace / 1024 / 1024).toFixed(2);
-        const requiredMB = (estimatedSize / 1024 / 1024).toFixed(2);
-        throw new Error(
-          `Not enough storage space. Available: ${availableMB} MB, Required: ${requiredMB} MB`,
-        );
-      }
-
-      await vaultPinata.purgeOldFiles(0.9);
-
-      const cmk = crypto.getRandomValues(new Uint8Array(32));
-      const compressed = compress(params.files);
-      const cipherArchive = await aesGcmEncrypt(cmk, compressed);
-      const timestamp = Date.now();
-      const filename = `vault_${params.title}_${timestamp}.encrypted`;
-      const payloadCid = await vaultPinata.uploadBytes(cipherArchive, filename);
-
-      const metadata = {
-        version: '1.0',
-        creator_pubkey: `ed25519:${toBase64(params.creatorKeys.ed25519.publicKey)}`,
-        payload_cid: payloadCid,
-        created_at: new Date().toISOString(),
-        encrypted_cmk: toBase64(cmk),
-        file_name: params.fileName,
-        file_size: params.fileSize,
-      };
-
-      const vaultId = await this.db.saveVault({
-        creator_pubkey: metadata.creator_pubkey,
-        title: params.title,
-        notes: params.notes,
-        document_type: params.documentType,
-        issuer: params.issuer,
-        document_id: params.documentId,
-        payload_cid: payloadCid,
-        metadata,
-        file_name: params.fileName,
-        file_size: params.fileSize,
-      }, metadata.creator_pubkey);
-
-      return vaultId;
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Vault creation failed: ${error.message}`);
-      }
-      throw error;
-    }
-  }
 }
