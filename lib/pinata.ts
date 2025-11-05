@@ -50,25 +50,25 @@ export class PinataClient {
   }
 
   async getStorageUsage(): Promise<{ used: number; limit: number; percentage: number }> {
-    const response = await fetch('https://api.pinata.cloud/data/pinList?status=pinned&pageLimit=1000', {
+    // Get account info for actual storage limit
+    const accountResponse = await fetch('https://api.pinata.cloud/data/userPinnedDataTotal', {
       headers: { Authorization: `Bearer ${this.apiKey}` }
     })
 
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => response.statusText)
-      console.error('[Pinata] Storage API error:', response.status, errorText)
-      throw new Error(`Failed to get storage usage: ${errorText}`)
+    if (!accountResponse.ok) {
+      const errorText = await accountResponse.text().catch(() => accountResponse.statusText)
+      console.error('[Pinata] Account API error:', accountResponse.status, errorText)
+      throw new Error(`Failed to get account info: ${errorText}`)
     }
 
-    const data = await response.json()
-    console.log('[Pinata] Storage API response:', { rowCount: data?.rows?.length, data })
-    
-    if (!data?.rows || !Array.isArray(data.rows)) throw new Error('Invalid response format')
+    const accountData = await accountResponse.json()
+    console.log('[Pinata] Account data:', accountData)
 
-    const used = data.rows.reduce((sum: number, row: any) => sum + (row.size || 0), 0)
-    const limit = 1073741824
+    // Extract used storage and limit from account data
+    const used = accountData?.pin_size_total || 0
+    const limit = accountData?.pin_size_with_replications_limit || 1073741824 // fallback to 1GB
     
-    console.log('[Pinata] Calculated storage:', { used, limit, percentage: (used / limit) * 100, fileCount: data.rows.length })
+    console.log('[Pinata] Storage info:', { used, limit, percentage: (used / limit) * 100 })
 
     return { used, limit, percentage: (used / limit) * 100 }
   }
