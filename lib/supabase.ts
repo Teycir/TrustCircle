@@ -148,9 +148,12 @@ export class TrustCircleDB {
     const deletedCapsules = capsules.filter(c => !existingCapsules.find(ec => ec.id === c.id));
 
     for (const capsule of deletedCapsules) {
-      await this.client.from("capsules").delete().eq("id", capsule.id).then(() => {
+      try {
+        await this.client.from("capsules").delete().eq("id", capsule.id);
         console.log(`[DB] Cleaned up capsule ${capsule.id} - file no longer on IPFS`);
-      }).catch(err => console.error(`[DB] Failed to clean capsule ${capsule.id}:`, err));
+      } catch (err) {
+        console.error(`[DB] Failed to clean capsule ${capsule.id}:`, err);
+      }
     }
 
     this.listCache.set(cacheKey, { data: existingCapsules, timestamp: Date.now() });
@@ -359,9 +362,12 @@ export class TrustCircleDB {
     const deletedVaults = vaults.filter(v => !existingVaults.find(ev => ev.id === v.id));
 
     for (const vault of deletedVaults) {
-      await this.client.from("vaults").delete().eq("id", vault.id).then(() => {
+      try {
+        await this.client.from("vaults").delete().eq("id", vault.id);
         console.log(`[DB] Cleaned up vault ${vault.id} - file no longer on IPFS`);
-      }).catch(err => console.error(`[DB] Failed to clean vault ${vault.id}:`, err));
+      } catch (err) {
+        console.error(`[DB] Failed to clean vault ${vault.id}:`, err);
+      }
     }
 
     return existingVaults;
