@@ -2,6 +2,24 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [2.8.2] - 2025-01-09
+
+### Added
+- FAQ explaining the two CIDs in vaults (Encrypted File CID vs Verification CID)
+- FAQ about IPFS gateways and multiple gateway options
+- FAQ clarifying TrustCircle's independence from Pinata
+- File name now stored with capsule metadata
+- Emoji icons for dashboard tabs (🔒 for Created, 📨 for Sent)
+
+### Changed
+- Improved README documentation for vault CID explanation
+- Enhanced IPFS gateway independence documentation
+- Simplified home page tagline to "Secure file storage and sharing"
+- Refactored unlock page variable names for better clarity
+
+### Fixed
+- Better separation of encrypted content vs public verification proof concepts
+
 ## [2.8.1] - 2025-01-09
 
 ### Added

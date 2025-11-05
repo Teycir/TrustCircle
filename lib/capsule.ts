@@ -40,6 +40,7 @@ export interface CapsuleMetadata {
   hints?: {
     title?: string;
     notes?: string;
+    file_name?: string;
     location?: {
       latitude: number;
       longitude: number;
@@ -56,6 +57,7 @@ export interface CreateCapsuleParams {
   title?: string;
   notes?: string;
   expiresAt?: string;
+  fileName?: string;
 }
 
 export interface UnlockCapsuleParams {
@@ -147,7 +149,7 @@ export class CapsuleManager {
           ephemeral_pub: `x25519:${toBase64(wrap.ephemeralPub)}`,
           nonce: toBase64(wrap.nonce),
         },
-        hints: { title: params.title, notes: params.notes },
+        hints: { title: params.title, notes: params.notes, file_name: params.fileName },
       };
 
       const signature = signMetadata(
@@ -228,10 +230,7 @@ export class CapsuleManager {
       const approverPubkey = `ed25519:${toBase64(params.approverKeys.ed25519.publicKey)}`;
       await this.db.updateStatus(params.capsuleId, "unlocked", approverPubkey);
 
-      const timestamp = new Date(metadata.created_at).getTime();
-      const filename = metadata.hints?.title
-        ? `${metadata.hints.title}_${timestamp}`
-        : `capsule_${timestamp}`;
+      const filename = metadata.hints?.file_name || metadata.hints?.title || 'capsule_file';
 
       return { data: archive, filename };
     } catch (error) {

@@ -95,7 +95,7 @@ export default function Home() {
             Privacy-First Secure Data Sharing
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Lock files with time and location conditions. Only the designated approver can unlock them.
+            Secure file storage and sharing.
           </p>
         </div>
 
@@ -528,6 +528,83 @@ export default function Home() {
                     <p>• Share verification CID to prove document existence forever</p>
                   </div>
                   <p className="pt-2">The verification link uses the verification CID to provide permanent, immutable proof of your document on IPFS.</p>
+                </div>
+              }
+            />
+            <FAQItem
+              question="What are the two CIDs in my vault?"
+              answer={
+                <div className="space-y-3">
+                  <p>Each vault has two different IPFS Content Identifiers serving different purposes:</p>
+                  <div className="space-y-2">
+                    <p><strong>Encrypted File CID:</strong></p>
+                    <p>• Your actual document stored encrypted on IPFS</p>
+                    <p>• Private and secure - only you can decrypt with your keys</p>
+                    <p>• Cannot be accessed or viewed by anyone else</p>
+                    <p>• Permanent storage of your encrypted file</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p><strong>Verification CID:</strong></p>
+                    <p>• Public metadata JSON file on IPFS</p>
+                    <p>• Contains document info: type, issuer, timestamp</p>
+                    <p>• Does NOT contain your actual document or decryption keys</p>
+                    <p>• Shareable proof that document exists</p>
+                    <p>• Anyone can view metadata but not the document content</p>
+                  </div>
+                  <p className="pt-2">This separation lets you prove a document exists without revealing what's inside.</p>
+                </div>
+              }
+            />
+            <FAQItem
+              question="What is an IPFS gateway and why are there multiple options?"
+              answer={
+                <div className="space-y-3">
+                  <p>IPFS gateways provide web browser access to IPFS content:</p>
+                  <div className="space-y-2">
+                    <p><strong>What is a Gateway?</strong></p>
+                    <p>• Web servers that let you access IPFS through HTTP</p>
+                    <p>• Think of them as different doors to the same building</p>
+                    <p>• The CID is the permanent address</p>
+                    <p>• Gateways are just different ways to access it</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p><strong>Available Gateways:</strong></p>
+                    <p>• gateway.pinata.cloud - Pinata's gateway</p>
+                    <p>• ipfs.io - Public IPFS gateway</p>
+                    <p>• cloudflare-ipfs.com - Cloudflare's gateway</p>
+                    <p>• Any other public or private IPFS gateway</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p><strong>Why Multiple Gateways?</strong></p>
+                    <p>• No single company controls IPFS</p>
+                    <p>• If one gateway is down, use another</p>
+                    <p>• True decentralization and independence</p>
+                    <p>• Your proof remains accessible even if one service fails</p>
+                  </div>
+                  <p className="pt-2">Use the CID with any gateway: gateway.example.com/ipfs/[YOUR_CID]</p>
+                </div>
+              }
+            />
+            <FAQItem
+              question="Is TrustCircle dependent on Pinata?"
+              answer={
+                <div className="space-y-3">
+                  <p>TrustCircle uploads to Pinata but your data is not locked to them:</p>
+                  <div className="space-y-2">
+                    <p><strong>What Pinata Provides:</strong></p>
+                    <p>• Reliable IPFS pinning service for uploads</p>
+                    <p>• Fast gateway for accessing content</p>
+                    <p>• Storage infrastructure</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p><strong>Your Independence:</strong></p>
+                    <p>• Data stored on IPFS, not just Pinata</p>
+                    <p>• CIDs work with any IPFS gateway</p>
+                    <p>• Can access via ipfs.io, Cloudflare, or any gateway</p>
+                    <p>• Verification proof survives even if Pinata disappears</p>
+                    <p>• You can run your own IPFS node to access the data</p>
+                  </div>
+                  <p className="pt-2">The CID is the permanent identifier - gateways are just access methods.</p>
                 </div>
               }
             />

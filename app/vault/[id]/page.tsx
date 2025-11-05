@@ -154,10 +154,10 @@ function VaultViewContent() {
           </div>
 
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <h4 className="font-semibold text-gray-900 mb-3">Cryptographic Proof</h4>
+            <h4 className="font-semibold text-gray-900 mb-3">Storage Information</h4>
             <div className="space-y-2">
               <div>
-                <span className="text-xs font-medium text-gray-600">IPFS CID:</span>
+                <span className="text-xs font-medium text-gray-600">Encrypted File CID:</span>
                 <div className="flex items-center gap-2 mt-1">
                   <code className="flex-1 text-xs bg-white p-2 rounded font-mono text-gray-700 break-all">{vault.payload_cid}</code>
                   <CopyButton text={vault.payload_cid} label="Copy" />
@@ -175,16 +175,52 @@ function VaultViewContent() {
 
           {vault.metadata?.verification_cid && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h4 className="font-semibold text-blue-900 mb-3">🌐 Eternal Verification Link</h4>
-              <p className="text-sm text-blue-800 mb-3">This verification proof is stored permanently on IPFS and will exist forever, independent of any website.</p>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 text-xs bg-white p-2 rounded font-mono text-gray-700 break-all">
-                  {`https://gateway.pinata.cloud/ipfs/${vault.metadata.verification_cid}`}
-                </code>
-                <CopyButton text={`https://gateway.pinata.cloud/ipfs/${vault.metadata.verification_cid}`} label="Copy" />
+              <h4 className="font-semibold text-blue-900 mb-3">🌐 Public Verification Proof</h4>
+              <p className="text-sm text-blue-800 mb-3">Share this proof to verify document authenticity without revealing content.</p>
+              <div className="space-y-2">
+                <div>
+                  <label className="text-xs text-blue-700 font-medium">Verification CID:</label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <code className="flex-1 text-xs bg-white p-2 rounded font-mono text-gray-700 break-all">
+                      {vault.metadata.verification_cid}
+                    </code>
+                    <CopyButton text={vault.metadata.verification_cid} label="Copy" />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-blue-700 font-medium">Access via IPFS Gateways:</label>
+                  <p className="text-xs text-blue-600 mt-1">Use the CID above with any IPFS gateway:</p>
+                  <ul className="text-xs text-blue-700 mt-2 space-y-1 list-disc list-inside">
+                    <li>gateway.pinata.cloud/ipfs/[CID]</li>
+                    <li>ipfs.io/ipfs/[CID]</li>
+                    <li>cloudflare-ipfs.com/ipfs/[CID]</li>
+                    <li>Or any other public IPFS gateway</li>
+                  </ul>
+                </div>
               </div>
             </div>
           )}
+
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <h4 className="font-semibold text-purple-900 mb-3">❓ Understanding Your Vault</h4>
+            <div className="space-y-3 text-sm text-purple-800">
+              <div>
+                <p className="font-medium mb-1">What are the two CIDs?</p>
+                <ul className="space-y-1 text-xs list-disc list-inside">
+                  <li><strong>Encrypted File CID:</strong> Your actual document, encrypted and private. Only you can decrypt it with your keys.</li>
+                  <li><strong>Verification CID:</strong> Public metadata (title, type, issuer, timestamp) that proves the document exists without revealing its content.</li>
+                </ul>
+              </div>
+              <div>
+                <p className="font-medium mb-1">What is an IPFS Gateway?</p>
+                <p className="text-xs">IPFS gateways are web servers that let you access IPFS content through a regular web browser. Think of them like different doors to the same building - the CID is the address, and gateways are different entrances. If one gateway is down, you can use another with the same CID.</p>
+              </div>
+              <div>
+                <p className="font-medium mb-1">Why use multiple gateways?</p>
+                <p className="text-xs">No single company controls IPFS. By supporting multiple gateways (Pinata, IPFS.io, Cloudflare, etc.), your verification proof remains accessible even if one service has issues. This makes your proof truly decentralized and independent.</p>
+              </div>
+            </div>
+          </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
             <button

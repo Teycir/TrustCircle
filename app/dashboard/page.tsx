@@ -147,10 +147,10 @@ function DashboardContent() {
           <div className="border-b overflow-x-auto">
             <div className="flex min-w-max">
               <button onClick={() => setTab('created')} className={`px-3 sm:px-6 py-3 sm:py-4 font-medium text-sm sm:text-base whitespace-nowrap ${tab === 'created' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-600'}`}>
-                Created by Me
+                🔒 Capsules Created by Me
               </button>
               <button onClick={() => setTab('sent')} className={`px-3 sm:px-6 py-3 sm:py-4 font-medium text-sm sm:text-base whitespace-nowrap ${tab === 'sent' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-600'}`}>
-                Sent to Me
+                📨 Capsules Sent to Me
               </button>
               <button onClick={() => setTab('vaults')} className={`px-3 sm:px-6 py-3 sm:py-4 font-medium text-sm sm:text-base whitespace-nowrap ${tab === 'vaults' ? 'text-amber-600 border-b-2 border-amber-600' : 'text-gray-600'}`}>
                 🔐 Vaults

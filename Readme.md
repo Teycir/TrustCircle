@@ -76,26 +76,45 @@ Vaults are encrypted document storage containers designed for professional use c
 - Links to application features like dashboard, access control
 - Example: `83353b20-5ca7-43ac-b0e6-5f7433526216`
 
-**CID (Content Identifier):**
-- IPFS hash of the encrypted file content
+**Encrypted File CID:**
+- IPFS hash of your encrypted document
 - Immutable - content cannot be changed
 - Permanent - exists on IPFS forever
-- Cryptographic proof of file integrity
+- Private - only you can decrypt with your keys
 - Example: `QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG`
 
-**Why Both?**
-- **Vault ID**: Application layer for access control, metadata, and user management
-- **CID**: Storage layer for immutable content and cryptographic verification
-- **Separation**: Database can be rebuilt from CIDs, but CIDs provide eternal proof independent of any database
-
 **Verification CID:**
-Each vault also has a separate verification CID pointing to a JSON file on IPFS containing:
-- Document metadata (type, issuer, timestamp)
-- Vault CID reference
-- Creator public key
-- File information
+- IPFS hash of public metadata JSON
+- Contains document info (type, issuer, timestamp) but NOT the file content
+- Shareable - anyone can view to verify document exists
+- Accessible via any IPFS gateway
+- Example: `QmUXt4ET3Js4BwFcEp3iAGUB1WSMQsQ3rHM5uX4rtqqhmB`
 
-This verification file is eternal and can prove document existence even if the TrustCircle website disappears.
+**Why Two CIDs?**
+- **Encrypted File CID**: Your private document, encrypted and secure
+- **Verification CID**: Public proof of document existence without revealing content
+- **Separation**: You can prove a document exists without exposing what's inside
+
+### IPFS Gateway Independence
+
+While TrustCircle uploads to Pinata, the verification proof is accessible through any IPFS gateway:
+
+**What is an IPFS Gateway?**
+- Web servers that provide HTTP access to IPFS content
+- Think of them as different doors to the same building
+- The CID is the permanent address, gateways are just access points
+
+**Multiple Gateway Options:**
+- `gateway.pinata.cloud/ipfs/[CID]` - Pinata's gateway
+- `ipfs.io/ipfs/[CID]` - Public IPFS gateway
+- `cloudflare-ipfs.com/ipfs/[CID]` - Cloudflare's gateway
+- Any other public or private IPFS gateway
+
+**Why This Matters:**
+- No single company controls access to your verification proof
+- If one gateway is down, use another with the same CID
+- True decentralization - your proof exists independently of any service
+- Even if TrustCircle or Pinata disappear, the CID remains valid on IPFS
 
 ### Verification Links
 
@@ -104,12 +123,13 @@ Verification links allow third parties to confirm:
 - Document type and issuer information
 - File hash (CID) and size for integrity verification
 - Owner public key for authenticity
-- Immutable proof via IPFS that survives website changes
+- Immutable proof via IPFS accessible through any gateway
 
 Verification links do NOT reveal:
 - Encrypted document content
 - Decryption keys
 - File preview or download
+- Any sensitive information from the document
 
 ### Use Cases
 

@@ -102,7 +102,8 @@ function CreateCapsuleContent() {
         policy: { conditions, logic: 'ALL' },
         title,
         notes,
-        expiresAt: expiresAt ? new Date(expiresAt).toISOString() : undefined
+        expiresAt: expiresAt ? new Date(expiresAt).toISOString() : undefined,
+        fileName: file.name
       })
 
       if (enableDeadHand && deadHandDate) {
