@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://trustcircle.app'
+  const baseUrl = 'https://thetrustcircle.vercel.app'
   
   return [
     {

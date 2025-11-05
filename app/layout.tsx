@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     'AES-256-GCM',
     'location-based access',
   ],
-  authors: [{ name: 'TrustCircle', url: 'https://trustcircle.app' }],
+  authors: [{ name: 'TrustCircle', url: 'https://thetrustcircle.vercel.app' }],
   creator: 'TrustCircle',
   publisher: 'TrustCircle',
   formatDetection: {
@@ -38,14 +38,14 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://trustcircle.app'),
+  metadataBase: new URL('https://thetrustcircle.vercel.app'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     title: 'TrustCircle - Privacy-First Secure Data Sharing',
     description: 'End-to-end encrypted file sharing with time and location-based unlocking. Store documents securely with cryptographic proof.',
-    url: 'https://trustcircle.app',
+    url: 'https://thetrustcircle.vercel.app',
     siteName: 'TrustCircle',
     locale: 'en_US',
     type: 'website',

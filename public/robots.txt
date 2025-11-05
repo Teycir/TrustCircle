@@ -9,4 +9,4 @@ Disallow: /vault/
 Disallow: /verify/
 
 # Sitemap
-Sitemap: https://trustcircle.app/sitemap.xml
+Sitemap: https://thetrustcircle.vercel.app/sitemap.xml
