@@ -3,8 +3,8 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
 
 interface CacheContextType {
-  get: (key: string) => any
-  set: (key: string, value: any, ttl?: number) => void
+  get: (key: string) => unknown
+  set: (key: string, value: unknown, ttl?: number) => void
   invalidate: (key: string) => void
   clear: () => void
 }
@@ -12,7 +12,7 @@ interface CacheContextType {
 const CacheContext = createContext<CacheContextType | null>(null)
 
 export function CacheProvider({ children }: { children: ReactNode }) {
-  const [cache, setCache] = useState<Map<string, { value: any; expires: number }>>(new Map())
+  const [cache, setCache] = useState<Map<string, { value: unknown; expires: number }>>(new Map())
 
   const get = useCallback((key: string) => {
     const item = cache.get(key)
@@ -28,7 +28,7 @@ export function CacheProvider({ children }: { children: ReactNode }) {
     return item.value
   }, [cache])
 
-  const set = useCallback((key: string, value: any, ttl = 60000) => {
+  const set = useCallback((key: string, value: unknown, ttl = 60000) => {
     setCache(prev => new Map(prev).set(key, {
       value,
       expires: Date.now() + ttl

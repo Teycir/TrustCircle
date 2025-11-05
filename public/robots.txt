@@ -1,0 +1,12 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow private pages
+Disallow: /api/
+Disallow: /capsule/
+Disallow: /vault/
+Disallow: /verify/
+
+# Sitemap
+Sitemap: https://trustcircle.app/sitemap.xml

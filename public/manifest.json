@@ -1,0 +1,36 @@
+{
+  "name": "TrustCircle - Privacy-First Secure Data Sharing",
+  "short_name": "TrustCircle",
+  "description": "End-to-end encrypted file sharing with time and location-based unlocking",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "security", "utilities"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Create Capsule",
+      "short_name": "Create",
+      "description": "Create a new time-locked capsule",
+      "url": "/create",
+      "icons": [{ "src": "/icon.svg", "sizes": "96x96" }]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View your capsules and vaults",
+      "url": "/dashboard",
+      "icons": [{ "src": "/icon.svg", "sizes": "96x96" }]
+    }
+  ]
+}

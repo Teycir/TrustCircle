@@ -85,7 +85,7 @@ function haversineDistance(
 }
 
 export function checkLocationCondition(
-  policy: any,
+  policy: { location?: { latitude: number; longitude: number; radius: number } },
   currentLocation: { latitude: number; longitude: number },
 ): void {
   if (!policy.location) return;

@@ -2,6 +2,27 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [2.8.1] - 2025-01-09
+
+### Added
+- Comprehensive SEO metadata with Open Graph and Twitter Cards
+- PWA manifest.json for installable mobile app experience
+- Dynamic sitemap.ts for search engine indexing
+- robots.txt for crawler instructions
+- Favicon with gradient lock icon
+- Global ErrorBoundary component for graceful error handling
+- App shortcuts for quick access to Create and Dashboard
+
+### Changed
+- Enhanced metadata with 14 relevant keywords
+- Improved type safety by replacing `any` with `unknown` and `Record<string, unknown>`
+- Better structured metadata with title templates
+- Added canonical URLs and format detection settings
+
+### Fixed
+- Type safety in cache, validation, and capsule modules
+- Proper TypeScript types for location condition checking
+
 ## [2.8.0] - 2025-01-09
 
 ### Added

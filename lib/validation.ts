@@ -46,7 +46,7 @@ export function validateFileSize(size: number, maxMB = 100): void {
   }
 }
 
-export function sanitizeMetadata(metadata: any): any {
+export function sanitizeMetadata(metadata: Record<string, unknown>): Record<string, unknown> {
   if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
     throw new Error("Metadata must be an object");
   }
@@ -63,7 +63,7 @@ export function sanitizeMetadata(metadata: any): any {
     "approver_pubkey",
     "payload_cid",
   ];
-  const sanitized: any = {};
+  const sanitized: Record<string, unknown> = {};
 
   for (const key of allowed) {
     if (key in metadata) {
