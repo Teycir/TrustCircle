@@ -33,7 +33,7 @@ function UnlockCapsuleContent() {
         const cacheKey = `capsules:${publicKey}`
         
         const cached = cache.get(cacheKey)
-        if (cached) {
+        if (cached && Array.isArray(cached)) {
           setCapsules([...cached].sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()))
           setLoadingList(false)
           return
