@@ -2,6 +2,28 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [2.9.0] - 2025-01-09
+
+### Added
+- Storage warning banners on Create Capsule and Create Vault pages
+- Warning at 80% storage usage with usage statistics
+- Critical alert at 95% storage capacity blocking uploads
+- Comprehensive storage stress testing suite
+- Unit tests for storage quota enforcement with Vitest
+- Integration script for real-world storage stress testing
+- Database-level SQL tests for quota enforcement
+- Storage monitoring scripts and utilities
+- npm scripts for storage testing: test:storage, test:stress, storage:check
+- Documentation guide for storage stress testing
+
+### Changed
+- Storage warnings now display real-time usage percentages
+- Enhanced user feedback for storage capacity issues
+
+### Dependencies
+- Added tsx for TypeScript execution
+- Added dotenv for environment variable management
+
 ## [2.8.2] - 2025-01-09
 
 ### Added

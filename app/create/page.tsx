@@ -13,6 +13,19 @@ import { CopyButton } from '@/components/CopyButton'
 function CreateCapsuleContent() {
   const { identity, getPublicKeyString } = useIdentity()
   const [file, setFile] = useState<File | null>(null)
+  
+  useState(() => {
+    import('@/lib/client').then(({ getStorageUsage }) => getStorageUsage())
+      .then(({ used, limit }) => {
+        const percentage = (used / limit) * 100
+        if (percentage >= 95) {
+          setStorageWarning({ level: 'critical', message: `Storage at ${percentage.toFixed(1)}% (${(used / 1024 / 1024).toFixed(1)}MB/${(limit / 1024 / 1024).toFixed(0)}MB). Uploads blocked.` })
+        } else if (percentage >= 80) {
+          setStorageWarning({ level: 'warning', message: `Storage at ${percentage.toFixed(1)}% (${(used / 1024 / 1024).toFixed(1)}MB/${(limit / 1024 / 1024).toFixed(0)}MB). Consider deleting old capsules.` })
+        }
+      })
+      .catch(() => {})
+  })
   const [approverKey, setApproverKey] = useState('')
   const [title, setTitle] = useState('')
   const [notes, setNotes] = useState('')
@@ -27,6 +40,7 @@ function CreateCapsuleContent() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [storageWarning, setStorageWarning] = useState<{ level: 'warning' | 'critical' | null; message: string }>({ level: null, message: '' })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -154,6 +168,18 @@ function CreateCapsuleContent() {
 
       <main className="max-w-3xl mx-auto px-4 py-6 sm:py-12">
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">Create Capsule</h2>
+
+        {storageWarning.level && (
+          <div className={`border rounded-lg p-4 mb-6 ${
+            storageWarning.level === 'critical' ? 'bg-red-50 border-red-500' : 'bg-yellow-50 border-yellow-500'
+          }`}>
+            <p className={`font-semibold flex items-center gap-2 ${
+              storageWarning.level === 'critical' ? 'text-red-900' : 'text-yellow-900'
+            }`}>
+              {storageWarning.level === 'critical' ? '🚨' : '⚠️'} {storageWarning.message}
+            </p>
+          </div>
+        )}
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
