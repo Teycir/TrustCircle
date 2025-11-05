@@ -172,7 +172,8 @@ Automatic capsule unlocking if the owner becomes inactive, ensuring important in
 ## Technology Stack
 
 - **Framework**: Next.js 14 with App Router and TypeScript
-- **Deployment**: Vercel
+- **Deployment**: Vercel or Docker
+- **Containerization**: Docker with multi-stage builds
 - **UI**: Tailwind CSS with gradient design system
 - **Crypto**: noble-curves for Ed25519/X25519, Web Crypto API for AES-GCM
 - **Storage**: Dual Pinata IPFS (separate for Capsules and Vaults), Supabase for metadata
@@ -193,6 +194,34 @@ Automatic capsule unlocking if the owner becomes inactive, ensuring important in
 4. Create capsules or unlock capsules sent to you
 
 ### For Developers
+
+#### Option 1: Docker (Recommended)
+
+```bash
+# Clone repository
+git clone https://github.com/yourusername/TrustCircle.git
+cd TrustCircle
+
+# Configure environment
+cp .env.example .env
+# Edit .env with your credentials
+
+# Build and run with Docker
+docker compose up -d
+
+# Access at http://localhost:3001
+```
+
+**Docker Benefits:**
+- No Node.js installation required
+- Consistent environment across all systems
+- API keys never baked into image (runtime injection only)
+- Production-ready configuration
+- Multiple ports available (3001-3004)
+
+See [DOCKER.md](DOCKER.md) for detailed Docker deployment guide.
+
+#### Option 2: Local Development
 
 ```bash
 # Clone and install
@@ -326,6 +355,40 @@ Row Level Security policies ensure users can only access their own capsules and 
 
 ---
 
+## Deployment Options
+
+### Docker Deployment
+
+TrustCircle includes production-ready Docker configuration:
+
+**Security Features:**
+- API keys NOT baked into Docker image
+- Placeholder values used during build
+- Real credentials injected at runtime only
+- Non-root user execution (nextjs:nodejs)
+- Health checks and auto-restart
+
+**Quick Deploy:**
+```bash
+cp .env.example .env
+# Edit .env with your credentials
+docker compose up -d
+```
+
+**Access Points:**
+- http://localhost:3001
+- http://localhost:3002
+- http://localhost:3003
+- http://localhost:3004
+
+See [DOCKER.md](DOCKER.md) for complete Docker documentation.
+
+### Vercel Deployment
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for Vercel deployment instructions.
+
+---
+
 ## Recent Updates (v2.5.0)
 
 - 🔧 Removed admin panel UI
@@ -333,6 +396,7 @@ Row Level Security policies ensure users can only access their own capsules and 
 - 🔒 Environment variables prioritized for security
 - 📝 Added setup scripts for easy deployment
 - 🚀 Simplified configuration management
+- 🐳 Docker support with secure credential management
 
 See [CHANGELOG.md](CHANGELOG.md) for full version history.
 

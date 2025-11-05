@@ -1,0 +1,30 @@
+services:
+  trustcircle:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 3001:3000
+      - 3002:3000
+      - 3003:3000
+      - 3004:3000
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - NEXT_PUBLIC_PINATA_JWT=${NEXT_PUBLIC_PINATA_JWT}
+      - NEXT_PUBLIC_PINATA_GATEWAY=${NEXT_PUBLIC_PINATA_GATEWAY}
+      - PINATA_API_KEY=${PINATA_API_KEY}
+      - PINATA_API_SECRET=${PINATA_API_SECRET}
+      - PINATA_JWT=${PINATA_JWT}
+      - NEXT_PUBLIC_PINATA_VAULT_JWT=${NEXT_PUBLIC_PINATA_VAULT_JWT}
+      - PINATA_VAULT_API_KEY=${PINATA_VAULT_API_KEY}
+      - PINATA_VAULT_API_SECRET=${PINATA_VAULT_API_SECRET}
+      - PINATA_VAULT_JWT=${PINATA_VAULT_JWT}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, wget, --quiet, --tries=1, --spider, http://localhost:3000]
+      interval: 30s
+      timeout: 10s
+      retries: 3

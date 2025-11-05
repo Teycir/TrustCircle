@@ -2,6 +2,34 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [2.10.0] - 2025-01-09
+
+### Added
+
+- Docker support with production-ready containerization
+- Multi-stage Dockerfile for optimized image size
+- docker-compose.yml for easy deployment
+- .dockerignore for efficient build context
+- DOCKER.md comprehensive deployment guide
+- DOCKER_STATUS.md with current installation status
+- Multiple port mappings (3001-3004) for flexibility
+- Health checks with wget every 30 seconds
+- Auto-restart policy for high availability
+
+### Changed
+
+- Updated README with Docker deployment option as recommended method
+- Supabase client now uses placeholder values during build for security
+- API keys injected at runtime only, never baked into Docker image
+- Removed obsolete version field from docker-compose.yml
+
+### Security
+
+- Docker images contain only placeholder credentials
+- Real API keys loaded from environment at container startup
+- Non-root user execution in container (nextjs:nodejs)
+- Image can be shared publicly without exposing secrets
+
 ## [2.9.0] - 2025-01-09
 
 ### Added
