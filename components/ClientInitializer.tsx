@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { useIdentity } from '@/lib/hooks'
 import { getClient } from '@/lib/client'
-import { toBase64 } from '@/lib/crypto'
+import { toBase64 } from '@trustcircle/core'
 import { useCache } from '@/lib/cache'
 
 export default function ClientInitializer() {

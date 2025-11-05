@@ -30,21 +30,6 @@ function FAQItem({ question, answer }: Readonly<{ question: string; answer: stri
 
 export default function Home() {
   const { user, signOut } = useAuth()
-  const [storage, setStorage] = useState<{ capsules: number; vaults: number; limit: number } | null>(null)
-
-  useEffect(() => {
-    import('@/lib/client').then(({ getStorageUsage, getVaultStorageUsage }) => {
-      return Promise.all([getStorageUsage(), getVaultStorageUsage()])
-    }).then(([capsulesData, vaultsData]) => {
-      setStorage({
-        capsules: capsulesData.used,
-        vaults: vaultsData.used,
-        limit: capsulesData.limit
-      })
-    }).catch((err) => {
-      console.error('[HOME] Storage load error:', err)
-    })
-  }, [])
 
   const handleSignOut = () => {
     signOut()
@@ -58,29 +43,6 @@ export default function Home() {
             <h1 className="text-xl sm:text-2xl font-bold text-indigo-600 flex items-center gap-2">
               <span>🔐</span> <span className="hidden sm:inline">TrustCircle</span><span className="sm:hidden">TC</span>
             </h1>
-            
-            {storage && (
-              <div className="order-last sm:order-none sm:absolute sm:left-1/2 sm:transform sm:-translate-x-1/2 w-full sm:w-auto">
-                <div className={`rounded-lg px-2 py-1 sm:px-3 sm:py-1.5 shadow-sm ${
-                  (storage.capsules + storage.vaults) / storage.limit >= 0.95 ? 'bg-red-100 border-2 border-red-500' :
-                  (storage.capsules + storage.vaults) / storage.limit >= 0.80 ? 'bg-yellow-100 border-2 border-yellow-500' :
-                  'bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200'
-                }`}>
-                  <div className="text-xs font-medium flex items-center justify-center gap-1 sm:gap-2">
-                    {(storage.capsules + storage.vaults) / storage.limit >= 0.95 && <span>🚨</span>}
-                    {(storage.capsules + storage.vaults) / storage.limit >= 0.80 && (storage.capsules + storage.vaults) / storage.limit < 0.95 && <span>⚠️</span>}
-                    <span className={(storage.capsules + storage.vaults) / storage.limit >= 0.80 ? 'text-gray-900' : 'text-gray-700'}>
-                      🔒 {(storage.capsules / 1024 / 1024).toFixed(1)}/{(storage.limit / 1024 / 1024).toFixed(0)}MB
-                    </span>
-                    <span className="text-gray-400">|</span>
-                    <span className={(storage.capsules + storage.vaults) / storage.limit >= 0.80 ? 'text-gray-900' : 'text-gray-700'}>
-                      🔐 {(storage.vaults / 1024 / 1024).toFixed(1)}/{(storage.limit / 1024 / 1024).toFixed(0)}MB
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-            
             <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
               {user ? (
                 <>

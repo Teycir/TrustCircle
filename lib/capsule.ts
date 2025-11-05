@@ -7,7 +7,8 @@ import {
   verifyMetadata,
   toBase64,
   fromBase64,
-} from "./crypto";
+  decompress,
+} from "@trustcircle/core";
 import {
   evaluate,
   type UnlockPolicy,
@@ -16,7 +17,6 @@ import {
 } from "./policy";
 import { PinataClient } from "./pinata";
 import { TrustCircleDB, type CapsuleRecord } from "./supabase";
-import { decompress } from "./compression";
 import { checkStorageSpace, prepareAndEncryptFile, uploadEncryptedFile } from "./storage-common";
 
 export interface CapsuleMetadata {

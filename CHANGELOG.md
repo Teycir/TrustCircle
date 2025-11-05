@@ -2,6 +2,29 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [2.10.2] - 2025-01-11
+
+### Fixed
+
+- Storage display now uses real-time pinList API instead of cached userPinnedDataTotal API
+- IPFS verification on vault and capsule listing to auto-cleanup deleted files from database
+- Vault delete functionality with proper button styling matching capsule design
+- Storage display format changed to 0.00 (2 decimal places) in dashboard
+- Removed storage display from main page navigation
+
+### Changed
+
+- listVaults and listCapsules now verify file existence on IPFS before returning
+- Database records automatically cleaned when IPFS files no longer exist
+- Storage tooltips show exact byte count and cache delay warning
+- Dashboard storage refreshes every 30 seconds and after data operations
+
+### Added
+
+- Storage separation test script for verifying capsule and vault account isolation
+- Delete buttons for vaults in dashboard and vault detail pages
+- Gray gradient styling for vault delete buttons
+
 ## [2.10.1] - 2025-01-09
 
 ### Removed

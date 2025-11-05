@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { buildLocationHash } from '../lib/policy'
-import { toBase64, fromBase64 } from '../lib/crypto'
+import { toBase64, fromBase64 } from '@trustcircle/core'
 
 describe('Input Validation', () => {
   it('rejects invalid latitude', async () => {

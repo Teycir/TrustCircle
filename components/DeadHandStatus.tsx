@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { getDeadHandStatus, resetDeadHandDate, disableDeadHand, type DeadHandStatus } from '@/lib/dead-hand'
 import { TrustCircleDB } from '@/lib/supabase'
 import { useIdentity } from '@/lib/hooks'
-import { toBase64 } from '@/lib/crypto'
+import { toBase64 } from '@trustcircle/core'
 
 interface DeadHandStatusProps {
   capsuleId: string

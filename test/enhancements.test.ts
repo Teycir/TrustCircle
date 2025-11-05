@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { generateIdentity, wrapCmkForRecipient, unwrapCmk } from '../lib/crypto'
+import { generateIdentity, wrapCmkForRecipient, unwrapCmk } from '@trustcircle/core'
 import { PolicyError } from '../lib/policy'
 
 describe('Enhancements', () => {

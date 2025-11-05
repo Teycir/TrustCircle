@@ -7,8 +7,7 @@ import { useIdentity } from '@/lib/hooks'
 import { getClient, downloadFile } from '@/lib/client'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { CopyButton } from '@/components/CopyButton'
-import { aesGcmDecrypt, fromBase64 } from '@/lib/crypto'
-import { decompress } from '@/lib/compression'
+import { aesGcmDecrypt, fromBase64, decompress } from '@trustcircle/core'
 
 function VaultViewContent() {
   const params = useParams()
@@ -229,6 +228,21 @@ function VaultViewContent() {
               className="flex-1 bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-500 hover:to-yellow-500 text-white py-3 rounded-lg font-semibold disabled:bg-gray-300 disabled:from-gray-300 disabled:to-gray-300 shadow-sm"
             >
               {decrypting ? 'Decrypting...' : '📥 Download Document'}
+            </button>
+            <button
+              onClick={async () => {
+                if (!confirm('Delete this vault? This cannot be undone.')) return
+                try {
+                  const client = getClient()
+                  await client['db'].deleteVault(vaultId)
+                  window.location.href = '/dashboard'
+                } catch (err) {
+                  setError((err as Error).message)
+                }
+              }}
+              className="bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white py-3 px-6 rounded-lg font-semibold shadow-sm"
+            >
+              Delete
             </button>
           </div>
         </div>

@@ -5,7 +5,7 @@ config({ path: '.env.local' })
 
 import { CapsuleManager } from '../lib/capsule'
 import { VaultManager } from '../lib/vault'
-import { generateIdentity } from '../lib/crypto'
+import { generateIdentity } from '@trustcircle/core'
 import { PinataClient } from '../lib/pinata'
 import { TrustCircleDB } from '../lib/supabase'
 

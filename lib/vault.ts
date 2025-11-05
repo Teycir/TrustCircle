@@ -1,7 +1,6 @@
-import { generateIdentity, aesGcmDecrypt, toBase64, fromBase64 } from "./crypto";
+import { generateIdentity, aesGcmDecrypt, toBase64, fromBase64, decompress } from "@trustcircle/core";
 import { PinataClient } from "./pinata";
 import { TrustCircleDB } from "./supabase";
-import { decompress } from "./compression";
 import { checkStorageSpace, prepareAndEncryptFile, uploadEncryptedFile } from "./storage-common";
 
 export interface CreateVaultParams {

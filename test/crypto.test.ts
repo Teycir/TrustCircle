@@ -9,7 +9,7 @@ import {
   verifyMetadata,
   toBase64,
   fromBase64
-} from '../lib/crypto'
+} from '@trustcircle/core'
 
 describe('Crypto Engine', () => {
   it('generates identity keypairs', async () => {

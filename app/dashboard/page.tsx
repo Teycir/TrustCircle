@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useIdentity } from '@/lib/hooks'
 import { getClient, getStorageUsage } from '@/lib/client'
-import { toBase64 } from '@/lib/crypto'
+import { toBase64 } from '@trustcircle/core'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { CopyButton } from '@/components/CopyButton'
 import { UnlockConditions } from '@/components/UnlockConditions'
@@ -23,17 +23,22 @@ function DashboardContent() {
   const [storage, setStorage] = useState<{ capsules: number; vaults: number; limit: number } | null>(null)
 
   useEffect(() => {
-    import('@/lib/client').then(({ getStorageUsage, getVaultStorageUsage }) => {
-      return Promise.all([getStorageUsage(), getVaultStorageUsage()])
-    }).then(([capsulesData, vaultsData]) => {
-      setStorage({
-        capsules: capsulesData.used,
-        vaults: vaultsData.used,
-        limit: capsulesData.limit
+    const loadStorage = () => {
+      import('@/lib/client').then(({ getStorageUsage, getVaultStorageUsage }) => {
+        return Promise.all([getStorageUsage(), getVaultStorageUsage()])
+      }).then(([capsulesData, vaultsData]) => {
+        setStorage({
+          capsules: capsulesData.used,
+          vaults: vaultsData.used,
+          limit: capsulesData.limit
+        })
+      }).catch((err) => {
+        console.error('[DASHBOARD] Storage error:', err)
       })
-    }).catch((err) => {
-      console.error('[DASHBOARD] Storage error:', err)
-    })
+    }
+    loadStorage()
+    const interval = setInterval(loadStorage, 30000)
+    return () => clearInterval(interval)
   }, [])
 
   useEffect(() => {
@@ -61,6 +66,18 @@ function DashboardContent() {
           )
           setCapsules(data.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()))
         }
+
+        import('@/lib/client').then(({ getStorageUsage, getVaultStorageUsage }) => {
+          return Promise.all([getStorageUsage(), getVaultStorageUsage()])
+        }).then(([capsulesData, vaultsData]) => {
+          setStorage({
+            capsules: capsulesData.used,
+            vaults: vaultsData.used,
+            limit: capsulesData.limit
+          })
+        }).catch((err) => {
+          console.error('[DASHBOARD] Storage refresh error:', err)
+        })
       } catch (err) {
         setError((err as Error).message)
       } finally {
@@ -122,9 +139,9 @@ function DashboardContent() {
               {storage && (
                 <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg px-2 py-1 sm:px-3 sm:py-1.5 shadow-sm">
                   <div className="text-xs font-medium text-gray-700 flex items-center gap-1 sm:gap-2">
-                    <span>🔒 {(storage.capsules / 1024 / 1024).toFixed(1)}/{(storage.limit / 1024 / 1024).toFixed(0)}MB</span>
+                    <span title={`${storage.capsules} bytes (may take 5-10 min to update after deletion)`}>🔒 {(storage.capsules / 1024 / 1024).toFixed(2)}/{(storage.limit / 1024 / 1024).toFixed(0)}MB</span>
                     <span className="text-gray-400">|</span>
-                    <span>🔐 {(storage.vaults / 1024 / 1024).toFixed(1)}/{(storage.limit / 1024 / 1024).toFixed(0)}MB</span>
+                    <span title={`${storage.vaults} bytes (may take 5-10 min to update after deletion)`}>🔐 {(storage.vaults / 1024 / 1024).toFixed(2)}/{(storage.limit / 1024 / 1024).toFixed(0)}MB</span>
                   </div>
                 </div>
               )}
@@ -232,10 +249,25 @@ function DashboardContent() {
                           <div className="flex gap-2">
                             <Link
                               href={`/vault/${vault.id}`}
-                              className="text-amber-600 hover:text-amber-800 text-sm font-medium"
+                              className="bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-500 hover:to-yellow-500 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm"
                             >
-                              Open Vault →
+                              Open Vault
                             </Link>
+                            <button
+                              onClick={async () => {
+                                if (!confirm('Delete this vault? This cannot be undone.')) return
+                                try {
+                                  const client = getClient()
+                                  await client['db'].deleteVault(vault.id)
+                                  setVaults(vaults.filter(v => v.id !== vault.id))
+                                } catch (err) {
+                                  setError((err as Error).message)
+                                }
+                              }}
+                              className="bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm"
+                            >
+                              Delete
+                            </button>
                           </div>
                         </div>
                       </div>

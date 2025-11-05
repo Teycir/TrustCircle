@@ -1,7 +1,5 @@
 import { PinataClient } from "./pinata";
-import { validateFileSize } from "./validation";
-import { aesGcmEncrypt } from "./crypto";
-import { compress } from "./compression";
+import { validateFileSize, aesGcmEncrypt, compress } from "@trustcircle/core";
 
 export async function checkStorageSpace(
   pinata: PinataClient,

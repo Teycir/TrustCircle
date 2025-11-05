@@ -1,31 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useIdentity } from '@/lib/hooks'
 import { getClient, fileToUint8Array } from '@/lib/client'
-import { getCurrentLocation } from '@/lib/geolocation'
+import { getCurrentLocation, fromBase64 } from '@trustcircle/core'
 import { buildLocationHash } from '@/lib/policy'
-import { fromBase64 } from '@/lib/crypto'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { CopyButton } from '@/components/CopyButton'
 
 function CreateCapsuleContent() {
   const { identity, getPublicKeyString } = useIdentity()
   const [file, setFile] = useState<File | null>(null)
-  
-  useState(() => {
-    import('@/lib/client').then(({ getStorageUsage }) => getStorageUsage())
-      .then(({ used, limit }) => {
-        const percentage = (used / limit) * 100
-        if (percentage >= 95) {
-          setStorageWarning({ level: 'critical', message: `Storage at ${percentage.toFixed(1)}% (${(used / 1024 / 1024).toFixed(1)}MB/${(limit / 1024 / 1024).toFixed(0)}MB). Uploads blocked.` })
-        } else if (percentage >= 80) {
-          setStorageWarning({ level: 'warning', message: `Storage at ${percentage.toFixed(1)}% (${(used / 1024 / 1024).toFixed(1)}MB/${(limit / 1024 / 1024).toFixed(0)}MB). Consider deleting old capsules.` })
-        }
-      })
-      .catch(() => {})
-  })
   const [approverKey, setApproverKey] = useState('')
   const [title, setTitle] = useState('')
   const [notes, setNotes] = useState('')
@@ -41,6 +27,19 @@ function CreateCapsuleContent() {
   const [result, setResult] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [storageWarning, setStorageWarning] = useState<{ level: 'warning' | 'critical' | null; message: string }>({ level: null, message: '' })
+
+  useEffect(() => {
+    import('@/lib/client').then(({ getStorageUsage }) => getStorageUsage())
+      .then(({ used, limit }) => {
+        const percentage = (used / limit) * 100
+        if (percentage >= 95) {
+          setStorageWarning({ level: 'critical', message: `Storage at ${percentage.toFixed(1)}% (${(used / 1024 / 1024).toFixed(1)}MB/${(limit / 1024 / 1024).toFixed(0)}MB). Uploads blocked.` })
+        } else if (percentage >= 80) {
+          setStorageWarning({ level: 'warning', message: `Storage at ${percentage.toFixed(1)}% (${(used / 1024 / 1024).toFixed(1)}MB/${(limit / 1024 / 1024).toFixed(0)}MB). Consider deleting old capsules.` })
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -89,7 +88,7 @@ function CreateCapsuleContent() {
       if (useLocation) {
         const location = await getCurrentLocation()
         const salt = crypto.getRandomValues(new Uint8Array(16))
-        const saltB64 = btoa(String.fromCharCode(...salt))
+        const saltB64 = btoa(String.fromCodePoint(...salt))
         const hash = await buildLocationHash(location.lat, location.lon, new Date(), 2, saltB64)
 
         conditions.push({

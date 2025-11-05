@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { validatePublicKey, validateCapsuleId, validateFileSize } from '../lib/validation'
+import { validatePublicKey, validateCapsuleId, validateFileSize } from '@trustcircle/core'
 
 describe('Validation Edge Cases', () => {
   describe('validatePublicKey', () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { compress, decompress } from '../lib/compression'
+import { compress, decompress } from '@trustcircle/core'
 
 describe('Compression', () => {
   it('compresses and decompresses data', () => {

@@ -2,7 +2,7 @@
 
 import { useIdentity } from '@/lib/hooks'
 import { useAuth } from '@/lib/useAuth'
-import { toBase64 } from '@/lib/crypto'
+import { toBase64 } from '@trustcircle/core'
 import Link from 'next/link'
 import { useState } from 'react'
 import { ProtectedRoute } from '@/components/ProtectedRoute'

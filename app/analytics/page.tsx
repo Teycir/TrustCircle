@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useIdentity } from '@/lib/hooks'
 import { getClient } from '@/lib/client'
-import { toBase64 } from '@/lib/crypto'
+import { toBase64 } from '@trustcircle/core'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 
 function AnalyticsContent() {

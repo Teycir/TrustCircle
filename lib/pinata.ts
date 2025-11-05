@@ -50,25 +50,17 @@ export class PinataClient {
   }
 
   async getStorageUsage(): Promise<{ used: number; limit: number; percentage: number }> {
-    // Get account info for actual storage limit
-    const accountResponse = await fetch('https://api.pinata.cloud/data/userPinnedDataTotal', {
+    const listResponse = await fetch('https://api.pinata.cloud/data/pinList?status=pinned&pageLimit=1000', {
       headers: { Authorization: `Bearer ${this.apiKey}` }
     })
 
-    if (!accountResponse.ok) {
-      const errorText = await accountResponse.text().catch(() => accountResponse.statusText)
-      console.error('[Pinata] Account API error:', accountResponse.status, errorText)
-      throw new Error(`Failed to get account info: ${errorText}`)
+    if (!listResponse.ok) {
+      throw new Error(`Failed to list pins: ${listResponse.statusText}`)
     }
 
-    const accountData = await accountResponse.json()
-    console.log('[Pinata] Account data:', accountData)
-
-    // Extract used storage and limit from account data
-    const used = accountData?.pin_size_total || 0
-    const limit = accountData?.pin_size_with_replications_limit || 1073741824 // fallback to 1GB
-    
-    console.log('[Pinata] Storage info:', { used, limit, percentage: (used / limit) * 100 })
+    const listData = await listResponse.json()
+    const used = listData.rows?.reduce((sum: number, file: any) => sum + (file.size || 0), 0) || 0
+    const limit = 262144000
 
     return { used, limit, percentage: (used / limit) * 100 }
   }

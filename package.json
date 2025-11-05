@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/Teycir/TrustCircle#readme",
   "dependencies": {
-    "@noble/curves": "^2.0.1",
+    "@trustcircle/core": "file:./packages/core",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.78.0",
@@ -35,7 +35,6 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "autoprefixer": "^10.4.21",
-    "fflate": "^0.8.2",
     "idb": "^8.0.3",
     "next": "^14.2.33",
     "postcss": "^8.5.6",

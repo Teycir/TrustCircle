@@ -126,9 +126,35 @@ export class TrustCircleDB {
     const { data, error } = await query;
 
     if (error) throw new Error(`Failed to list capsules: ${error.message}`);
-    const result = data || [];
-    this.listCache.set(cacheKey, { data: result, timestamp: Date.now() });
-    return result;
+    const capsules = data || [];
+
+    if (!this.pinataClient) {
+      this.listCache.set(cacheKey, { data: capsules, timestamp: Date.now() });
+      return capsules;
+    }
+
+    const validCapsules = await Promise.all(
+      capsules.map(async (capsule) => {
+        try {
+          const response = await fetch(`https://gateway.pinata.cloud/ipfs/${capsule.payload_cid}`, { method: 'HEAD' });
+          return response.ok ? capsule : null;
+        } catch {
+          return null;
+        }
+      })
+    );
+
+    const existingCapsules = validCapsules.filter((c): c is CapsuleRecord => c !== null);
+    const deletedCapsules = capsules.filter(c => !existingCapsules.find(ec => ec.id === c.id));
+
+    for (const capsule of deletedCapsules) {
+      await this.client.from("capsules").delete().eq("id", capsule.id).then(() => {
+        console.log(`[DB] Cleaned up capsule ${capsule.id} - file no longer on IPFS`);
+      }).catch(err => console.error(`[DB] Failed to clean capsule ${capsule.id}:`, err));
+    }
+
+    this.listCache.set(cacheKey, { data: existingCapsules, timestamp: Date.now() });
+    return existingCapsules;
   }
 
   async deleteExpiredCapsules(): Promise<number> {
@@ -314,7 +340,31 @@ export class TrustCircleDB {
       .order("created_at", { ascending: false });
 
     if (error) throw new Error(`Failed to list vaults: ${error.message}`);
-    return data || [];
+    const vaults = data || [];
+
+    if (!this.pinataClient) return vaults;
+
+    const validVaults = await Promise.all(
+      vaults.map(async (vault) => {
+        try {
+          const response = await fetch(`https://gateway.pinata.cloud/ipfs/${vault.payload_cid}`, { method: 'HEAD' });
+          return response.ok ? vault : null;
+        } catch {
+          return null;
+        }
+      })
+    );
+
+    const existingVaults = validVaults.filter((v): v is VaultRecord => v !== null);
+    const deletedVaults = vaults.filter(v => !existingVaults.find(ev => ev.id === v.id));
+
+    for (const vault of deletedVaults) {
+      await this.client.from("vaults").delete().eq("id", vault.id).then(() => {
+        console.log(`[DB] Cleaned up vault ${vault.id} - file no longer on IPFS`);
+      }).catch(err => console.error(`[DB] Failed to clean vault ${vault.id}:`, err));
+    }
+
+    return existingVaults;
   }
 
   async deleteVault(id: string, userPubkey?: string): Promise<void> {
