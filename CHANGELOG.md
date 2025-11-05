@@ -2,6 +2,19 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [2.10.1] - 2025-01-09
+
+### Removed
+
+- Dead email service (lib/email.ts, test files, resend dependency)
+- Unused streaming module (lib/streaming.ts)
+- Development-only SQL files (disable-rls-for-development.sql, permissive-insert-policy.sql)
+- Applied migration file (remove-email-fields.sql)
+
+### Changed
+
+- Cleaned up package.json dependencies
+
 ## [2.10.0] - 2025-01-09
 
 ### Added
