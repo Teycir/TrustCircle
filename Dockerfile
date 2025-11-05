@@ -11,10 +11,10 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ENV NEXT_PUBLIC_SUPABASE_URL=https://placeholder.supabase.co
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder
-ENV NEXT_PUBLIC_PINATA_JWT=placeholder
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=placeholder-key
+ENV NEXT_PUBLIC_PINATA_JWT=placeholder-jwt
 ENV NEXT_PUBLIC_PINATA_GATEWAY=https://gateway.pinata.cloud
-ENV NEXT_PUBLIC_PINATA_VAULT_JWT=placeholder
+ENV NEXT_PUBLIC_PINATA_VAULT_JWT=placeholder-vault-jwt
 
 RUN npm run build
 
