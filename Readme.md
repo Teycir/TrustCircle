@@ -12,18 +12,30 @@ TrustCircle provides two secure file management solutions:
 
 **Vaults** - Professional document storage with cryptographic proof. Store important documents with instant access and generate public verification links that prove document existence without revealing content. Ideal for certifications, contracts, and credentials.
 
-### Core Features
+### Capsule Features
 
 - ✅ **Client-Side Encryption**: AES-256-GCM encryption in browser
 - ✅ **Time-Based Unlocking**: Set unlock dates for future access
 - ✅ **Location-Based Unlocking**: Require specific GPS location with 1km radius
+- ✅ **Designated Approver**: Only one person can decrypt with their private key
 - ✅ **Dead Hand Protocol**: Automatic unlock if owner becomes inactive
-- ✅ **Professional Vaults**: Store documents with cryptographic proof and public verification
+- ✅ **Auto-Expiration**: Optional capsule expiration dates
 - ✅ **Dashboard Management**: Track created and received capsules
 - ✅ **Search & Filter**: Find capsules by title, notes, or status
-- ✅ **Analytics**: View usage statistics with optimized caching
 - ✅ **QR Code Sharing**: Share public keys via QR code
-- ✅ **Auto-Expiration**: Optional capsule expiration dates
+
+### Vault Features
+
+- ✅ **Instant Access**: No waiting period, access documents anytime
+- ✅ **Document Metadata**: Store type, issuer, document ID, timestamp
+- ✅ **Public Verification**: Generate shareable proof links
+- ✅ **Cryptographic Proof**: IPFS CID provides immutable evidence
+- ✅ **Separate Storage**: Dedicated IPFS storage isolated from capsules
+- ✅ **Gateway Independence**: Access via any IPFS gateway
+
+### General Features
+
+- ✅ **Analytics**: View usage statistics with optimized caching
 - ✅ **Offline Support**: Works without internet connectivity
 - ✅ **Mobile Responsive**: Works on all devices
 
@@ -136,7 +148,7 @@ Verification links do NOT reveal:
 - File preview or download
 - Any sensitive information from the document
 
-### Use Cases
+### Vault Use Cases
 
 - Professional certifications and credentials
 - Legal contracts and agreements
@@ -165,12 +177,15 @@ Automatic capsule unlocking if the owner becomes inactive, ensuring important in
 - At least one recipient email required
 - Owner can reset date or disable anytime before trigger
 
-### Use Cases
+### Capsule Use Cases
 
+- Scheduled secure file delivery
+- Time-sensitive information release
+- Location-restricted document access
 - Estate planning and digital legacy
 - Emergency access to critical information
 - Business continuity planning
-- Backup access for important documents
+- Conditional file sharing with approval
 
 ---
 
