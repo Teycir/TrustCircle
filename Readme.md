@@ -2,13 +2,15 @@
 
 🔐 Privacy-first secure data sharing with time and location-based unlocking. Built with Next.js, all encryption happens client-side.
 
-**Version:** 2.4.0
-
 ---
 
 ## Overview
 
-TrustCircle lets you lock files so that exactly one designated approver can unlock them under specific conditions like date/time and location. Encryption and policy checks happen in the browser before any upload.
+TrustCircle provides two secure file management solutions:
+
+**Capsules** - Time-locked file sharing with designated approvers. Create encrypted files that unlock only when specific conditions are met (date, time, location). Perfect for scheduled secure delivery, dead hand protocols, and conditional access.
+
+**Vaults** - Professional document storage with cryptographic proof. Store important documents with instant access and generate public verification links that prove document existence without revealing content. Ideal for certifications, contracts, and credentials.
 
 ### Core Features
 
@@ -37,19 +39,22 @@ Vaults are encrypted document storage containers designed for professional use c
 
 ### Key Differences from Capsules
 
-**Capsules:**
-- Time locked until specific date
-- Shared with designated approver
-- Location based unlocking optional
-- Dead hand protocol support
-- Temporary secure sharing
+**Capsules - Conditional File Sharing:**
+- Encrypted files that unlock only when conditions are met
+- Time-based: Set specific unlock date and time
+- Location-based: Require GPS coordinates within radius
+- Designated approver: Only one person can decrypt using their private key
+- Dead hand protocol: Auto-unlock if creator becomes inactive
+- Expiration dates: Optional auto-deletion after date
+- Perfect for: Scheduled releases, emergency access, conditional delivery
 
-**Vaults:**
-- Always accessible by owner
-- No time or location restrictions
-- Public verification without content disclosure
-- Professional document metadata
-- Permanent secure storage
+**Vaults - Professional Document Storage:**
+- Always accessible encrypted storage for your documents
+- No waiting period or unlock conditions
+- Document metadata: Type, issuer, document ID, timestamp
+- Public verification: Prove document exists without revealing content
+- Cryptographic proof: IPFS CID provides immutable evidence
+- Perfect for: Certifications, contracts, diplomas, licenses
 
 ### Vault Features
 
