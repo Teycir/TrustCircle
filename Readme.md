@@ -24,6 +24,16 @@ TrustCircle provides two secure file management solutions:
 - ✅ **Search & Filter**: Find capsules by title, notes, or status
 - ✅ **QR Code Sharing**: Share public keys via QR code
 
+### Capsule Use Cases
+
+- Scheduled secure file delivery
+- Time-sensitive information release
+- Location-restricted document access
+- Estate planning and digital legacy
+- Emergency access to critical information
+- Business continuity planning
+- Conditional file sharing with approval
+
 ### Vault Features
 
 - ✅ **Instant Access**: No waiting period, access documents anytime
@@ -32,6 +42,15 @@ TrustCircle provides two secure file management solutions:
 - ✅ **Cryptographic Proof**: IPFS CID provides immutable evidence
 - ✅ **Separate Storage**: Dedicated IPFS storage isolated from capsules
 - ✅ **Gateway Independence**: Access via any IPFS gateway
+
+### Vault Use Cases
+
+- Professional certifications and credentials
+- Legal contracts and agreements
+- Academic diplomas and transcripts
+- Professional licenses
+- Important business documents
+- Proof of document existence for legal purposes
 
 ### General Features
 
@@ -148,15 +167,6 @@ Verification links do NOT reveal:
 - File preview or download
 - Any sensitive information from the document
 
-### Vault Use Cases
-
-- Professional certifications and credentials
-- Legal contracts and agreements
-- Academic diplomas and transcripts
-- Professional licenses
-- Important business documents
-- Proof of document existence for legal purposes
-
 ---
 
 ## Dead Hand Protocol
@@ -176,16 +186,6 @@ Automatic capsule unlocking if the owner becomes inactive, ensuring important in
 - Owner email required for warnings
 - At least one recipient email required
 - Owner can reset date or disable anytime before trigger
-
-### Capsule Use Cases
-
-- Scheduled secure file delivery
-- Time-sensitive information release
-- Location-restricted document access
-- Estate planning and digital legacy
-- Emergency access to critical information
-- Business continuity planning
-- Conditional file sharing with approval
 
 ---
 
