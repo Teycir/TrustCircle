@@ -2,6 +2,23 @@
 
 All notable changes to TrustCircle will be documented in this file.
 
+## [2.10.3] - 2025-01-11
+
+### Fixed
+
+- Orphaned database records now properly deleted when IPFS files are removed
+- Sync now runs every 60 seconds instead of only once on page load
+- Added listFiles method to PinataClient for proper IPFS verification
+- Replaced no-cors fetch with Pinata API for reliable file existence checks
+
+### Changed
+
+- Database sync with IPFS now runs continuously for better consistency
+- Improved error logging for sync operations
+- All cache Map properties marked as readonly for better type safety
+- Replaced forEach with for...of loops per SonarQube recommendations
+- Updated globalThis.window checks to compare directly with undefined
+
 ## [2.10.2] - 2025-01-11
 
 ### Fixed

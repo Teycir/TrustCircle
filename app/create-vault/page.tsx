@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useIdentity } from '@/lib/hooks'
 import { getVaultClient, fileToUint8Array } from '@/lib/client'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { CopyButton } from '@/components/CopyButton'
+import { useStorageStatus } from '@/lib/useStorageStatus'
 
 function CreateVaultContent() {
   const { identity } = useIdentity()
@@ -18,20 +19,21 @@ function CreateVaultContent() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const storageStatus = useStorageStatus()
   const [storageWarning, setStorageWarning] = useState<{ level: 'warning' | 'critical' | null; message: string }>({ level: null, message: '' })
   
-  useState(() => {
-    import('@/lib/client').then(({ getVaultStorageUsage }) => getVaultStorageUsage())
-      .then(({ used, limit }) => {
-        const percentage = (used / limit) * 100
-        if (percentage >= 95) {
-          setStorageWarning({ level: 'critical', message: `Vault storage at ${percentage.toFixed(1)}% (${(used / 1024 / 1024).toFixed(1)}MB/${(limit / 1024 / 1024).toFixed(0)}MB). Uploads blocked.` })
-        } else if (percentage >= 80) {
-          setStorageWarning({ level: 'warning', message: `Vault storage at ${percentage.toFixed(1)}% (${(used / 1024 / 1024).toFixed(1)}MB/${(limit / 1024 / 1024).toFixed(0)}MB). Consider deleting old vaults.` })
-        }
-      })
-      .catch(() => {})
-  })
+  useEffect(() => {
+    if (!storageStatus.vaults) return
+    const { used, limit } = storageStatus.vaults
+    const percentage = (used / limit) * 100
+    if (percentage >= 95) {
+      setStorageWarning({ level: 'critical', message: `Vault storage at ${percentage.toFixed(1)}% (${(used / 1024 / 1024).toFixed(1)}MB/${(limit / 1024 / 1024).toFixed(0)}MB). Uploads blocked.` })
+    } else if (percentage >= 80) {
+      setStorageWarning({ level: 'warning', message: `Vault storage at ${percentage.toFixed(1)}% (${(used / 1024 / 1024).toFixed(1)}MB/${(limit / 1024 / 1024).toFixed(0)}MB). Consider deleting old vaults.` })
+    } else {
+      setStorageWarning({ level: null, message: '' })
+    }
+  }, [storageStatus.vaults])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

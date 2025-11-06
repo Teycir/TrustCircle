@@ -8,6 +8,7 @@ import { getCurrentLocation, fromBase64 } from '@trustcircle/core'
 import { buildLocationHash } from '@/lib/policy'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { CopyButton } from '@/components/CopyButton'
+import { useStorageStatus } from '@/lib/useStorageStatus'
 
 function CreateCapsuleContent() {
   const { identity, getPublicKeyString } = useIdentity()
@@ -26,20 +27,21 @@ function CreateCapsuleContent() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const storageStatus = useStorageStatus()
   const [storageWarning, setStorageWarning] = useState<{ level: 'warning' | 'critical' | null; message: string }>({ level: null, message: '' })
 
   useEffect(() => {
-    import('@/lib/client').then(({ getStorageUsage }) => getStorageUsage())
-      .then(({ used, limit }) => {
-        const percentage = (used / limit) * 100
-        if (percentage >= 95) {
-          setStorageWarning({ level: 'critical', message: `Storage at ${percentage.toFixed(1)}% (${(used / 1024 / 1024).toFixed(1)}MB/${(limit / 1024 / 1024).toFixed(0)}MB). Uploads blocked.` })
-        } else if (percentage >= 80) {
-          setStorageWarning({ level: 'warning', message: `Storage at ${percentage.toFixed(1)}% (${(used / 1024 / 1024).toFixed(1)}MB/${(limit / 1024 / 1024).toFixed(0)}MB). Consider deleting old capsules.` })
-        }
-      })
-      .catch(() => {})
-  }, [])
+    if (!storageStatus.capsules) return
+    const { used, limit } = storageStatus.capsules
+    const percentage = (used / limit) * 100
+    if (percentage >= 95) {
+      setStorageWarning({ level: 'critical', message: `Storage at ${percentage.toFixed(1)}% (${(used / 1024 / 1024).toFixed(1)}MB/${(limit / 1024 / 1024).toFixed(0)}MB). Uploads blocked.` })
+    } else if (percentage >= 80) {
+      setStorageWarning({ level: 'warning', message: `Storage at ${percentage.toFixed(1)}% (${(used / 1024 / 1024).toFixed(1)}MB/${(limit / 1024 / 1024).toFixed(0)}MB). Consider deleting old capsules.` })
+    } else {
+      setStorageWarning({ level: null, message: '' })
+    }
+  }, [storageStatus.capsules])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

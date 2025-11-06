@@ -1,9 +1,14 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
+const supabaseUrl =
+  process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
+const supabaseKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-key";
 
-if (typeof window !== 'undefined' && (supabaseUrl === 'placeholder' || supabaseKey === 'placeholder')) {
+if (
+  globalThis.window !== undefined &&
+  (supabaseUrl === "placeholder" || supabaseKey === "placeholder")
+) {
   console.error("Missing Supabase environment variables");
 }
 
@@ -12,7 +17,10 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    storage: typeof window !== "undefined" ? window.localStorage : undefined,
+    storage:
+      globalThis.window === undefined
+        ? undefined
+        : globalThis.window.localStorage,
   },
 });
 
@@ -50,12 +58,21 @@ export interface VaultRecord {
 }
 
 export class TrustCircleDB {
-  private client: SupabaseClient;
-  private pinataClient?: any;
-  private analyticsCache = new Map<string, { data: any; timestamp: number }>();
-  private listCache = new Map<string, { data: CapsuleRecord[]; timestamp: number }>();
-  private capsuleCache = new Map<string, { data: CapsuleRecord; timestamp: number }>();
-  private cacheTTL = 5 * 60 * 1000;
+  private readonly client: SupabaseClient;
+  private readonly pinataClient?: any;
+  private readonly analyticsCache = new Map<
+    string,
+    { data: any; timestamp: number }
+  >();
+  private readonly listCache = new Map<
+    string,
+    { data: CapsuleRecord[]; timestamp: number }
+  >();
+  private readonly capsuleCache = new Map<
+    string,
+    { data: CapsuleRecord; timestamp: number }
+  >();
+  private readonly cacheTTL = 5 * 60 * 1000;
 
   constructor(url: string, key: string, pinataClient?: any) {
     this.client = createClient(url, key, {
@@ -78,7 +95,7 @@ export class TrustCircleDB {
       .single();
 
     if (error) {
-      console.error('Insert error details:', error);
+      console.error("Insert error details:", error);
       throw new Error(`Failed to save capsule: ${error.message}`);
     }
     this.analyticsCache.delete(record.creator_pubkey);
@@ -102,7 +119,7 @@ export class TrustCircleDB {
 
     if (error) throw new Error(`Failed to get capsule: ${error.message}`);
     if (!data) throw new Error("Capsule not found");
-    
+
     this.capsuleCache.set(id, { data, timestamp: Date.now() });
     return data;
   }
@@ -111,7 +128,7 @@ export class TrustCircleDB {
     creator?: string;
     approver?: string;
   }): Promise<CapsuleRecord[]> {
-    const cacheKey = `${filters?.creator || ''}_${filters?.approver || ''}`;
+    const cacheKey = `${filters?.creator || ""}_${filters?.approver || ""}`;
     const cached = this.listCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.cacheTTL) {
       return cached.data;
@@ -128,36 +145,8 @@ export class TrustCircleDB {
     if (error) throw new Error(`Failed to list capsules: ${error.message}`);
     const capsules = data || [];
 
-    if (!this.pinataClient) {
-      this.listCache.set(cacheKey, { data: capsules, timestamp: Date.now() });
-      return capsules;
-    }
-
-    const validCapsules = await Promise.all(
-      capsules.map(async (capsule) => {
-        try {
-          const response = await fetch(`https://gateway.pinata.cloud/ipfs/${capsule.payload_cid}`, { method: 'HEAD' });
-          return response.ok ? capsule : null;
-        } catch {
-          return null;
-        }
-      })
-    );
-
-    const existingCapsules = validCapsules.filter((c): c is CapsuleRecord => c !== null);
-    const deletedCapsules = capsules.filter(c => !existingCapsules.find(ec => ec.id === c.id));
-
-    for (const capsule of deletedCapsules) {
-      try {
-        await this.client.from("capsules").delete().eq("id", capsule.id);
-        console.log(`[DB] Cleaned up capsule ${capsule.id} - file no longer on IPFS`);
-      } catch (err) {
-        console.error(`[DB] Failed to clean capsule ${capsule.id}:`, err);
-      }
-    }
-
-    this.listCache.set(cacheKey, { data: existingCapsules, timestamp: Date.now() });
-    return existingCapsules;
+    this.listCache.set(cacheKey, { data: capsules, timestamp: Date.now() });
+    return capsules;
   }
 
   async deleteExpiredCapsules(): Promise<number> {
@@ -268,47 +257,81 @@ export class TrustCircleDB {
       return cached.data;
     }
 
-    const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    const sevenDaysFromNow = new Date(
+      Date.now() + 7 * 24 * 60 * 60 * 1000,
+    ).toISOString();
 
-    const [created, received, unlocked, expiring, deadHand] = await Promise.all([
-      this.client.from("capsules").select("id", { count: "exact", head: true }).eq("creator_pubkey", userPubkey),
-      this.client.from("capsules").select("id", { count: "exact", head: true }).eq("approver_pubkey", userPubkey),
-      this.client.from("capsules").select("created_at,unlocked_at").eq("creator_pubkey", userPubkey).eq("status", "unlocked"),
-      this.client.from("capsules").select("id", { count: "exact", head: true }).eq("creator_pubkey", userPubkey).lt("expires_at", sevenDaysFromNow).not("expires_at", "is", null),
-      this.client.from("capsules").select("dead_hand_status").eq("creator_pubkey", userPubkey).not("dead_hand_trigger_date", "is", null)
-    ]);
+    const [created, received, unlocked, expiring, deadHand] = await Promise.all(
+      [
+        this.client
+          .from("capsules")
+          .select("id", { count: "exact", head: true })
+          .eq("creator_pubkey", userPubkey),
+        this.client
+          .from("capsules")
+          .select("id", { count: "exact", head: true })
+          .eq("approver_pubkey", userPubkey),
+        this.client
+          .from("capsules")
+          .select("created_at,unlocked_at")
+          .eq("creator_pubkey", userPubkey)
+          .eq("status", "unlocked"),
+        this.client
+          .from("capsules")
+          .select("id", { count: "exact", head: true })
+          .eq("creator_pubkey", userPubkey)
+          .lt("expires_at", sevenDaysFromNow)
+          .not("expires_at", "is", null),
+        this.client
+          .from("capsules")
+          .select("dead_hand_status")
+          .eq("creator_pubkey", userPubkey)
+          .not("dead_hand_trigger_date", "is", null),
+      ],
+    );
 
     let totalUnlockTime = 0;
     const unlockedData = unlocked.data || [];
-    unlockedData.forEach(c => {
+    for (const c of unlockedData) {
       if (c.unlocked_at && c.created_at) {
-        totalUnlockTime += new Date(c.unlocked_at).getTime() - new Date(c.created_at).getTime();
+        totalUnlockTime +=
+          new Date(c.unlocked_at).getTime() - new Date(c.created_at).getTime();
       }
-    });
+    }
 
     const deadHandData = deadHand.data || [];
-    const deadHandActive = deadHandData.filter(c => !c.dead_hand_status || c.dead_hand_status === 'warning_sent' || c.dead_hand_status === 'grace_period').length;
-    const deadHandTriggered = deadHandData.filter(c => c.dead_hand_status === 'triggered').length;
+    const deadHandActive = deadHandData.filter(
+      (c) =>
+        !c.dead_hand_status ||
+        c.dead_hand_status === "warning_sent" ||
+        c.dead_hand_status === "grace_period",
+    ).length;
+    const deadHandTriggered = deadHandData.filter(
+      (c) => c.dead_hand_status === "triggered",
+    ).length;
 
     const result = {
       totalCreated: created.count || 0,
       totalReceived: received.count || 0,
       totalUnlocked: unlockedData.length,
-      avgUnlockTime: unlockedData.length > 0 ? totalUnlockTime / unlockedData.length / (1000 * 60 * 60 * 24) : 0,
+      avgUnlockTime:
+        unlockedData.length > 0
+          ? totalUnlockTime / unlockedData.length / (1000 * 60 * 60 * 24)
+          : 0,
       expiringSoon: expiring.count || 0,
       deadHandEnabled: deadHandData.length,
       deadHandActive,
-      deadHandTriggered
+      deadHandTriggered,
     };
 
-    this.analyticsCache.set(userPubkey, { data: result, timestamp: Date.now() });
+    this.analyticsCache.set(userPubkey, {
+      data: result,
+      timestamp: Date.now(),
+    });
     return result;
   }
 
-  async saveVault(
-    record: VaultRecord,
-    userPubkey?: string,
-  ): Promise<string> {
+  async saveVault(record: VaultRecord, userPubkey?: string): Promise<string> {
     const { data, error } = await this.client
       .from("vaults")
       .insert(record)
@@ -316,7 +339,7 @@ export class TrustCircleDB {
       .single();
 
     if (error) {
-      console.error('Insert error details:', error);
+      console.error("Insert error details:", error);
       throw new Error(`Failed to save vault: ${error.message}`);
     }
     return data.id;
@@ -331,7 +354,7 @@ export class TrustCircleDB {
 
     if (error) throw new Error(`Failed to get vault: ${error.message}`);
     if (!data) throw new Error("Vault not found");
-    
+
     return data;
   }
 
@@ -343,34 +366,7 @@ export class TrustCircleDB {
       .order("created_at", { ascending: false });
 
     if (error) throw new Error(`Failed to list vaults: ${error.message}`);
-    const vaults = data || [];
-
-    if (!this.pinataClient) return vaults;
-
-    const validVaults = await Promise.all(
-      vaults.map(async (vault) => {
-        try {
-          const response = await fetch(`https://gateway.pinata.cloud/ipfs/${vault.payload_cid}`, { method: 'HEAD' });
-          return response.ok ? vault : null;
-        } catch {
-          return null;
-        }
-      })
-    );
-
-    const existingVaults = validVaults.filter((v): v is VaultRecord => v !== null);
-    const deletedVaults = vaults.filter(v => !existingVaults.find(ev => ev.id === v.id));
-
-    for (const vault of deletedVaults) {
-      try {
-        await this.client.from("vaults").delete().eq("id", vault.id);
-        console.log(`[DB] Cleaned up vault ${vault.id} - file no longer on IPFS`);
-      } catch (err) {
-        console.error(`[DB] Failed to clean vault ${vault.id}:`, err);
-      }
-    }
-
-    return existingVaults;
+    return data || [];
   }
 
   async deleteVault(id: string, userPubkey?: string): Promise<void> {
@@ -385,6 +381,38 @@ export class TrustCircleDB {
         await this.pinataClient.unpin(vault.payload_cid);
       } catch (err) {
         console.error("Failed to unpin from IPFS:", err);
+      }
+    }
+  }
+
+  async syncCapsulesWithIPFS(pinata: any): Promise<void> {
+    const { data } = await this.client
+      .from("capsules")
+      .select("id, payload_cid");
+    if (!data) return;
+
+    const pinnedFiles = await pinata.listFiles();
+    const pinnedCids = new Set(pinnedFiles.map((f: any) => f.ipfs_pin_hash));
+
+    for (const capsule of data) {
+      if (!pinnedCids.has(capsule.payload_cid)) {
+        await this.client.from("capsules").delete().eq("id", capsule.id);
+        console.log(`[DB] Removed orphaned capsule ${capsule.id}`);
+      }
+    }
+  }
+
+  async syncVaultsWithIPFS(pinata: any): Promise<void> {
+    const { data } = await this.client.from("vaults").select("id, payload_cid");
+    if (!data) return;
+
+    const pinnedFiles = await pinata.listFiles();
+    const pinnedCids = new Set(pinnedFiles.map((f: any) => f.ipfs_pin_hash));
+
+    for (const vault of data) {
+      if (!pinnedCids.has(vault.payload_cid)) {
+        await this.client.from("vaults").delete().eq("id", vault.id);
+        console.log(`[DB] Removed orphaned vault ${vault.id}`);
       }
     }
   }

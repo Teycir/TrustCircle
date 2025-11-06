@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useIdentity } from '@/lib/hooks'
-import { getClient, getStorageUsage } from '@/lib/client'
+import { getClient } from '@/lib/client'
 import { toBase64 } from '@trustcircle/core'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { CopyButton } from '@/components/CopyButton'
 import { UnlockConditions } from '@/components/UnlockConditions'
 import { DeadHandStatus } from '@/components/DeadHandStatus'
+import { useStorageStatus } from '@/lib/useStorageStatus'
 import type { CapsuleMetadata } from '@/lib/capsule'
 
 function DashboardContent() {
@@ -20,26 +21,12 @@ function DashboardContent() {
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'locked' | 'unlocked'>('all')
-  const [storage, setStorage] = useState<{ capsules: number; vaults: number; limit: number } | null>(null)
-
-  useEffect(() => {
-    const loadStorage = () => {
-      import('@/lib/client').then(({ getStorageUsage, getVaultStorageUsage }) => {
-        return Promise.all([getStorageUsage(), getVaultStorageUsage()])
-      }).then(([capsulesData, vaultsData]) => {
-        setStorage({
-          capsules: capsulesData.used,
-          vaults: vaultsData.used,
-          limit: capsulesData.limit
-        })
-      }).catch((err) => {
-        console.error('[DASHBOARD] Storage error:', err)
-      })
-    }
-    loadStorage()
-    const interval = setInterval(loadStorage, 30000)
-    return () => clearInterval(interval)
-  }, [])
+  const storageStatus = useStorageStatus()
+  const storage = storageStatus.capsules && storageStatus.vaults ? {
+    capsules: storageStatus.capsules.used,
+    vaults: storageStatus.vaults.used,
+    limit: storageStatus.capsules.limit
+  } : null
 
   useEffect(() => {
     if (!identity) {
@@ -66,18 +53,6 @@ function DashboardContent() {
           )
           setCapsules(data.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()))
         }
-
-        import('@/lib/client').then(({ getStorageUsage, getVaultStorageUsage }) => {
-          return Promise.all([getStorageUsage(), getVaultStorageUsage()])
-        }).then(([capsulesData, vaultsData]) => {
-          setStorage({
-            capsules: capsulesData.used,
-            vaults: vaultsData.used,
-            limit: capsulesData.limit
-          })
-        }).catch((err) => {
-          console.error('[DASHBOARD] Storage refresh error:', err)
-        })
       } catch (err) {
         setError((err as Error).message)
       } finally {

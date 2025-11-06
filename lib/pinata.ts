@@ -79,6 +79,19 @@ export class PinataClient {
     }
   }
 
+  async listFiles(): Promise<any[]> {
+    const response = await fetch('https://api.pinata.cloud/data/pinList?status=pinned&pageLimit=1000', {
+      headers: { Authorization: `Bearer ${this.apiKey}` }
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to list files: ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    return data.rows || []
+  }
+
   async purgeOldFiles(threshold: number = 0.9): Promise<void> {
     const usage = await this.getStorageUsage()
 

@@ -4,6 +4,7 @@ import './globals.css'
 import { ConfigLoader } from '@/components/ConfigLoader'
 import { CacheProvider } from '@/lib/cache'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import StorageStatusProvider from '@/components/StorageStatusProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -105,6 +106,7 @@ export default function RootLayout({
         <ErrorBoundary>
           <CacheProvider>
             <ConfigLoader />
+            <StorageStatusProvider />
             {children}
           </CacheProvider>
         </ErrorBoundary>
