@@ -409,14 +409,15 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for Vercel deployment instructions.
 
 ---
 
-## Recent Updates (v2.5.0)
+## Recent Updates
 
-- 🔧 Removed admin panel UI
-- 💾 Configuration stored in Supabase `app_config` table
+- 🔧 Configuration stored in Supabase for easy management
 - 🔒 Environment variables prioritized for security
-- 📝 Added setup scripts for easy deployment
-- 🚀 Simplified configuration management
 - 🐳 Docker support with secure credential management
+- 📝 Setup scripts for easy deployment
+- 🔄 Automatic IPFS sync to remove orphaned records
+- 🎨 Footer with creator attribution
+- 📊 Real-time storage monitoring and sync
 
 See [CHANGELOG.md](CHANGELOG.md) for full version history.
 
