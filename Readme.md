@@ -1,6 +1,46 @@
 # TrustCircle
 
-🔐 Privacy-first secure data sharing with time and location-based unlocking. Built with Next.js, all encryption happens client-side.
+<div align="center">
+
+![MIT License](https://img.shields.io/badge/License-MIT-green.svg)
+![Next.js](https://img.shields.io/badge/Next.js-14-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![React](https://img.shields.io/badge/React-18-blue)
+![Supabase](https://img.shields.io/badge/Supabase-Database-green)
+![IPFS](https://img.shields.io/badge/IPFS-Storage-orange)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38bdf8)
+
+</div>
+
+<div align="center">
+
+## 🔐 Send Files to the Future. Prove Documents Forever.
+
+**TrustCircle** is a privacy-first platform for secure file sharing with time-locks, location restrictions, and cryptographic proof. Create encrypted capsules that unlock only when your conditions are met, or store documents with eternal verification links—all with client-side encryption that keeps your data truly private.
+
+**🎯 Perfect for:** Estate planning • Legal contracts • Scheduled releases • Emergency access • Professional credentials • Dead hand protocols
+
+</div>
+
+<p align="center">
+  <img src="Assets/Images/mainpagetrustcircle.png" alt="TrustCircle Main Page" width="800" />
+</p>
+
+### ✨ Why TrustCircle?
+
+**Capsules - Conditional Sharing:**
+- **⏰ Time-Locked Delivery** - Send files that unlock at specific dates for scheduled releases or future delivery.
+- **📍 Location-Based Access** - Require recipients to be at GPS coordinates to unlock sensitive documents.
+- **💀 Dead Hand Protocol** - Automatically unlock capsules if you become inactive—your digital legacy, protected.
+
+**Vaults - Permanent Storage:**
+- **💼 Professional Documents** - Store certifications, contracts, diplomas with instant access anytime.
+- **✅ Public Verification** - Generate shareable proof links that verify documents without revealing content.
+- **🌐 Eternal Proof** - IPFS-based verification that survives even if TrustCircle disappears.
+
+**Universal Security:**
+- **🔒 Zero-Knowledge Encryption** - All files encrypted in your browser before upload. We never see your data.
+- **🔑 Client-Side Keys** - Your encryption keys never leave your device. True end-to-end encryption.
 
 ---
 
@@ -13,6 +53,10 @@ TrustCircle provides two secure file management solutions:
 **Vaults** - Professional document storage with cryptographic proof. Store important documents with instant access and generate public verification links that prove document existence without revealing content. Ideal for certifications, contracts, and credentials.
 
 ### Capsule Features
+
+<p align="center">
+  <img src="Assets/Images/createcapsule.png" alt="Create Capsule" />
+</p>
 
 - ✅ **Client-Side Encryption**: AES-256-GCM encryption in browser
 - ✅ **Time-Based Unlocking**: Set unlock dates for future access
@@ -35,6 +79,10 @@ TrustCircle provides two secure file management solutions:
 - Conditional file sharing with approval
 
 ### Vault Features
+
+<p align="center">
+  <img src="Assets/Images/createvault.png" alt="Create Vault" />
+</p>
 
 - ✅ **Instant Access**: No waiting period, access documents anytime
 - ✅ **Document Metadata**: Store type, issuer, document ID, timestamp
@@ -339,6 +387,10 @@ Currently, each capsule has one creator and one approver. The approver is the pe
 
 ### How does time-based unlocking work?
 
+<p align="center">
+  <img src="Assets/Images/unlockcapsule.png" alt="Unlock Capsule" />
+</p>
+
 Time-based unlocking ensures capsules can only be opened after a specific date and time:
 
 1. When creating a capsule, you set an unlock date and time
@@ -365,6 +417,10 @@ This is useful for location-specific documents, event access, or geo-restricted 
 
 ### What can I do in the Dashboard?
 
+<p align="center">
+  <img src="Assets/Images/dashboardcapsules.png" alt="Dashboard Capsules" />
+</p>
+
 The Dashboard is your central hub for managing all capsules:
 
 1. View all capsules you created in the Created tab
@@ -378,7 +434,15 @@ The Dashboard is your central hub for managing all capsules:
 
 The Dashboard provides a complete overview of your secure file sharing activity.
 
+<p align="center">
+  <img src="Assets/Images/dashboardvault.png" alt="Dashboard Vaults" />
+</p>
+
 ### How do I manage my Identity and keys?
+
+<p align="center">
+  <img src="Assets/Images/identitymanagement.png" alt="Identity Management" />
+</p>
 
 The Identity page lets you manage your cryptographic keys:
 
@@ -393,6 +457,10 @@ The Identity page lets you manage your cryptographic keys:
 Always backup your keys! Without them, you cannot decrypt capsules sent to you.
 
 ### What insights does Analytics provide?
+
+<p align="center">
+  <img src="Assets/Images/analytics.png" alt="Analytics" />
+</p>
 
 Analytics gives you detailed statistics about your capsule usage:
 
