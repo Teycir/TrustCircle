@@ -91,7 +91,7 @@ export class TrustCircleDB {
     const { data, error } = await this.client
       .from("capsules")
       .insert(record)
-      .select("id")
+      .select("*")
       .single();
 
     if (error) {
@@ -102,6 +102,7 @@ export class TrustCircleDB {
     this.analyticsCache.delete(record.approver_pubkey);
     this.listCache.delete(`${record.creator_pubkey}_`);
     this.listCache.delete(`_${record.approver_pubkey}`);
+    this.capsuleCache.set(data.id, { data, timestamp: Date.now() });
     return data.id;
   }
 
