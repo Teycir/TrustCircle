@@ -14,6 +14,16 @@
 
 <div align="center">
 
+<a href="https://www.youtube.com/watch?v=F8JxKGnXrNY">
+  <img src="https://img.youtube.com/vi/F8JxKGnXrNY/maxresdefault.jpg" alt="TrustCircle Demo Video" width="800" />
+</a>
+
+**[▶️ Watch the TrustCircle Demo](https://www.youtube.com/watch?v=F8JxKGnXrNY)**
+
+</div>
+
+<div align="center">
+
 ## 🔐 Send Files to the Future. Prove Documents Forever.
 
 **TrustCircle** is a privacy-first platform for secure file sharing with time-locks, location restrictions, and cryptographic proof. Create encrypted capsules that unlock only when your conditions are met, or store documents with eternal verification links—all with client-side encryption that keeps your data truly private.
