@@ -82,10 +82,10 @@ function VaultViewContent() {
   if (error && !vault) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 to-yellow-100 flex items-center justify-center">
-        <div className="bg-white rounded-lg shadow-md p-8 max-w-md">
+        <div className="bg-white rounded-lg shadow-md p-8 max-w-md w-full mx-4">
           <h3 className="text-xl font-semibold text-red-600 mb-4">Error</h3>
           <p className="text-gray-600 mb-6">{error}</p>
-          <Link href="/dashboard" className="block w-full bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-500 hover:to-yellow-500 text-white py-3 rounded-lg text-center font-semibold shadow-sm">
+          <Link href="/dashboard" className="block w-full bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-500 hover:to-yellow-500 text-white py-3 px-6 rounded-lg text-center font-semibold shadow-sm whitespace-nowrap">
             Back to Dashboard
           </Link>
         </div>

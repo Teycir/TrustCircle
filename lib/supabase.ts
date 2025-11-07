@@ -72,6 +72,10 @@ export class TrustCircleDB {
     string,
     { data: CapsuleRecord; timestamp: number }
   >();
+  private readonly vaultCache = new Map<
+    string,
+    { data: VaultRecord; timestamp: number }
+  >();
   private readonly cacheTTL = 5 * 60 * 1000;
 
   constructor(url: string, key: string, pinataClient?: any) {
@@ -336,17 +340,23 @@ export class TrustCircleDB {
     const { data, error } = await this.client
       .from("vaults")
       .insert(record)
-      .select("id")
+      .select("*")
       .single();
 
     if (error) {
       console.error("Insert error details:", error);
       throw new Error(`Failed to save vault: ${error.message}`);
     }
+    this.vaultCache.set(data.id, { data, timestamp: Date.now() });
     return data.id;
   }
 
   async getVault(id: string): Promise<VaultRecord> {
+    const cached = this.vaultCache.get(id);
+    if (cached && Date.now() - cached.timestamp < this.cacheTTL) {
+      return cached.data;
+    }
+
     const { data, error } = await this.client
       .from("vaults")
       .select("*")
@@ -356,6 +366,7 @@ export class TrustCircleDB {
     if (error) throw new Error(`Failed to get vault: ${error.message}`);
     if (!data) throw new Error("Vault not found");
 
+    this.vaultCache.set(id, { data, timestamp: Date.now() });
     return data;
   }
 
@@ -376,6 +387,8 @@ export class TrustCircleDB {
     const { error } = await this.client.from("vaults").delete().eq("id", id);
 
     if (error) throw new Error(`Failed to delete vault: ${error.message}`);
+
+    this.vaultCache.delete(id);
 
     if (this.pinataClient && vault.payload_cid) {
       try {
