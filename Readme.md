@@ -434,3 +434,5 @@ MIT
 ## 💬 Support
 
 For issues and questions, please open an issue on GitHub.
+
+Created by [Teycir Ben Soltane](https://teycirbensoltane.tn)
