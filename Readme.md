@@ -97,9 +97,9 @@
 - ✅ **Instant Access**: No waiting period, access documents anytime
 - ✅ **Document Metadata**: Store type, issuer, document ID, timestamp
 - ✅ **Public Verification**: Generate shareable proof links
-- ✅ **Cryptographic Proof**: IPFS CID provides immutable evidence
+- ✅ **Cryptographic Proof**: IPFS CID provides immutable content verification
 - ✅ **Separate Storage**: Dedicated IPFS storage isolated from capsules
-- ✅ **Gateway Independence**: Access via any IPFS gateway
+- ✅ **Content Addressing**: CID-based retrieval ensures data integrity
 
 ### Use Cases
 
@@ -195,7 +195,7 @@ Yes. All encryption happens client-side in your browser using AES-256-GCM. Your 
 
 ### Where is my data stored?
 
-Encrypted files are stored on IPFS via Pinata for decentralized storage. Capsules and Vaults use separate IPFS accounts for isolation. Metadata is stored on Supabase. Your encryption keys never leave your browser.
+Encrypted files are pinned to IPFS via Pinata. While IPFS uses content addressing, Pinata is currently the only service storing your data. Capsules and Vaults use separate Pinata accounts for isolation. Metadata is stored on Supabase. Your encryption keys never leave your browser.
 
 ### Do I need an API key to use TrustCircle?
 
@@ -233,7 +233,7 @@ Verification links prove a document exists without revealing its contents:
 
 ### Is TrustCircle dependent on Pinata?
 
-No. While TrustCircle uploads to Pinata, your data is stored on IPFS and can be accessed via any IPFS gateway (ipfs.io, Cloudflare, etc.). The CID is the permanent identifier—gateways are just access methods.
+Yes, currently. TrustCircle uses Pinata to pin content to IPFS. While the CID is a permanent content identifier, the actual data is only stored on Pinata's servers unless you or others also pin it. The CID verifies content integrity and allows migration to other IPFS pinning services, but doesn't guarantee availability if Pinata stops hosting the data.
 
 ---
 
